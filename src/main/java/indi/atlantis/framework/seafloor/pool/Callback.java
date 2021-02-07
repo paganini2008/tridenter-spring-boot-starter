@@ -1,0 +1,19 @@
+package indi.atlantis.framework.seafloor.pool;
+
+/**
+ * 
+ * Callback
+ * 
+ * @author Jimmy Hoff
+ *
+ * @since 1.0
+ */
+public interface Callback {
+	
+	Invocation getInvocation();
+
+	String getMethodName();
+
+	Object[] getArguments();
+
+}

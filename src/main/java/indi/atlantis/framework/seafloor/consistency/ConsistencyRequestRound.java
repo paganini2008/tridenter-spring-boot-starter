@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
-import org.springtribe.framework.reditools.common.TtlKeeper;
 
 import com.github.paganini2008.devtools.collection.MapUtils;
 
+import indi.atlantis.framework.reditools.common.TtlKeeper;
 import indi.atlantis.framework.seafloor.Constants;
 
 /**

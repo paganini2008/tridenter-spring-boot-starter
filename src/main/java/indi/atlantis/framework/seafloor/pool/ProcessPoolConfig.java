@@ -8,11 +8,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springtribe.framework.reditools.common.RedisCounter;
-import org.springtribe.framework.reditools.common.RedisSharedLatch;
-import org.springtribe.framework.reditools.common.SharedLatch;
-import org.springtribe.framework.reditools.common.TtlKeeper;
 
+import indi.atlantis.framework.reditools.common.RedisCounter;
+import indi.atlantis.framework.reditools.common.RedisSharedLatch;
+import indi.atlantis.framework.reditools.common.SharedLatch;
+import indi.atlantis.framework.reditools.common.TtlKeeper;
 import indi.atlantis.framework.seafloor.Constants;
 
 /**

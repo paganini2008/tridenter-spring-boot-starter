@@ -16,13 +16,13 @@ import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springtribe.framework.reditools.messager.RedisMessageSender;
 
 import com.github.paganini2008.devtools.Assert;
 import com.github.paganini2008.devtools.collection.MapUtils;
 import com.github.paganini2008.devtools.multithreads.Executable;
 import com.github.paganini2008.devtools.multithreads.ThreadUtils;
 
+import indi.atlantis.framework.reditools.messager.RedisMessageSender;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.InstanceId;
 import indi.atlantis.framework.seafloor.LoadBalancer;

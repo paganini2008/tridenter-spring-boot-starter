@@ -1,8 +1,8 @@
 package indi.atlantis.framework.seafloor.pool;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springtribe.framework.reditools.messager.RedisMessageSender;
 
+import indi.atlantis.framework.reditools.messager.RedisMessageSender;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMessageListener;
 

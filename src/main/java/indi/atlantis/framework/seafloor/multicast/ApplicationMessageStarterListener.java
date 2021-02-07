@@ -4,8 +4,8 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springtribe.framework.reditools.messager.RedisMessageHandler;
 
+import indi.atlantis.framework.reditools.messager.RedisMessageHandler;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.InstanceId;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastEvent.MulticastEventType;

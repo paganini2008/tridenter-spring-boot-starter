@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springtribe.framework.reditools.BeanNames;
 
+import indi.atlantis.framework.reditools.BeanNames;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.Constants;
 import indi.atlantis.framework.seafloor.InstanceId;

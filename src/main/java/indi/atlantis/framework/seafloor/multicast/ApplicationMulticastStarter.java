@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springtribe.framework.reditools.messager.RedisMessageSender;
 
+import indi.atlantis.framework.reditools.messager.RedisMessageSender;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.InstanceId;
 

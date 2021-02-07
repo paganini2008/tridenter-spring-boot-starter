@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.retry.support.RetryTemplate;
-import org.springtribe.framework.reditools.common.ConnectionFailureHandler;
-import org.springtribe.framework.reditools.common.RedisKeepAliveResolver;
 
+import indi.atlantis.framework.reditools.common.ConnectionFailureHandler;
+import indi.atlantis.framework.reditools.common.RedisKeepAliveResolver;
 import indi.atlantis.framework.seafloor.http.RetryTemplateFactory;
 import lombok.extern.slf4j.Slf4j;
 

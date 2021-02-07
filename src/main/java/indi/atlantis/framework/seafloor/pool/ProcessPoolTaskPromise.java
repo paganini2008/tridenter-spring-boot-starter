@@ -7,11 +7,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import org.springtribe.framework.reditools.messager.RedisMessageHandler;
-
 import com.github.paganini2008.devtools.ArrayUtils;
 import com.github.paganini2008.devtools.date.DateUtils;
 
+import indi.atlantis.framework.reditools.messager.RedisMessageHandler;
 import lombok.extern.slf4j.Slf4j;
 
 /**

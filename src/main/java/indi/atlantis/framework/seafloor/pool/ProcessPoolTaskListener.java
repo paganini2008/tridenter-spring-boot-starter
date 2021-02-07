@@ -2,12 +2,12 @@ package indi.atlantis.framework.seafloor.pool;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springtribe.framework.reditools.common.SharedLatch;
 
 import com.github.paganini2008.devtools.ClassUtils;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.reflection.MethodUtils;
 
+import indi.atlantis.framework.reditools.common.SharedLatch;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.InstanceId;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMessageListener;

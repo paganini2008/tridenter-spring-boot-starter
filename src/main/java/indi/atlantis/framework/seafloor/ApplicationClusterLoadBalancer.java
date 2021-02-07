@@ -3,9 +3,10 @@ package indi.atlantis.framework.seafloor;
 import java.util.List;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springtribe.framework.reditools.common.RedisAtomicLongSequence;
 
 import com.github.paganini2008.devtools.collection.CollectionUtils;
+
+import indi.atlantis.framework.reditools.common.RedisAtomicLongSequence;
 
 /**
  * 

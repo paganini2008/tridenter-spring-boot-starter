@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import indi.atlantis.framework.seafloor.InstanceId;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastEvent;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastEvent.MulticastEventType;
@@ -42,7 +42,7 @@ public class ApplicationLeaderRecoveryListener implements ApplicationListener<Ap
 			leaderRecovery.recover(formerLeader);
 
 			ApplicationContext applicationContext = applicationEvent.getApplicationContext();
-			applicationContext.publishEvent(new ApplicationClusterLeaderEvent(applicationContext, HealthState.UNLEADABLE));
+			applicationContext.publishEvent(new ApplicationClusterLeaderEvent(applicationContext, LeaderState.UNLEADABLE));
 		}
 	}
 

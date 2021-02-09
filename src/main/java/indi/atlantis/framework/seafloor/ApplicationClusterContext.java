@@ -15,24 +15,24 @@ import indi.atlantis.framework.seafloor.election.ApplicationClusterRefreshedEven
 public class ApplicationClusterContext implements SmartApplicationListener {
 
 	private ApplicationInfo leaderInfo;
-	private volatile HealthState healthState = HealthState.UNLEADABLE;
+	private volatile LeaderState leaderState = LeaderState.UNLEADABLE;
 
 	public ApplicationInfo getLeaderInfo() {
 		return leaderInfo;
 	}
 
-	public HealthState getHealthState() {
-		return healthState;
+	public LeaderState getLeaderState() {
+		return leaderState;
 	}
 
-	public void setHealthState(HealthState clusterState) {
-		this.healthState = healthState;
+	public void setLeaderState(LeaderState leaderState) {
+		this.leaderState = leaderState;
 	}
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		ApplicationClusterEvent applicationClusterEvent = (ApplicationClusterEvent) event;
-		this.healthState = applicationClusterEvent.getHealthState();
+		this.leaderState = applicationClusterEvent.getLeaderState();
 
 		if (event instanceof ApplicationClusterRefreshedEvent) {
 			this.leaderInfo = ((ApplicationClusterRefreshedEvent) event).getLeaderInfo();

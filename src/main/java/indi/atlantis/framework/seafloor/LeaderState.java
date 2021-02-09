@@ -2,13 +2,13 @@ package indi.atlantis.framework.seafloor;
 
 /**
  * 
- * HealthState
+ * LeaderState
  * 
  * @author Jimmy Hoff
  *
  * @since 1.0
  */
-public enum HealthState {
+public enum LeaderState {
 
 	UNLEADABLE, LEADABLE, FATAL;
 

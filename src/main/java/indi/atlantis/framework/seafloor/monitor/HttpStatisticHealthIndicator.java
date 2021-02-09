@@ -12,7 +12,7 @@ import org.springframework.boot.actuate.health.Health.Builder;
 import com.github.paganini2008.devtools.collection.MapUtils;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterContext;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import indi.atlantis.framework.seafloor.http.Statistic;
 import indi.atlantis.framework.seafloor.http.StatisticIndicator;
 
@@ -38,8 +38,8 @@ public class HttpStatisticHealthIndicator extends AbstractHealthIndicator {
 
 	@Override
 	protected void doHealthCheck(Builder builder) throws Exception {
-		HealthState healthState = applicationClusterContext.getHealthState();
-		if (healthState == HealthState.FATAL) {
+		LeaderState leaderState = applicationClusterContext.getLeaderState();
+		if (leaderState == LeaderState.FATAL) {
 			builder.down();
 		} else {
 			builder.up();

@@ -17,7 +17,7 @@ import com.github.paganini2008.devtools.ArrayUtils;
 import com.github.paganini2008.devtools.proxy.Aspect;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterContext;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import indi.atlantis.framework.seafloor.utils.ApplicationContextUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,7 +49,7 @@ public class RestClientBeanAspect implements Aspect {
 
 	@Override
 	public boolean beforeCall(Object target, Method method, Object[] args) {
-		if (applicationClusterContext.getHealthState() == HealthState.FATAL) {
+		if (applicationClusterContext.getLeaderState() == LeaderState.FATAL) {
 			throw new HttpClientErrorException(HttpStatus.SERVICE_UNAVAILABLE, "RestClient is unavailable now");
 		}
 		return true;

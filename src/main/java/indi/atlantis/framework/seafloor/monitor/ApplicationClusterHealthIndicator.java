@@ -8,7 +8,7 @@ import com.github.paganini2008.devtools.io.FileUtils;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterContext;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastGroup;
 
 /**
@@ -28,13 +28,13 @@ public class ApplicationClusterHealthIndicator extends AbstractHealthIndicator {
 
 	@Override
 	protected void doHealthCheck(Builder builder) throws Exception {
-		HealthState healthState = applicationClusterContext.getHealthState();
-		if (healthState == HealthState.FATAL) {
+		LeaderState leaderState = applicationClusterContext.getLeaderState();
+		if (leaderState == LeaderState.FATAL) {
 			builder.down();
 		} else {
 			builder.up();
 		}
-		builder.withDetail("healthState", healthState);
+		builder.withDetail("leaderState", leaderState);
 		builder.withDetail("candidates", applicationMulticastGroup.countOfCandidate());
 		builder.withDetail("leader", getLeaderInfo());
 		builder.withDetail("totalMemory", FileUtils.formatSize(Runtime.getRuntime().totalMemory()));

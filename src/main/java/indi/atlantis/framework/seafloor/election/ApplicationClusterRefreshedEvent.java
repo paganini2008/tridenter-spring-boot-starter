@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationContext;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterEvent;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 
 /**
  * 
@@ -19,7 +19,7 @@ public class ApplicationClusterRefreshedEvent extends ApplicationClusterEvent {
 	private static final long serialVersionUID = 3115067071903624457L;
 
 	public ApplicationClusterRefreshedEvent(ApplicationContext applicationContext, ApplicationInfo leader) {
-		super(applicationContext, HealthState.LEADABLE);
+		super(applicationContext, LeaderState.LEADABLE);
 		this.leader = leader;
 	}
 

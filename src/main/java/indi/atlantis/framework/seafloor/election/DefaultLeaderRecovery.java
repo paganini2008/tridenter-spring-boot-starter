@@ -7,7 +7,7 @@ import com.github.paganini2008.devtools.Observable;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterContext;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -38,7 +38,7 @@ public class DefaultLeaderRecovery implements ApplicationListener<ApplicationClu
 
 	@Override
 	public void recover(ApplicationInfo leaderInfo) {
-		applicationClusterContext.setHealthState(HealthState.UNLEADABLE);
+		applicationClusterContext.setLeaderState(LeaderState.UNLEADABLE);
 		electionObservable.notifyObservers(leaderInfo);
 	}
 

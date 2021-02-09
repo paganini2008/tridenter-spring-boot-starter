@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.github.paganini2008.devtools.StringUtils;
 
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 import indi.atlantis.framework.seafloor.election.DefaultLeaderRecovery;
 import indi.atlantis.framework.seafloor.multicast.ApplicationHeartbeatTask;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class RetryableLeaderRecovery extends DefaultLeaderRecovery implements Ap
 
 	@Override
 	public void recover(ApplicationInfo formerLeader) {
-		applicationClusterContext.setHealthState(HealthState.UNLEADABLE);
+		applicationClusterContext.setLeaderState(LeaderState.UNLEADABLE);
 		try {
 			leaderService.ping();
 		} catch (Throwable e) {
@@ -47,7 +47,7 @@ public class RetryableLeaderRecovery extends DefaultLeaderRecovery implements Ap
 	@Override
 	public void onRetryEnd(String provider, Request request, Throwable e) {
 		ApplicationInfo leader = applicationClusterContext.getLeaderInfo();
-		if (applicationClusterContext.getHealthState() == HealthState.UNLEADABLE) {
+		if (applicationClusterContext.getLeaderState() == LeaderState.UNLEADABLE) {
 			log.warn("Application cluster leader [{}] is exhausted", leader);
 			super.recover(leader);
 		}

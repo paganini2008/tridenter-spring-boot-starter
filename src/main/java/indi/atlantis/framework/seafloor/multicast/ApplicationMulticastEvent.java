@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationContext;
 
 import indi.atlantis.framework.seafloor.ApplicationClusterEvent;
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 
 /**
  * 
@@ -18,7 +18,7 @@ public class ApplicationMulticastEvent extends ApplicationClusterEvent {
 	private static final long serialVersionUID = -2482108960259276628L;
 
 	public ApplicationMulticastEvent(ApplicationContext source, ApplicationInfo applicationInfo, MulticastEventType eventType) {
-		super(source, HealthState.UNLEADABLE);
+		super(source, LeaderState.UNLEADABLE);
 		this.applicationInfo = applicationInfo;
 		this.multicastEventType = eventType;
 	}

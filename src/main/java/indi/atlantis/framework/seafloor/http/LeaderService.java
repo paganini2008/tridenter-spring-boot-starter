@@ -3,7 +3,7 @@ package indi.atlantis.framework.seafloor.http;
 import org.springframework.http.HttpMethod;
 
 import indi.atlantis.framework.seafloor.ApplicationInfo;
-import indi.atlantis.framework.seafloor.HealthState;
+import indi.atlantis.framework.seafloor.LeaderState;
 
 /**
  * 
@@ -20,7 +20,7 @@ public interface LeaderService {
 	ApplicationInfo ping();
 
 	@Api(path = "/application/cluster/state", method = HttpMethod.GET, retries = 3, timeout = 60)
-	HealthState state();
+	LeaderState state();
 
 	@Api(path = "/application/cluster/list", method = HttpMethod.GET)
 	ApplicationInfo[] list();

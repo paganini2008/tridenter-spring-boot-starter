@@ -13,3 +13,4 @@
 *.iml
 /bin/
 .dbeaver
+.factorypath

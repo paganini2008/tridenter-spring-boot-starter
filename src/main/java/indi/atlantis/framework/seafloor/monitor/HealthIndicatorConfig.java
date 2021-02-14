@@ -24,9 +24,9 @@ public class HealthIndicatorConfig {
 		return new ApplicationClusterHealthIndicator();
 	}
 
-	@Bean("taskExecutorHealthIndicator")
+	@Bean("applicationClusterTaskExecutorHealthIndicator")
 	@ConditionalOnBean(value = ThreadPoolTaskExecutor.class, name = "applicationClusterTaskExecutor")
-	public TaskExecutorHealthIndicator taskExecutorHealthIndicator() {
+	public TaskExecutorHealthIndicator applicationClusterTaskExecutorHealthIndicator() {
 		return new TaskExecutorHealthIndicator();
 	}
 

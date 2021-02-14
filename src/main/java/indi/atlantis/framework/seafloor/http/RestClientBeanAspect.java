@@ -2,13 +2,15 @@ package indi.atlantis.framework.seafloor.http;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -57,21 +59,21 @@ public class RestClientBeanAspect implements Aspect {
 
 	@Override
 	public Object call(Object proxy, Method method, Object[] args) throws Throwable {
-		BasicRequest request;
+		ParameterizedRequest request;
 		Api api = method.getAnnotation(Api.class);
 		if (api != null) {
-			request = buildDefaultRequest(api, method, args);
-		} else if (method.getAnnotation(RequestMapping.class) != null) {
-			request = new RequestSpringAnnotationSupported(method.getAnnotation(RequestMapping.class));
+			request = buildParameterizedRequest(api, method, args);
 		} else {
-			throw new HttpClientErrorException(HttpStatus.SERVICE_UNAVAILABLE, "No definition on target method");
+			request = buildParameterizedRequest(method, args);
 		}
-		request.setAttribute("methodSignature", new MethodSignature(interfaceClass, method, args));
+		if (request instanceof BasicRequest) {
+			((BasicRequest) request).setAttribute("methodSignature", new MethodSignature(interfaceClass, method, args));
+		}
 		ResponseEntity<Object> responseEntity = requestTemplate.sendRequest(provider, request, method.getGenericReturnType());
 		return responseEntity.getBody();
 	}
 
-	private BasicRequest buildDefaultRequest(Api api, Method method, Object[] args) {
+	private ParameterizedRequest buildParameterizedRequest(Api api, Method method, Object[] args) {
 		final String path = api.path();
 		HttpMethod httpMethod = api.method();
 		String[] headers = api.headers();
@@ -93,6 +95,28 @@ public class RestClientBeanAspect implements Aspect {
 		request.setRetries(Integer.max(api.retries(), restClient.retries()));
 		request.setAllowedPermits(Integer.min(api.allowedPermits(), restClient.permits()));
 		request.setFallback(getFallback(api.fallback(), restClient.fallback()));
+		return request;
+	}
+	
+	private ParameterizedRequest buildParameterizedRequest(Method method, Object[] args) {
+		ParameterizedRequestImpl request;
+		if (method.getAnnotation(RequestMapping.class) != null) {
+			request = new SpringMvcRequests.GenericRequest(method.getAnnotation(RequestMapping.class));
+		} else if (method.getAnnotation(GetMapping.class) != null) {
+			request = new SpringMvcRequests.GetRequest(method.getAnnotation(GetMapping.class));
+		} else if (method.getAnnotation(PostMapping.class) != null) {
+			request = new SpringMvcRequests.PostRequest(method.getAnnotation(PostMapping.class));
+		} else if (method.getAnnotation(PutMapping.class) != null) {
+			request = new SpringMvcRequests.PutRequest(method.getAnnotation(PutMapping.class));
+		} else if (method.getAnnotation(DeleteMapping.class) != null) {
+			request = new SpringMvcRequests.DeleteRequest(method.getAnnotation(DeleteMapping.class));
+		} else {
+			throw new HttpClientErrorException(HttpStatus.SERVICE_UNAVAILABLE, "No definition on target method");
+		}
+		Parameter[] parameters = method.getParameters();
+		for (int i = 0; i < parameters.length; i++) {
+			request.accessParameter(parameters[i], args[i]);
+		}
 		return request;
 	}
 
@@ -146,28 +170,6 @@ public class RestClientBeanAspect implements Aspect {
 
 		public Object[] getArgs() {
 			return args;
-		}
-
-	}
-
-	/**
-	 * 
-	 * SpringAnnotationRequest
-	 *
-	 * @author Jimmy Hoff
-	 * @version 1.0
-	 */
-	private static class RequestSpringAnnotationSupported extends ParameterizedRequestImpl {
-
-		RequestSpringAnnotationSupported(RequestMapping requestMapping) {
-			super(requestMapping.value()[0], HttpMethod.valueOf(requestMapping.method()[0].name()));
-			if (ArrayUtils.isNotEmpty(requestMapping.produces())) {
-				List<MediaType> acceptableMediaTypes = new ArrayList<MediaType>();
-				for (String produce : requestMapping.produces()) {
-					acceptableMediaTypes.add(MediaType.parseMediaType(produce));
-				}
-				getHeaders().setAccept(acceptableMediaTypes);
-			}
 		}
 
 	}

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -67,7 +68,23 @@ public class ParameterizedRequestImpl extends ForwardedRequest implements Parame
 					parameterName = ObjectUtils.toString(pathVariable.value(), parameter.getName());
 					pathVariables.put(parameterName, argument);
 				}
-				if (annotation.annotationType() == RequestBody.class || annotation.annotationType() == ModelAttribute.class) {
+				if (annotation.annotationType() == RequestBody.class) {
+					MediaType mediaType = getHeaders().getContentType();
+					if (mediaType == null) {
+						getHeaders().setContentType(MediaType.APPLICATION_JSON);
+					}
+					setBody(new HttpEntity<Object>(argument, getHeaders()));
+				} else if (annotation.annotationType() == ModelAttribute.class) {
+					MediaType mediaType = getHeaders().getContentType();
+					if (mediaType == null) {
+						getHeaders().setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+					}
+					setBody(new HttpEntity<Object>(argument, getHeaders()));
+				} else if (annotation.annotationType() == MultipartBody.class) {
+					MediaType mediaType = getHeaders().getContentType();
+					if (mediaType == null) {
+						getHeaders().setContentType(MediaType.MULTIPART_FORM_DATA);
+					}
 					setBody(new HttpEntity<Object>(argument, getHeaders()));
 				}
 			}

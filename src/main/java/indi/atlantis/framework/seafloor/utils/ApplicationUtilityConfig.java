@@ -1,8 +1,5 @@
 package indi.atlantis.framework.seafloor.utils;
 
-import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +38,6 @@ public class ApplicationUtilityConfig {
 		taskExecutor.setCorePoolSize(nThreads);
 		taskExecutor.setMaxPoolSize(nThreads);
 		taskExecutor.setThreadFactory(new PooledThreadFactory("spring-application-cluster-task-executor-"));
-		taskExecutor.setRejectedExecutionHandler(defaultRejectedPolicy());
 		return taskExecutor;
 	}
 
@@ -54,18 +50,10 @@ public class ApplicationUtilityConfig {
 		threadPoolTaskScheduler.setThreadFactory(new PooledThreadFactory("spring-application-cluster-task-scheduler-"));
 		threadPoolTaskScheduler.setWaitForTasksToCompleteOnShutdown(true);
 		threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
-		threadPoolTaskScheduler.setRejectedExecutionHandler(defaultRejectedPolicy());
 		threadPoolTaskScheduler.setErrorHandler(defaultErrorHandler());
 		return threadPoolTaskScheduler;
 	}
 
-	@ConditionalOnMissingBean
-	@Bean
-	public RejectedExecutionHandler defaultRejectedPolicy() {
-		return new ThreadPoolExecutor.AbortPolicy();
-	}
-
-	@ConditionalOnMissingBean
 	@Bean
 	public ErrorHandler defaultErrorHandler() {
 		return new DefaultErrorHandler();

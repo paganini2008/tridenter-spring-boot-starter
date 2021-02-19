@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
@@ -31,7 +32,7 @@ public abstract class AbstractStatisticIndicator implements StatisticIndicator, 
 	protected final List<String> pathPatterns = new CopyOnWriteArrayList<String>();
 
 	@Autowired
-	public void configure(TaskScheduler taskScheduler) {
+	public void configure(@Qualifier("applicationClusterTaskScheduler") TaskScheduler taskScheduler) {
 		taskScheduler.scheduleWithFixedDelay(this, Duration.ofSeconds(1));
 	}
 

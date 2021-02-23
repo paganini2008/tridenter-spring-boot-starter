@@ -16,6 +16,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 import com.github.paganini2008.devtools.ArrayUtils;
+import com.github.paganini2008.devtools.collection.ListUtils;
 import com.github.paganini2008.devtools.collection.MultiMappedMap;
 
 /**
@@ -45,7 +46,7 @@ public abstract class AbstractStatisticIndicator implements StatisticIndicator, 
 	@Override
 	public Statistic compute(String provider, Request request) {
 		String path;
-		if (pathPatterns.isEmpty() || shouldCompute(provider, request)) {
+		if (shouldCompute(provider, request)) {
 			path = request.getPath();
 		} else {
 			path = "/**";
@@ -68,14 +69,13 @@ public abstract class AbstractStatisticIndicator implements StatisticIndicator, 
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public Collection<Statistic> toCollection(String provider) {
-		return cache.containsKey(provider) ? Collections.unmodifiableCollection((cache.get(provider).values())) : Collections.EMPTY_LIST;
+		return cache.containsKey(provider) ? Collections.unmodifiableCollection((cache.get(provider).values())) : ListUtils.emptyList();
 	}
 
 	@Override
-	public Map<String, Collection<Statistic>> toMap() {
+	public Map<String, Collection<Statistic>> toEntries() {
 		Map<String, Collection<Statistic>> copy = new HashMap<String, Collection<Statistic>>();
 		for (Map.Entry<String, Map<String, Statistic>> entry : cache.entrySet()) {
 			copy.put(entry.getKey(), Collections.unmodifiableCollection(entry.getValue().values()));

@@ -19,4 +19,5 @@ public interface RestClientPerformer {
 
 	<T> ResponseEntity<T> perform(String url, HttpMethod method, Object requestBody, Type responseType, Map<String, Object> uriParameters);
 
+	<T> T perform(String url, HttpMethod method, Object requestBody, ResponseExchanger<T> exchanger, Map<String, Object> uriParameters);
 }

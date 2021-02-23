@@ -34,11 +34,13 @@ public class ResponseStatisticIndicator extends AbstractStatisticIndicator imple
 		statistic.getPermit().release();
 
 		long startTime = (Long) req.getAttribute(REQUEST_ATTRIBUTE_TIMESTAMP);
-		statistic.getSnapshot().addRequest(request, startTime);
+		long elapsed = System.currentTimeMillis() - startTime;
+		statistic.setElapsed(elapsed);
 
-		statistic.getTotalExecution().incrementAndGet();
+		statistic.total.incrementAndGet();
+		statistic.qps.incrementAndGet();
 		if (ex != null) {
-			statistic.getFailedExecution().incrementAndGet();
+			statistic.failure.incrementAndGet();
 		}
 	}
 

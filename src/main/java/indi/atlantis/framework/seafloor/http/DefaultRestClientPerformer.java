@@ -28,17 +28,28 @@ public class DefaultRestClientPerformer extends CharsetDefinedRestTemplate imple
 		super(clientHttpRequestFactory, charset);
 	}
 
+	@Override
 	public <T> ResponseEntity<T> perform(String url, HttpMethod method, Object requestBody, Type responseType, Object... uriVariables) {
 		RequestCallback requestCallback = super.httpEntityCallback(requestBody, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = super.responseEntityExtractor(responseType);
 		return super.execute(url, method, requestCallback, responseExtractor, uriVariables);
 	}
 
+	@Override
 	public <T> ResponseEntity<T> perform(String url, HttpMethod method, Object requestBody, Type responseType,
 			Map<String, Object> uriParameters) {
 		RequestCallback requestCallback = super.httpEntityCallback(requestBody, responseType);
 		ResponseExtractor<ResponseEntity<T>> responseExtractor = super.responseEntityExtractor(responseType);
 		return super.execute(url, method, requestCallback, responseExtractor, uriParameters);
+	}
+
+	@Override
+	public <T> T perform(String url, HttpMethod method, Object requestBody, ResponseExchanger<T> exchanger,
+			Map<String, Object> uriParameters) {
+		RequestCallback requestCallback = super.httpEntityCallback(requestBody, null);
+		return super.execute(url, method, requestCallback, response -> {
+			return exchanger.exchange(response);
+		}, uriParameters);
 	}
 
 }

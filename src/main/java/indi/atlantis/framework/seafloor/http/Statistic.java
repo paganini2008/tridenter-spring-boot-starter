@@ -1,14 +1,13 @@
 package indi.atlantis.framework.seafloor.http;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicStampedReference;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.github.paganini2008.devtools.collection.LruList;
 import com.github.paganini2008.devtools.multithreads.AtomicLongSequence;
+
+import lombok.Data;
 
 /**
  * 
@@ -21,21 +20,21 @@ public final class Statistic {
 
 	private final String provider;
 	private final String path;
-	private final AtomicLongSequence totalExecution = new AtomicLongSequence();
-	private final AtomicLongSequence timeoutExecution = new AtomicLongSequence();
-	private final AtomicLongSequence failedExecution = new AtomicLongSequence();
+	final AtomicLongSequence total = new AtomicLongSequence();
+	final AtomicLongSequence timeout = new AtomicLongSequence();
+	final AtomicLongSequence failure = new AtomicLongSequence();
+	final AtomicInteger qps = new AtomicInteger();
 	private final Permit permit;
-	private final Snapshot snapshot;
 
 	public Statistic(String provider, String path, int maxPermits) {
 		this.provider = provider;
 		this.path = path;
 		this.permit = new Permit(maxPermits);
-		this.snapshot = new Snapshot(totalExecution);
+		this.requestTimeRef = new AtomicStampedReference<RequestTime>(null, 0);
 	}
 
-	private volatile long lastExecutionCount;
-	private long qps;
+	private AtomicStampedReference<RequestTime> requestTimeRef;
+	private volatile int qpsValue;
 
 	public String getProvider() {
 		return provider;
@@ -45,62 +44,57 @@ public final class Statistic {
 		return path;
 	}
 
-	@JsonIgnore
-	public AtomicLongSequence getTotalExecution() {
-		return totalExecution;
+	public long getTotalCount() {
+		return total.get();
 	}
 
-	@JsonIgnore
-	public AtomicLongSequence getTimeoutExecution() {
-		return timeoutExecution;
+	public long getTimeoutCount() {
+		return timeout.get();
 	}
 
-	@JsonIgnore
-	public AtomicLongSequence getFailedExecution() {
-		return failedExecution;
+	public long getFailedCount() {
+		return failure.get();
 	}
 
-	public long getTotalExecutionCount() {
-		return totalExecution.get();
+	void calculateQps() {
+		final int current = qps.get();
+		this.qpsValue = current;
+		this.qps.getAndAdd(-1 * current);
 	}
 
-	public long getTimeoutExecutionCount() {
-		return timeoutExecution.get();
-	}
-
-	public long getFailedExecutionCount() {
-		return failedExecution.get();
-	}
-
-	public void calculateQps() {
-		long totalExecutionCount = getTotalExecutionCount();
-		this.qps = totalExecutionCount - lastExecutionCount;
-		this.lastExecutionCount = totalExecutionCount;
-	}
-
-	public long getQps() {
-		return qps;
+	public int getQps() {
+		return qpsValue;
 	}
 
 	public Permit getPermit() {
 		return permit;
 	}
 
-	public Snapshot getSnapshot() {
-		return snapshot;
+	public void setElapsed(long elapsed) {
+		RequestTime current;
+		RequestTime update = new RequestTime();
+		do {
+			current = requestTimeRef.getReference();
+			if (current == null) {
+				update = new RequestTime(elapsed);
+			} else {
+				update.setCount(current.getCount() + 1);
+				update.setTotal(current.getTotal() + elapsed);
+				update.setMaximum(Math.max(current.getMaximum(), elapsed));
+				update.setMinimum(Math.min(current.getMinimum(), elapsed));
+			}
+		} while (!requestTimeRef.compareAndSet(current, update, requestTimeRef.getStamp(), requestTimeRef.getStamp() + 1));
 	}
 
-	public Map<String, Object> toMap() {
+	public Map<String, Object> toEntries() {
 		Map<String, Object> data = new LinkedHashMap<String, Object>();
 		data.put("provider", provider);
 		data.put("path", path);
-		data.put("totalExecutionCount", getTotalExecutionCount());
-		data.put("timeoutExecutionCount", getTimeoutExecutionCount());
-		data.put("failedExecutionCount", getFailedExecutionCount());
+		data.put("totalCount", getTotalCount());
+		data.put("timeoutCount", getTimeoutCount());
+		data.put("failedCount", getFailedCount());
+		data.put("requestTime", requestTimeRef.getReference());
 		data.put("qps", getQps());
-		data.put("maximumRequestTime", snapshot.getMaximumRequestTime());
-		data.put("minimumRequestTime", snapshot.getMinimumRequestTime());
-		data.put("averageRequestTime", snapshot.getAverageRequestTime());
 		data.put("activePermits", permit.getMaxPermits() - permit.getAvailablePermits());
 		data.put("maxPermits", permit.getMaxPermits());
 		return data;
@@ -142,49 +136,27 @@ public final class Statistic {
 
 	}
 
-	public static class Snapshot {
+	@Data
+	public static class RequestTime {
 
-		private final List<Request> latestRequests = new LruList<Request>(120);
-		private final AtomicLongSequence totalRequestTime = new AtomicLongSequence();
-		private volatile long maximumRequestTime;
-		private volatile long minimumRequestTime = Long.MAX_VALUE;
-
-		Snapshot(AtomicLongSequence totalExecution) {
-			this.totalExecution = totalExecution;
+		RequestTime(long elapsed) {
+			this.count = 1;
+			this.total = elapsed;
+			this.maximum = elapsed;
+			this.minimum = elapsed;
 		}
 
-		private final AtomicLongSequence totalExecution;
-
-		public long addRequest(Request request) {
-			return addRequest(request, request.getTimestamp());
+		RequestTime() {
 		}
 
-		public long addRequest(Request request, long startTime) {
-			latestRequests.add(request);
-			totalExecution.incrementAndGet();
-			long elapsed = System.currentTimeMillis() - startTime;
-			totalRequestTime.addAndGet(elapsed);
-			maximumRequestTime = Long.max(maximumRequestTime, elapsed);
-			minimumRequestTime = Long.min(minimumRequestTime, elapsed);
-			return elapsed;
-		}
+		private long maximum;
+		private long minimum;
+		private long total;
+		private long count;
 
-		public long getMinimumRequestTime() {
-			return minimumRequestTime;
+		public long getAverage() {
+			return count > 0 ? total / count : 0;
 		}
-
-		public long getMaximumRequestTime() {
-			return maximumRequestTime;
-		}
-
-		public long getAverageRequestTime() {
-			return totalExecution.get() > 0 ? totalRequestTime.get() / totalExecution.get() : 0L;
-		}
-
-		public List<Request> getLatestRequests() {
-			return new ArrayList<Request>(latestRequests);
-		}
-
 	}
 
 }

@@ -34,16 +34,16 @@ public class RequestStatisticIndicator extends AbstractStatisticIndicator implem
 	public boolean beforeSubmit(String provider, Request request) {
 		boolean proceed = true;
 		Statistic statistic = compute(provider, request);
-		long totalExecutionCount = statistic.getTotalExecutionCount();
-		if (timeoutPercentage != null && totalExecutionCount > 0) {
-			long timeoutExecutionCount = statistic.getTimeoutExecutionCount();
-			proceed &= Floats.toFixed((float) (timeoutExecutionCount / totalExecutionCount), 2) < timeoutPercentage.floatValue();
+		long totalCount = statistic.getTotalCount();
+		if (timeoutPercentage != null && totalCount > 0) {
+			long timeoutCount = statistic.getTimeoutCount();
+			proceed &= Floats.toFixed((float) (timeoutCount / totalCount), 2) < timeoutPercentage.floatValue();
 		}
-		if (errorPercentage != null && totalExecutionCount > 0) {
-			long failedExecutionCount = statistic.getFailedExecutionCount();
-			proceed &= Floats.toFixed((float) (failedExecutionCount / totalExecutionCount), 2) < errorPercentage.floatValue();
+		if (errorPercentage != null && totalCount > 0) {
+			long failedCount = statistic.getFailedCount();
+			proceed &= Floats.toFixed((float) (failedCount / totalCount), 2) < errorPercentage.floatValue();
 		}
-		if (permitPercentage != null && totalExecutionCount > 0) {
+		if (permitPercentage != null && totalCount > 0) {
 			long maxPermits = statistic.getPermit().getMaxPermits();
 			long availablePermits = statistic.getPermit().getAvailablePermits();
 			proceed &= Floats.toFixed((float) ((maxPermits - availablePermits) / maxPermits), 2) < permitPercentage.floatValue();
@@ -54,16 +54,19 @@ public class RequestStatisticIndicator extends AbstractStatisticIndicator implem
 	@Override
 	public void afterSubmit(String provider, Request request, ResponseEntity<?> responseEntity, Throwable e) {
 		Statistic statistic = compute(provider, request);
-		statistic.getSnapshot().addRequest(request);
-		if (responseEntity != null && (responseEntity.getStatusCodeValue() < 200 || responseEntity.getStatusCodeValue() >= 300)) {
-			statistic.getFailedExecution().incrementAndGet();
+		long elapsed = System.currentTimeMillis() - request.getTimestamp();
+		statistic.setElapsed(elapsed);
+		if (responseEntity != null && !responseEntity.getStatusCode().is2xxSuccessful()) {
+			statistic.failure.incrementAndGet();
 		} else if (e != null && e instanceof RestClientException) {
 			if (isRequestTimeout((RestClientException) e)) {
-				statistic.getTimeoutExecution().incrementAndGet();
+				statistic.timeout.incrementAndGet();
 			} else {
-				statistic.getFailedExecution().incrementAndGet();
+				statistic.failure.incrementAndGet();
 			}
 		}
+		statistic.total.incrementAndGet();
+		statistic.qps.incrementAndGet();
 	}
 
 	private boolean isRequestTimeout(RestClientException e) {

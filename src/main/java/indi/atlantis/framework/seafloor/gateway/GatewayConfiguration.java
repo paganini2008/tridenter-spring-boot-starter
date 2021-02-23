@@ -9,13 +9,13 @@ import com.github.paganini2008.devtools.cache.HashCache;
 
 /**
  * 
- * CustomizedRoutingConfig
+ * GatewayConfiguration
  *
  * @author Jimmy Hoff
  * @version 1.0
  */
 @Configuration
-public class CustomizedRoutingConfig {
+public class GatewayConfiguration {
 
 	@Bean
 	public RouterManager routerManager() {

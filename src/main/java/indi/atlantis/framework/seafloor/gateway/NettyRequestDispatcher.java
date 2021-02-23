@@ -23,6 +23,8 @@ import indi.atlantis.framework.seafloor.http.RestClientUtils;
 import indi.atlantis.framework.seafloor.utils.ApplicationContextUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
@@ -47,7 +49,7 @@ public class NettyRequestDispatcher extends RequestDispatcher {
 	private RequestTemplate requestTemplate;
 
 	@Autowired
-	private RouterManager routingManager;
+	private RouterManager routeManager;
 
 	@Autowired
 	private Cache cache;
@@ -57,7 +59,7 @@ public class NettyRequestDispatcher extends RequestDispatcher {
 	public void channelRead(ChannelHandlerContext ctx, Object data) throws Exception {
 		final FullHttpRequest httpRequest = (FullHttpRequest) data;
 		final String path = httpRequest.uri();
-		Router router = routingManager.match(path);
+		Router router = routeManager.match(path);
 		String rawPath = router.direct() ? path : path.substring(router.prefixEndPosition());
 		ResponseEntity<String> responseEntity = null;
 		if (router.cached()) {
@@ -80,8 +82,10 @@ public class NettyRequestDispatcher extends RequestDispatcher {
 		if (HttpUtil.isKeepAlive(httpRequest)) {
 			httpResponse.headers().set(CONNECTION, HttpHeaderValues.KEEP_ALIVE);
 		}
-		ctx.writeAndFlush(httpResponse);
-		ctx.channel().close();
+		ChannelFuture future = ctx.writeAndFlush(httpResponse);
+		if (!HttpUtil.isKeepAlive(httpRequest)) {
+			future.addListener(ChannelFutureListener.CLOSE);
+		}
 	}
 
 	private ResponseEntity<String> doSendRequest(FullHttpRequest httpRequest, Router router, String rawPath) {
@@ -106,13 +110,11 @@ public class NettyRequestDispatcher extends RequestDispatcher {
 		request.setAllowedPermits(router.allowedPermits());
 		request.setFallback(getFallback(router.fallback()));
 
-		ResponseEntity<String> responseEntity;
 		try {
-			responseEntity = requestTemplate.sendRequest(router.provider(), request, String.class);
+			return requestTemplate.sendRequest(router.provider(), request, String.class);
 		} catch (Throwable e) {
-			responseEntity = RestClientUtils.getErrorResponse(e);
+			return RestClientUtils.getErrorResponse(e);
 		}
-		return responseEntity;
 	}
 
 	private FallbackProvider getFallback(Class<?> fallbackClass) {

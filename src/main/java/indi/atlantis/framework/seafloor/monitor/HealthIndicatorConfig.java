@@ -3,7 +3,6 @@ package indi.atlantis.framework.seafloor.monitor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import indi.atlantis.framework.seafloor.http.RestClientConfig;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastConfig;
@@ -18,22 +17,22 @@ import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastConfig;
 @Configuration
 public class HealthIndicatorConfig {
 
-	@Bean("applicationCluster")
+	@Bean("applicationClusterHealth")
 	@ConditionalOnBean(ApplicationMulticastConfig.class)
-	public ApplicationClusterHealthIndicator applicationClusterHealthIndicator() {
+	public ApplicationClusterHealthIndicator applicationClusterHealth() {
 		return new ApplicationClusterHealthIndicator();
 	}
 
-	@Bean("applicationClusterTaskExecutorHealthIndicator")
-	@ConditionalOnBean(value = ThreadPoolTaskExecutor.class, name = "applicationClusterTaskExecutor")
-	public TaskExecutorHealthIndicator applicationClusterTaskExecutorHealthIndicator() {
+	@Bean("applicationClusterTaskExecutorHealth")
+	@ConditionalOnBean(name = "applicationClusterTaskExecutor")
+	public TaskExecutorHealthIndicator applicationClusterTaskExecutorHealth() {
 		return new TaskExecutorHealthIndicator();
 	}
 
-	@Bean("httpStatistic")
+	@Bean("restClientHealth")
 	@ConditionalOnBean(RestClientConfig.class)
-	public HttpStatisticHealthIndicator httpStatisticHealthIndicator() {
-		return new HttpStatisticHealthIndicator();
+	public RestClientHealthIndicator restClientHealth() {
+		return new RestClientHealthIndicator();
 	}
 
 }

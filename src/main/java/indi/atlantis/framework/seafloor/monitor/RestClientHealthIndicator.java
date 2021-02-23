@@ -18,12 +18,12 @@ import indi.atlantis.framework.seafloor.http.StatisticIndicator;
 
 /**
  * 
- * HttpStatisticHealthIndicator
+ * RestClientHealthIndicator
  *
  * @author Jimmy Hoff
  * @version 1.0
  */
-public class HttpStatisticHealthIndicator extends AbstractHealthIndicator {
+public class RestClientHealthIndicator extends AbstractHealthIndicator {
 
 	@Qualifier("requestStatistic")
 	@Autowired
@@ -44,18 +44,18 @@ public class HttpStatisticHealthIndicator extends AbstractHealthIndicator {
 		} else {
 			builder.up();
 		}
-		Map<String, Collection<Statistic>> source = requestStatistic.toMap();
+		Map<String, Collection<Statistic>> source = requestStatistic.toEntries();
 		if (MapUtils.isNotEmpty(source)) {
 			for (Map.Entry<String, Collection<Statistic>> entry : source.entrySet()) {
 				builder.withDetail("[-]: " + entry.getKey(),
-						entry.getValue().stream().map(stat -> stat.toMap()).collect(Collectors.toList()));
+						entry.getValue().stream().map(stat -> stat.toEntries()).collect(Collectors.toList()));
 			}
 		}
-		source = responseStatistic.toMap();
+		source = responseStatistic.toEntries();
 		if (MapUtils.isNotEmpty(source)) {
 			for (Map.Entry<String, Collection<Statistic>> entry : source.entrySet()) {
 				builder.withDetail("[+]: " + entry.getKey(),
-						entry.getValue().stream().map(stat -> stat.toMap()).collect(Collectors.toList()));
+						entry.getValue().stream().map(stat -> stat.toEntries()).collect(Collectors.toList()));
 			}
 		}
 

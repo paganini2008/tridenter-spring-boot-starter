@@ -16,6 +16,6 @@ public interface StatisticIndicator {
 
 	Collection<Statistic> toCollection(String provider);
 
-	Map<String, Collection<Statistic>> toMap();
+	Map<String, Collection<Statistic>> toEntries();
 
 }

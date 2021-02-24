@@ -5,7 +5,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.http.ResponseEntity;
 
 /**
  * 
@@ -48,7 +47,7 @@ public class RequestInterceptorContainer implements BeanPostProcessor {
 		return proceeded;
 	}
 
-	public void afterSubmit(String provider, Request request, ResponseEntity<?> responseEntity, Throwable reason) {
+	public void afterSubmit(String provider, Request request, Object responseEntity, Throwable reason) {
 		for (RequestInterceptor interceptor : interceptors) {
 			if (interceptor.matches(provider, request)) {
 				interceptor.afterSubmit(provider, request, responseEntity, reason);

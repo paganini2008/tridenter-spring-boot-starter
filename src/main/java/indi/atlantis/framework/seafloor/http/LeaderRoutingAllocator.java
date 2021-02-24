@@ -24,7 +24,7 @@ public class LeaderRoutingAllocator implements RoutingAllocator, ApplicationList
 	}
 
 	@Override
-	public String allocateHost(String provider, String path) {
+	public String allocateHost(String provider, String path, Request request) {
 		if (leaderInfo == null) {
 			throw new LeaderNotFoundException();
 		}

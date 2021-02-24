@@ -23,4 +23,13 @@ public interface RequestProcessor {
 	<T> ResponseEntity<T> sendRequestWithTimeout(String provider, Request request, Type responseType, int timeout);
 
 	<T> ResponseEntity<T> sendRequestWithRetryAndTimeout(String provider, Request request, Type responseType, int retries, int timeout);
+
+	<T> T sendRequestWithRetry(String provider, Request request, RestTemplateCallback<T> responseExchanger, int retries);
+
+	<T> T sendRequest(String provider, Request request, RestTemplateCallback<T> responseExchanger);
+
+	<T> T sendRequestWithTimeout(String provider, Request request, RestTemplateCallback<T> responseExchanger, int timeout);
+
+	<T> T sendRequestWithRetryAndTimeout(String provider, Request request, RestTemplateCallback<T> responseExchanger, int retries,
+			int timeout);
 }

@@ -29,6 +29,7 @@ import io.netty.handler.codec.http.HttpServerCodec;
 import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
+import io.netty.handler.stream.ChunkedWriteHandler;
 import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 
@@ -79,7 +80,7 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 	@Value("${spring.application.gateway.embeddedserver.cors.maxAge:0}")
 	private long maxAge;
 
-	@Value("${spring.application.gateway.embeddedserver.gzip:true}")
+	@Value("${spring.application.gateway.embeddedserver.gzip:false}")
 	private boolean gzipEnabled;
 
 	@PostConstruct
@@ -103,6 +104,7 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 				}
 				pipeline.addLast("httpServerCodec", new HttpServerCodec(maxInitialLineLength, maxHeaderSize, maxChunkSize));
 				pipeline.addLast("httpAggregator", new HttpObjectAggregator(maxContentLength));
+				pipeline.addLast(new ChunkedWriteHandler());
 				if (corsEnabled) {
 					CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().allowedRequestHeaders("*")
 							.allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE).maxAge(maxAge)

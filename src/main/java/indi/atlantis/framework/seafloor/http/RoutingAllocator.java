@@ -14,6 +14,6 @@ public interface RoutingAllocator {
 
 	static final String LEADER = "L";
 
-	String allocateHost(String provider, String path);
+	String allocateHost(String provider, String path, Request request);
 
 }

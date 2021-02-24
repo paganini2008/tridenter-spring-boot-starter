@@ -1,6 +1,5 @@
 package indi.atlantis.framework.seafloor.http;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 
 /**
@@ -17,7 +16,7 @@ public interface RequestInterceptor {
 		return true;
 	}
 
-	default void afterSubmit(String provider, Request request, @Nullable ResponseEntity<?> responseEntity, @Nullable Throwable reason) {
+	default void afterSubmit(String provider, Request request, @Nullable Object responseEntity, @Nullable Throwable reason) {
 	}
 
 	default boolean matches(String provider, Request request) {

@@ -52,11 +52,12 @@ public class RequestStatisticIndicator extends AbstractStatisticIndicator implem
 	}
 
 	@Override
-	public void afterSubmit(String provider, Request request, ResponseEntity<?> responseEntity, Throwable e) {
+	public void afterSubmit(String provider, Request request, Object responseEntity, Throwable e) {
 		Statistic statistic = compute(provider, request);
 		long elapsed = System.currentTimeMillis() - request.getTimestamp();
 		statistic.setElapsed(elapsed);
-		if (responseEntity != null && !responseEntity.getStatusCode().is2xxSuccessful()) {
+		if (responseEntity != null && (responseEntity instanceof ResponseEntity)
+				&& !((ResponseEntity<?>) responseEntity).getStatusCode().is2xxSuccessful()) {
 			statistic.failure.incrementAndGet();
 		} else if (e != null && e instanceof RestClientException) {
 			if (isRequestTimeout((RestClientException) e)) {

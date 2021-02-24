@@ -25,10 +25,10 @@ public interface FallbackProvider {
 		return new HttpHeaders();
 	}
 
-	default boolean hasFallback(String provider, Request request, Type responseType, @Nullable RestClientException e) {
+	default boolean hasFallback(String provider, Request request, @Nullable Type responseType, @Nullable RestClientException e) {
 		return true;
 	}
 
-	Object getBody(String provider, Request request, Type responseType, @Nullable RestClientException e);
+	Object getBody(String provider, Request request, @Nullable Type responseType, @Nullable RestClientException e);
 
 }

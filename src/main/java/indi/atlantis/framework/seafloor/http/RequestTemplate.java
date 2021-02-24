@@ -3,6 +3,7 @@ package indi.atlantis.framework.seafloor.http;
 import java.lang.reflect.Type;
 
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Jimmy Hoff
  * @version 1.0
  */
+@SuppressWarnings("unchecked")
 @Slf4j
 public class RequestTemplate {
 
@@ -79,7 +81,50 @@ public class RequestTemplate {
 		return responseEntity;
 	}
 
-	@SuppressWarnings("unchecked")
+	public <T> ResponseEntity<T> sendRequest(String provider, Request req, RestTemplateCallback<T> callback) {
+		ResponseEntity<T> responseEntity = null;
+		RestClientException reason = null;
+		final ForwardedRequest request = (ForwardedRequest) req;
+		int retries = request.getRetries();
+		int timeout = request.getTimeout();
+		FallbackProvider fallback = request.getFallback();
+
+		Statistic statistic = statisticIndicator.compute(provider, request);
+		Permit permit = statistic.getPermit();
+		try {
+			if (permit.getAvailablePermits() < 1) {
+				throw new RestfulException(request, InterruptedType.TOO_MANY_REQUESTS);
+			}
+			permit.accquire();
+			T body = null;
+			if (requestInterceptorContainer.beforeSubmit(provider, request)) {
+				if (retries > 0 && timeout > 0) {
+					body = requestProcessor.sendRequestWithRetryAndTimeout(provider, request, callback, retries, timeout);
+				} else if (retries < 1 && timeout > 0) {
+					body = requestProcessor.sendRequestWithTimeout(provider, request, callback, timeout);
+				} else if (retries > 0 && timeout < 1) {
+					body = requestProcessor.sendRequestWithRetry(provider, request, callback, retries);
+				} else {
+					body = requestProcessor.sendRequest(provider, request, callback);
+				}
+				responseEntity = new ResponseEntity<T>(body, request.getHeaders(), HttpStatus.OK);
+			}
+		} catch (RestClientException e) {
+			log.error(e.getMessage(), e);
+			responseEntity = executeFallback(provider, request, null, e, fallback);
+			reason = e;
+		} catch (Throwable e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			permit.release();
+			requestInterceptorContainer.afterSubmit(provider, request, responseEntity, reason);
+		}
+		if (responseEntity == null) {
+			responseEntity = executeFallback(provider, request, null, reason, fallback);
+		}
+		return responseEntity;
+	}
+
 	protected <T> ResponseEntity<T> executeFallback(String provider, Request request, Type responseType, RestClientException e,
 			FallbackProvider fallback) {
 		if (fallback == null) {

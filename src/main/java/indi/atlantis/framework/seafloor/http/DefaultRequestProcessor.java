@@ -81,7 +81,7 @@ public class DefaultRequestProcessor implements RequestProcessor {
 	public <T> ResponseEntity<T> sendRequest(String provider, Request request, Type responseType) {
 		Map<String, Object> uriVariables = new HashMap<String, Object>();
 		String path = request.getPath();
-		String url = routingAllocator.allocateHost(provider, path);
+		String url = routingAllocator.allocateHost(provider, path, request);
 		if (request instanceof ParameterizedRequest) {
 			ParameterizedRequest parameterizedRequest = (ParameterizedRequest) request;
 			if (MapUtils.isNotEmpty(parameterizedRequest.getPathVariables())) {
@@ -137,6 +137,86 @@ public class DefaultRequestProcessor implements RequestProcessor {
 			int timeout) {
 		Future<ResponseEntity<T>> future = taskExecutor.submit(() -> {
 			return sendRequestWithRetry(provider, request, responseType, retries);
+		});
+		try {
+			if (timeout > 0) {
+				return future.get(timeout, TimeUnit.SECONDS);
+			}
+			return future.get();
+		} catch (TimeoutException e) {
+			throw new RestfulException(request, InterruptedType.REQUEST_TIMEOUT);
+		} catch (ExecutionException e) {
+			Throwable real = e.getCause();
+			throw RestClientUtils.wrapException(real.getMessage(), real, request);
+		} catch (Throwable e) {
+			throw RestClientUtils.wrapException(e.getMessage(), e, request);
+		}
+	}
+
+	@Override
+	public <T> T sendRequestWithRetry(String provider, Request request, RestTemplateCallback<T> callback, int retries) {
+		RetryTemplate retryTemplate = retryTemplateCache.get(provider, request.getPath(), () -> {
+			return retryTemplateFactory.setRetryPolicy(retries).createObject();
+		});
+		RetryEntry retryEntry = new RetryEntry(provider, request, retries);
+		return retryTemplate.execute(context -> {
+			context.setAttribute(CURRENT_RETRY_IDENTIFIER, retryEntry);
+			return sendRequest(provider, request, callback);
+		}, context -> {
+			context.removeAttribute(CURRENT_RETRY_IDENTIFIER);
+			Throwable e = context.getLastThrowable();
+			throw RestClientUtils.wrapException(e.getMessage(), e, request);
+		});
+	}
+
+	@Override
+	public <T> T sendRequest(String provider, Request request, RestTemplateCallback<T> callback) {
+		Map<String, Object> uriVariables = new HashMap<String, Object>();
+		String path = request.getPath();
+		String url = routingAllocator.allocateHost(provider, path, request);
+		if (request instanceof ParameterizedRequest) {
+			ParameterizedRequest parameterizedRequest = (ParameterizedRequest) request;
+			if (MapUtils.isNotEmpty(parameterizedRequest.getPathVariables())) {
+				uriVariables.putAll(parameterizedRequest.getPathVariables());
+			}
+			if (MapUtils.isNotEmpty(parameterizedRequest.getRequestParameters())) {
+				url = new StringBuilder(url).append("?").append(getQueryString(parameterizedRequest.getRequestParameters())).toString();
+				uriVariables.putAll(parameterizedRequest.getRequestParameters());
+			}
+		}
+		HttpEntity<?> body = request.getBody();
+		if (MapUtils.isNotEmpty(defaultHttpHeaders)) {
+			body.getHeaders().addAll(defaultHttpHeaders);
+		}
+		printFoot(url, request);
+		return restClientPerformer.perform(url, request.getMethod(), body, callback, uriVariables);
+	}
+
+	@Override
+	public <T> T sendRequestWithTimeout(String provider, Request request, RestTemplateCallback<T> callback, int timeout) {
+		Future<T> future = taskExecutor.submit(() -> {
+			return sendRequest(provider, request, callback);
+		});
+		try {
+			if (timeout > 0) {
+				return future.get(timeout, TimeUnit.SECONDS);
+			}
+			return future.get();
+		} catch (TimeoutException e) {
+			throw new RestfulException(request, InterruptedType.REQUEST_TIMEOUT);
+		} catch (ExecutionException e) {
+			Throwable real = e.getCause();
+			throw RestClientUtils.wrapException(real.getMessage(), real, request);
+		} catch (Throwable e) {
+			throw RestClientUtils.wrapException(e.getMessage(), e, request);
+		}
+	}
+
+	@Override
+	public <T> T sendRequestWithRetryAndTimeout(String provider, Request request, RestTemplateCallback<T> callback, int retries,
+			int timeout) {
+		Future<T> future = taskExecutor.submit(() -> {
+			return sendRequestWithRetry(provider, request, callback, retries);
 		});
 		try {
 			if (timeout > 0) {

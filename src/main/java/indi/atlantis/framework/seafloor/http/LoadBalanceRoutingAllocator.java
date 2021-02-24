@@ -6,9 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 
+import com.github.paganini2008.devtools.StringUtils;
+
 import indi.atlantis.framework.seafloor.ApplicationInfo;
 import indi.atlantis.framework.seafloor.LoadBalancer;
-import indi.atlantis.framework.seafloor.election.ApplicationClusterFollowerEvent;
+import indi.atlantis.framework.seafloor.election.ApplicationClusterRefreshedEvent;
 import indi.atlantis.framework.seafloor.election.LeaderNotFoundException;
 import indi.atlantis.framework.seafloor.multicast.RegistryCenter;
 
@@ -20,7 +22,7 @@ import indi.atlantis.framework.seafloor.multicast.RegistryCenter;
  * 
  * @since 1.0
  */
-public class LoadBalanceRoutingAllocator implements RoutingAllocator, ApplicationListener<ApplicationClusterFollowerEvent> {
+public class LoadBalanceRoutingAllocator implements RoutingAllocator, ApplicationListener<ApplicationClusterRefreshedEvent> {
 
 	@Autowired
 	private RegistryCenter registryCenter;
@@ -32,19 +34,27 @@ public class LoadBalanceRoutingAllocator implements RoutingAllocator, Applicatio
 	private ApplicationInfo leaderInfo;
 
 	@Override
-	public String allocateHost(String provider, String path) {
-		ApplicationInfo selectedApplication;
-		if (provider.equalsIgnoreCase(LEADER)) {
+	public String allocateHost(String provider, String path, Request request) {
+		if (StringUtils.isBlank(provider)) {
+			return path;
+		}
+		ApplicationInfo selectedApplication = null;
+		List<ApplicationInfo> candidates = null;
+		switch (provider) {
+		case LEADER:
 			if (leaderInfo == null) {
 				throw new LeaderNotFoundException(LEADER);
 			}
 			selectedApplication = leaderInfo;
-		} else if (provider.equals(ALL)) {
-			List<ApplicationInfo> candidates = registryCenter.getApplications();
+			break;
+		case ALL:
+			candidates = registryCenter.getApplications();
 			selectedApplication = loadBalancer.select(path, candidates);
-		} else {
-			List<ApplicationInfo> candidates = registryCenter.getApplications(provider);
+			break;
+		default:
+			candidates = registryCenter.getApplications(provider);
 			selectedApplication = loadBalancer.select(path, candidates);
+			break;
 		}
 		if (selectedApplication == null) {
 			throw new RoutingPolicyException("Invalid provider name: " + provider);
@@ -53,7 +63,7 @@ public class LoadBalanceRoutingAllocator implements RoutingAllocator, Applicatio
 	}
 
 	@Override
-	public void onApplicationEvent(ApplicationClusterFollowerEvent event) {
+	public void onApplicationEvent(ApplicationClusterRefreshedEvent event) {
 		this.leaderInfo = event.getLeaderInfo();
 	}
 

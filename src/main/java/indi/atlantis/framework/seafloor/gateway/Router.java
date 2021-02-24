@@ -27,14 +27,17 @@ import lombok.experimental.Accessors;
 @Data
 public final class Router implements Comparable<Router> {
 
+	public static final Router MISMATCHED = new Router("");
+
 	private final String prefix;
 	private final int prefixEndPosition;
-	private String provider;
+	private String provider = "";
 	private int retries;
 	private int timeout = Integer.MAX_VALUE;
 	private int allowedPermits = Integer.MAX_VALUE;
-	private boolean direct;
 	private boolean cached;
+	private boolean forward;
+	private boolean stream;
 	private Charset charset = CharsetUtils.UTF_8;
 	private Class<?> fallback;
 	private final MultiValueMap<String, String> defaultHeaders = new LinkedMultiValueMap<String, String>();
@@ -64,6 +67,10 @@ public final class Router implements Comparable<Router> {
 	@Override
 	public int compareTo(Router other) {
 		return other.prefixEndPosition() - prefixEndPosition();
+	}
+
+	public String trimPath(String path) {
+		return prefixEndPosition >= 0 ? path.substring(prefixEndPosition) : path;
 	}
 
 }

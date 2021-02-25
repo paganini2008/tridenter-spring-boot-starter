@@ -8,13 +8,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.github.paganini2008.devtools.StringUtils;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
@@ -25,7 +25,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpContentCompressor;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.HttpServerCodec;
+import io.netty.handler.codec.http.HttpRequestDecoder;
+import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.cors.CorsConfig;
 import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
@@ -47,8 +48,13 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 
+	@Qualifier("staticRequestDispatcher")
 	@Autowired
-	private RequestDispatcher httpRequestDispatcher;
+	private RequestDispatcher staticRequestDispatcher;
+
+	@Qualifier("dynamicRequestDispatcher")
+	@Autowired
+	private RequestDispatcher dynamicRequestDispatcher;
 
 	@Value("${spring.application.gateway.embeddedserver.port:7000}")
 	private int port;
@@ -102,8 +108,9 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 				if (gzipEnabled) {
 					pipeline.addLast(new HttpContentCompressor());
 				}
-				pipeline.addLast("httpServerCodec", new HttpServerCodec(maxInitialLineLength, maxHeaderSize, maxChunkSize));
+				pipeline.addLast("httpDecoder", new HttpRequestDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize));
 				pipeline.addLast("httpAggregator", new HttpObjectAggregator(maxContentLength));
+				ch.pipeline().addLast("httpEncoder", new HttpResponseEncoder());
 				pipeline.addLast(new ChunkedWriteHandler());
 				if (corsEnabled) {
 					CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().allowedRequestHeaders("*")
@@ -111,7 +118,8 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 							.build();
 					pipeline.addLast(new CorsHandler(corsConfig));
 				}
-				pipeline.addLast((ChannelHandler) httpRequestDispatcher);
+				pipeline.addLast(staticRequestDispatcher);
+				pipeline.addLast(dynamicRequestDispatcher);
 			}
 		});
 		try {

@@ -36,8 +36,8 @@ public final class Router implements Comparable<Router> {
 	private int timeout = Integer.MAX_VALUE;
 	private int allowedPermits = Integer.MAX_VALUE;
 	private boolean cached;
-	private boolean forward;
-	private boolean stream;
+	private String url;
+	private ResourceType resourceType = ResourceType.DEFAULT;
 	private Charset charset = CharsetUtils.UTF_8;
 	private Class<?> fallback;
 	private final MultiValueMap<String, String> defaultHeaders = new LinkedMultiValueMap<String, String>();
@@ -71,6 +71,12 @@ public final class Router implements Comparable<Router> {
 
 	public String trimPath(String path) {
 		return prefixEndPosition >= 0 ? path.substring(prefixEndPosition) : path;
+	}
+
+	public static enum ResourceType {
+
+		DEFAULT, REDIRECT, STREAM, FILE
+
 	}
 
 }

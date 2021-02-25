@@ -28,10 +28,14 @@ public class GatewayConfiguration {
 		return new NettyEmbeddedServer();
 	}
 
-	@ConditionalOnMissingBean
 	@Bean
-	public RequestDispatcher requestDispatcher() {
-		return new NettyRequestDispatcher();
+	public RequestDispatcher dynamicRequestDispatcher() {
+		return new DynamicRequestDispatcher();
+	}
+
+	@Bean
+	public RequestDispatcher staticRequestDispatcher() {
+		return new StaticRequestDispatcher();
 	}
 
 	@ConditionalOnMissingBean

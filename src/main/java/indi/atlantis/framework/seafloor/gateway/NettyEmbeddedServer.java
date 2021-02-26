@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.github.paganini2008.devtools.StringUtils;
@@ -48,13 +47,8 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 
-	@Qualifier("staticRequestDispatcher")
 	@Autowired
-	private RequestDispatcher staticRequestDispatcher;
-
-	@Qualifier("dynamicRequestDispatcher")
-	@Autowired
-	private RequestDispatcher dynamicRequestDispatcher;
+	private HttpRequestDispatcher httpRequestDispatcher;
 
 	@Value("${spring.application.gateway.embeddedserver.port:7000}")
 	private int port;
@@ -118,8 +112,7 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 							.build();
 					pipeline.addLast(new CorsHandler(corsConfig));
 				}
-				pipeline.addLast(staticRequestDispatcher);
-				pipeline.addLast(dynamicRequestDispatcher);
+				pipeline.addLast(httpRequestDispatcher);
 			}
 		});
 		try {

@@ -27,7 +27,7 @@ import lombok.experimental.Accessors;
 @Data
 public final class Router implements Comparable<Router> {
 
-	public static final Router MISMATCHED = new Router("");
+	private static final String PATTERN = "[_0-9a-zA-Z\\*\\/]+";
 
 	private final String prefix;
 	private final int prefixEndPosition;
@@ -40,12 +40,16 @@ public final class Router implements Comparable<Router> {
 	private ResourceType resourceType = ResourceType.DEFAULT;
 	private Charset charset = CharsetUtils.UTF_8;
 	private Class<?> fallback;
+
 	private final MultiValueMap<String, String> defaultHeaders = new LinkedMultiValueMap<String, String>();
 	private final List<String> ignoredHeaders = new ArrayList<String>();
 
 	Router(String prefix) {
 		if (prefix.endsWith("/")) {
-			throw new IllegalArgumentException("Router's prefix must not end with '/'");
+			throw new IllegalArgumentException("The prefix of router must not end with '/'");
+		}
+		if (!prefix.matches(PATTERN)) {
+			throw new IllegalArgumentException("The prefix of router contains illegal characters. Input string: " + prefix);
 		}
 		this.prefix = prefix;
 		this.prefixEndPosition = PathUtils.indexOfLastSeparator(prefix);

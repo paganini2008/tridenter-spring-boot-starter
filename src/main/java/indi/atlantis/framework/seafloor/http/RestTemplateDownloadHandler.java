@@ -10,6 +10,7 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import com.github.paganini2008.devtools.date.Duration;
 import com.github.paganini2008.devtools.io.FileUtils;
 import com.github.paganini2008.devtools.io.IOUtils;
 
@@ -45,13 +46,15 @@ public class RestTemplateDownloadHandler implements RestTemplateCallback<File> {
 
 	@Override
 	public ResponseExtractor<File> getResponseExtractor(RestTemplate restTemplate) {
+		long startMs = System.currentTimeMillis();
 		return response -> {
 			File tmpFile = FileUtils.getFile(dir, fileName);
 			OutputStream output = new FileOutputStream(tmpFile, false);
 			try {
 				long length = IOUtils.copy(response.getBody(), output);
 				if (log.isTraceEnabled()) {
-					log.trace("Downloaded file: {}, length: {}", tmpFile, length);
+					log.trace("Downloaded file: {}, length: {}, take: {}", tmpFile, length,
+							Duration.HOUR.format(System.currentTimeMillis() - startMs));
 				}
 			} finally {
 				IOUtils.flushAndCloseQuietly(output);

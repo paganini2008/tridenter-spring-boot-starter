@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @SuppressWarnings("unchecked")
 @Slf4j
-public class RequestTemplate {
+public final class RequestTemplate {
 
 	private final RequestProcessor requestProcessor;
 	private final StatisticIndicator statisticIndicator;

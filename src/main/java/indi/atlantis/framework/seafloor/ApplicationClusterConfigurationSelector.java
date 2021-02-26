@@ -9,7 +9,7 @@ import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.type.AnnotationMetadata;
 
 import indi.atlantis.framework.seafloor.election.ApplicationClusterLeaderConfig;
-import indi.atlantis.framework.seafloor.gateway.GatewayConfiguration;
+import indi.atlantis.framework.seafloor.gateway.GatewayAutoConfiguration;
 import indi.atlantis.framework.seafloor.monitor.HealthIndicatorConfig;
 import indi.atlantis.framework.seafloor.multicast.ApplicationMulticastConfig;
 import indi.atlantis.framework.seafloor.utils.ApplicationUtilityConfig;
@@ -37,7 +37,7 @@ public class ApplicationClusterConfigurationSelector implements ImportSelector {
 			importedClassNames.add(ApplicationClusterLeaderConfig.class.getName());
 		}
 		if (annotationAttributes.getBoolean("enableGateway")) {
-			importedClassNames.add(GatewayConfiguration.class.getName());
+			importedClassNames.add(GatewayAutoConfiguration.class.getName());
 		}
 		if (annotationAttributes.getBoolean("enableMonitor")) {
 			importedClassNames.add(HealthIndicatorConfig.class.getName());

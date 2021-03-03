@@ -1,2 +1,2 @@
-# seafloor-spring-boot-starter
-application cluster  components based on spring boot 
+### tridenter-spring-boot-starter
+tridenter-spring-boot-starter is an extended tool for spring application. It can easily and quickly build a spring cluster application without other framework like spring cloud. No specified register center location, no extra system configurations , once import tridenter-spring-boot-starter, your application  has had ability of cluster interactive between applications

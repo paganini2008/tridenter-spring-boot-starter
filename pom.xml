@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>indi.atlantis.framework</groupId>
-	<artifactId>seafloor-spring-boot-starter</artifactId>
+	<artifactId>tridenter-spring-boot-starter</artifactId>
 	<version>1.0-RC1</version>
 	
 	<packaging>jar</packaging>
-	<name>seafloor-spring-boot-starter</name>
+	<name>tridenter-spring-boot-starter</name>
 	<url>https://github.com/paganini2008</url>
 	<description>Distributed spring application framework</description>
 
@@ -27,9 +27,9 @@
 	</developers>
 
 	<scm>
-		<connection>https://github.com/paganini2008/seafloor-spring-boot-starter.git</connection>
-		<developerConnection>https://github.com/paganini2008/seafloor-spring-boot-starter.git</developerConnection>
-		<url>https://github.com/paganini2008/seafloor-spring-boot-starter</url>
+		<connection>https://github.com/paganini2008/tridenter-spring-boot-starter.git</connection>
+		<developerConnection>https://github.com/paganini2008/tridenter-spring-boot-starter.git</developerConnection>
+		<url>https://github.com/paganini2008/tridenter-spring-boot-starter</url>
 	</scm>
 
 	<properties>

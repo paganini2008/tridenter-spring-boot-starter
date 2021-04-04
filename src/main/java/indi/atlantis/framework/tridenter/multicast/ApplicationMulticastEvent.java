@@ -18,7 +18,7 @@ public class ApplicationMulticastEvent extends ApplicationClusterEvent {
 	private static final long serialVersionUID = -2482108960259276628L;
 
 	public ApplicationMulticastEvent(ApplicationContext source, ApplicationInfo applicationInfo, MulticastEventType eventType) {
-		super(source, LeaderState.UNLEADABLE);
+		super(source, LeaderState.DOWN);
 		this.applicationInfo = applicationInfo;
 		this.multicastEventType = eventType;
 	}

@@ -15,7 +15,7 @@ import indi.atlantis.framework.tridenter.election.ApplicationClusterRefreshedEve
 public class ApplicationClusterContext implements SmartApplicationListener {
 
 	private ApplicationInfo leaderInfo;
-	private volatile LeaderState leaderState = LeaderState.UNLEADABLE;
+	private volatile LeaderState leaderState = LeaderState.DOWN;
 
 	public ApplicationInfo getLeaderInfo() {
 		return leaderInfo;

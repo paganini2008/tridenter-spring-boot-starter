@@ -26,7 +26,7 @@ public class RetryableLeaderRecovery extends DefaultLeaderRecovery implements Ap
 
 	@Override
 	public void recover(ApplicationInfo formerLeader) {
-		applicationClusterContext.setLeaderState(LeaderState.UNLEADABLE);
+		applicationClusterContext.setLeaderState(LeaderState.DOWN);
 		try {
 			leaderService.ping();
 		} catch (Throwable e) {
@@ -47,7 +47,7 @@ public class RetryableLeaderRecovery extends DefaultLeaderRecovery implements Ap
 	@Override
 	public void onRetryEnd(String provider, Request request, Throwable e) {
 		ApplicationInfo leader = applicationClusterContext.getLeaderInfo();
-		if (applicationClusterContext.getLeaderState() == LeaderState.UNLEADABLE) {
+		if (applicationClusterContext.getLeaderState() == LeaderState.DOWN) {
 			log.warn("Application cluster leader [{}] is exhausted", leader);
 			super.recover(leader);
 		}

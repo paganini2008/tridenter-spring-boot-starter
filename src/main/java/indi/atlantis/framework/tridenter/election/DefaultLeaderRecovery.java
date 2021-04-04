@@ -38,7 +38,7 @@ public class DefaultLeaderRecovery implements ApplicationListener<ApplicationClu
 
 	@Override
 	public void recover(ApplicationInfo leaderInfo) {
-		applicationClusterContext.setLeaderState(LeaderState.UNLEADABLE);
+		applicationClusterContext.setLeaderState(LeaderState.DOWN);
 		electionObservable.notifyObservers(leaderInfo);
 	}
 

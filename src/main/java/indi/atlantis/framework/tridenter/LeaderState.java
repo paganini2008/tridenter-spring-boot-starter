@@ -10,6 +10,6 @@ package indi.atlantis.framework.tridenter;
  */
 public enum LeaderState {
 
-	UNLEADABLE, LEADABLE, FATAL;
+	DOWN, UP, FATAL;
 
 }

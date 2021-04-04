@@ -19,7 +19,7 @@ public class ApplicationClusterRefreshedEvent extends ApplicationClusterEvent {
 	private static final long serialVersionUID = 3115067071903624457L;
 
 	public ApplicationClusterRefreshedEvent(ApplicationContext applicationContext, ApplicationInfo leader) {
-		super(applicationContext, LeaderState.LEADABLE);
+		super(applicationContext, LeaderState.UP);
 		this.leader = leader;
 	}
 

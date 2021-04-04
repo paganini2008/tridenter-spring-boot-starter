@@ -40,7 +40,7 @@ public class ApplicationLeaderRecoveryListener implements ApplicationListener<Ap
 			instanceId.setLeaderInfo(null);
 
 			ApplicationContext applicationContext = applicationEvent.getApplicationContext();
-			applicationContext.publishEvent(new ApplicationClusterLeaderEvent(applicationContext, LeaderState.UNLEADABLE));
+			applicationContext.publishEvent(new ApplicationClusterLeaderEvent(applicationContext, LeaderState.DOWN));
 			
 			leaderRecovery.recover(formerLeader);
 		}

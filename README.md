@@ -12,7 +12,6 @@ graph LR
 A["Spring Application A"]-->D["Registry Center (or Cluster)"]
 B["Spring Application B"]-->D["Registry Center (or Cluster)"]
 C["Spring Application C"]-->D["Registry Center (or Cluster)"]
-
 ```
 Compare to building a spring cluster in common way,  using tridenter-spring-boot-starter in your application would be a cluster at once. No extra application as register center, no extra worry about register center is a cluster or not. tridenter-spring-boot-starter make applications in cluster have the ability that interact with each each.  No specified register center, all applications are register center.
 

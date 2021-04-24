@@ -9,8 +9,8 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 
 import com.github.paganini2008.devtools.collection.MapUtils;
+import com.github.paganini2008.springworld.reditools.common.TtlKeeper;
 
-import indi.atlantis.framework.reditools.common.TtlKeeper;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;
 import lombok.extern.slf4j.Slf4j;

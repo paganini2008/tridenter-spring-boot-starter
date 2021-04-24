@@ -6,7 +6,7 @@
 	<groupId>indi.atlantis.framework</groupId>
 	<artifactId>tridenter-spring-boot-starter</artifactId>
 	<version>1.0-RC1</version>
-	
+
 	<packaging>jar</packaging>
 	<name>tridenter-spring-boot-starter</name>
 	<url>https://github.com/paganini2008</url>
@@ -59,9 +59,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>indi.atlantis.framework</groupId>
+			<groupId>com.github.paganini2008.springworld</groupId>
 			<artifactId>reditools-spring-boot-starter</artifactId>
-			<version>1.0-RC1</version>
+			<version>2.0-RC5</version>
 		</dependency>
 
 		<dependency>

@@ -12,8 +12,9 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import indi.atlantis.framework.reditools.BeanNames;
-import indi.atlantis.framework.reditools.common.TtlKeeper;
+import com.github.paganini2008.springworld.reditools.BeanNames;
+import com.github.paganini2008.springworld.reditools.common.TtlKeeper;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;

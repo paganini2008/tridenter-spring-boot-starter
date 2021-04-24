@@ -8,7 +8,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import indi.atlantis.framework.reditools.BeanNames;
+import com.github.paganini2008.springworld.reditools.BeanNames;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;

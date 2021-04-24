@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
-import indi.atlantis.framework.reditools.messager.RedisMessageSender;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageSender;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.InstanceId;
 

@@ -6,8 +6,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import indi.atlantis.framework.reditools.common.SharedLatch;
-import indi.atlantis.framework.reditools.messager.RedisMessageSender;
+import com.github.paganini2008.springworld.reditools.common.SharedLatch;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageSender;
+
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 import lombok.extern.slf4j.Slf4j;
 

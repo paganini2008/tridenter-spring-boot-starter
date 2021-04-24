@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import indi.atlantis.framework.reditools.messager.RedisMessageHandler;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageHandler;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastEvent.MulticastEventType;

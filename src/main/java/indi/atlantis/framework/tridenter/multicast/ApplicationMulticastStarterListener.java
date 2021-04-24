@@ -6,8 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import indi.atlantis.framework.reditools.messager.RedisMessageHandler;
-import indi.atlantis.framework.reditools.messager.RedisMessageSender;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageHandler;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageSender;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;

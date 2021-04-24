@@ -9,10 +9,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
-import indi.atlantis.framework.reditools.common.RedisCounter;
-import indi.atlantis.framework.reditools.common.RedisSharedLatch;
-import indi.atlantis.framework.reditools.common.SharedLatch;
-import indi.atlantis.framework.reditools.common.TtlKeeper;
+import com.github.paganini2008.springworld.reditools.common.RedisCounter;
+import com.github.paganini2008.springworld.reditools.common.RedisSharedLatch;
+import com.github.paganini2008.springworld.reditools.common.SharedLatch;
+import com.github.paganini2008.springworld.reditools.common.TtlKeeper;
+
 import indi.atlantis.framework.tridenter.Constants;
 
 /**

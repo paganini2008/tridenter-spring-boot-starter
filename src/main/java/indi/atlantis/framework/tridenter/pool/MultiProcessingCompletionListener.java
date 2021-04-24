@@ -2,7 +2,8 @@ package indi.atlantis.framework.tridenter.pool;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import indi.atlantis.framework.reditools.messager.RedisMessageSender;
+import com.github.paganini2008.springworld.reditools.messager.RedisMessageSender;
+
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
 

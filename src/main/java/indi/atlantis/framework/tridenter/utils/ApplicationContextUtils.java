@@ -159,7 +159,15 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 		}
 	}
 
-	public static synchronized <T> T getBeanIfNecessary(Class<T> requiredType) {
+	public static synchronized <T> T getOrCreateBean(String name, Class<T> requiredType) {
+		try {
+			return getApplicationContext().getBean(name, requiredType);
+		} catch (RuntimeException e) {
+			return instantiateClass(requiredType);
+		}
+	}
+
+	public static synchronized <T> T getOrCreateBean(Class<T> requiredType) {
 		try {
 			return getApplicationContext().getBean(requiredType);
 		} catch (RuntimeException e) {

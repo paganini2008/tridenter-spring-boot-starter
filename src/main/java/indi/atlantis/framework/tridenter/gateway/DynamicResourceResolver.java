@@ -122,7 +122,7 @@ public class DynamicResourceResolver implements ResourceResolver {
 	private FallbackProvider getFallback(Class<?> fallbackClass) {
 		try {
 			if (fallbackClass != null && fallbackClass != Void.class && fallbackClass != void.class) {
-				return (FallbackProvider) ApplicationContextUtils.getBeanIfNecessary(fallbackClass);
+				return (FallbackProvider) ApplicationContextUtils.getOrCreateBean(fallbackClass);
 			}
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);

@@ -123,9 +123,9 @@ public class RestClientBeanAspect implements Aspect {
 	private FallbackProvider getFallback(Class<?> fallbackClass, Class<?> defaultFallbackClass) {
 		try {
 			if (fallbackClass != null && fallbackClass != Void.class && fallbackClass != void.class) {
-				return (FallbackProvider) ApplicationContextUtils.getBeanIfNecessary(fallbackClass);
+				return (FallbackProvider) ApplicationContextUtils.getOrCreateBean(fallbackClass);
 			} else if (defaultFallbackClass != null && defaultFallbackClass != Void.class && defaultFallbackClass != void.class) {
-				return (FallbackProvider) ApplicationContextUtils.getBeanIfNecessary(defaultFallbackClass);
+				return (FallbackProvider) ApplicationContextUtils.getOrCreateBean(defaultFallbackClass);
 			}
 		} catch (RuntimeException e) {
 			log.error(e.getMessage(), e);

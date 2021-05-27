@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * ApplicationMulticastGroup
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @Slf4j
@@ -235,7 +235,7 @@ public class ApplicationMulticastGroup {
 	 * 
 	 * MulticastMessage
 	 * 
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 *
 	 * @since 1.0
 	 */

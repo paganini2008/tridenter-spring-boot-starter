@@ -17,7 +17,7 @@ import indi.atlantis.framework.tridenter.Constants;
  * 
  * ConsistencyRequestRound
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public class ConsistencyRequestRound {

@@ -14,7 +14,7 @@ import org.springframework.retry.support.RetryTemplate;
  * 
  * RetryTemplateFactory
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

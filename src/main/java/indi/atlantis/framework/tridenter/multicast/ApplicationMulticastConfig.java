@@ -25,7 +25,7 @@ import indi.atlantis.framework.tridenter.pool.ProcessPoolConfig;
  * 
  * ApplicationMulticastConfig
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter.election;
  * 
  * LeaderNotFoundException
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public class LeaderNotFoundException extends IllegalStateException {

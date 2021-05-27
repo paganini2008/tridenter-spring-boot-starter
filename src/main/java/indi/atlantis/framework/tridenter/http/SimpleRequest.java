@@ -11,7 +11,7 @@ import com.github.paganini2008.devtools.collection.MapUtils;
  * 
  * SimpleRequest
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class SimpleRequest implements Request {

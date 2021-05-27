@@ -12,7 +12,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
  * 
  * ConsistencyRequestConfig
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 @Configuration

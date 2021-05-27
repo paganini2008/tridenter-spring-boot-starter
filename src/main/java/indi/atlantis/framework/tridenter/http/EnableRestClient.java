@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
  * 
  * EnableRestClient
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -6,7 +6,7 @@ import java.util.List;
  * 
  * LoadBalancer
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

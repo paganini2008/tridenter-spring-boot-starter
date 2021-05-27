@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Import;
  * 
  * EnableApplicationCluster
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @Retention(RetentionPolicy.RUNTIME)

@@ -20,7 +20,7 @@ import indi.atlantis.framework.tridenter.Constants;
  * 
  * ProcessPoolConfig
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * 
  * 
  * @version 1.0

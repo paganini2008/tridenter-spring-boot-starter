@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * RestClientBeanAspect
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */
@@ -145,7 +145,7 @@ public class RestClientBeanAspect implements Aspect {
 	 * 
 	 * MethodSignature
 	 *
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 * @version 1.0
 	 */
 	public static class MethodSignature {

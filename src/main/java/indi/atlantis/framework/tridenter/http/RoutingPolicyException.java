@@ -6,7 +6,7 @@ import org.springframework.web.client.RestClientException;
  * 
  * RoutingPolicyException
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

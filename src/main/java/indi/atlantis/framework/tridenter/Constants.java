@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter;
  * 
  * Constants
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class Constants {

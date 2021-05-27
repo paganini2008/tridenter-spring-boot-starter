@@ -11,7 +11,7 @@ import lombok.ToString;
  * 
  * ConsistencyResponse
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 @ToString

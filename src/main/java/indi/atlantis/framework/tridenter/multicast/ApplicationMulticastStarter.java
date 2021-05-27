@@ -16,7 +16,7 @@ import indi.atlantis.framework.tridenter.InstanceId;
  * 
  * ApplicationMulticastStarter
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -7,7 +7,7 @@ import java.util.Map;
  * 
  * StatisticIndicator
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface StatisticIndicator {

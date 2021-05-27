@@ -7,7 +7,7 @@ import java.net.URL;
  * 
  * DirectRoutingAllocator
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * 
  * @since 1.0
  */

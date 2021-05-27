@@ -13,7 +13,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
  * 
  * ApplicationClusterController
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @RequestMapping("/application/cluster")

@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
  * 
  * RestClientRegistrar
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -9,7 +9,7 @@ import indi.atlantis.framework.tridenter.election.ApplicationClusterRefreshedEve
  * 
  * ApplicationClusterContext
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ApplicationClusterContext implements SmartApplicationListener {

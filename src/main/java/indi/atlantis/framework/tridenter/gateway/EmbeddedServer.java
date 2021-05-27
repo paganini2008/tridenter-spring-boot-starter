@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter.gateway;
  * 
  * EmbeddedServer
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface EmbeddedServer {

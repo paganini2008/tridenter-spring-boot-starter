@@ -6,7 +6,7 @@ import indi.atlantis.framework.tridenter.ApplicationInfo;
  * 
  * ApplicationMessageListener
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public interface ApplicationMessageListener extends ApplicationClusterListener {

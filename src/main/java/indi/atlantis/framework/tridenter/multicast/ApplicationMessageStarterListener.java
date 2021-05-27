@@ -16,7 +16,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup.Mul
  * 
  * ApplicationMessageStarterListener
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ApplicationMessageStarterListener implements RedisMessageHandler, ApplicationContextAware {

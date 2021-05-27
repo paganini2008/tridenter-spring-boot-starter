@@ -10,7 +10,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastEvent.Mul
  * 
  * ApplicationLeaderElectionListener
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ApplicationLeaderElectionListener implements LeaderElectionListener, ApplicationListener<ApplicationMulticastEvent> {

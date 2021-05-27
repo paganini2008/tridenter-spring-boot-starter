@@ -13,7 +13,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastConfig;
  * 
  * HealthIndicatorConfig
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @ConditionalOnClass(AbstractHealthIndicator.class)

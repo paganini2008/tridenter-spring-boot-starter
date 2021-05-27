@@ -15,7 +15,7 @@ import indi.atlantis.framework.tridenter.http.DefaultRequestProcessor.RetryEntry
  * 
  * RetryListenerContainer
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

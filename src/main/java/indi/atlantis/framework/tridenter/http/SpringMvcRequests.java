@@ -17,7 +17,7 @@ import com.github.paganini2008.devtools.ArrayUtils;
  * 
  * SpringMvcRequests
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public abstract class SpringMvcRequests {

@@ -9,7 +9,7 @@ import indi.atlantis.framework.tridenter.LeaderState;
  * 
  * ApplicationClusterLeaderEvent
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ApplicationClusterLeaderEvent extends ApplicationClusterEvent {

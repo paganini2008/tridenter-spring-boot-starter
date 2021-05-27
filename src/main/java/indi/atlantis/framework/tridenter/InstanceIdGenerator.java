@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter;
  * 
  * InstanceIdGenerator
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface InstanceIdGenerator {

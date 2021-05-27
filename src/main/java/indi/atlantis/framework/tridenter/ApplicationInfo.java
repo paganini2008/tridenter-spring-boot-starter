@@ -16,10 +16,10 @@ import lombok.Setter;
 /**
  * 
  * ApplicationInfo
+ * 
+ * @author Fred Feng
  *
- * @author Jimmy Hoff
- *
- * @since 1.0
+ * @version 1.0
  */
 @JsonInclude(value = Include.NON_NULL)
 @Getter
@@ -82,7 +82,7 @@ public class ApplicationInfo implements Serializable, Comparable<ApplicationInfo
 
 	@Override
 	public String toString() {
-		return ToStringBuilder.reflectionToString(this, new String[] { "leaderInfo" });
+		return ToStringBuilder.reflectionToString(this, new String[] { "contact", "leaderInfo" });
 	}
 
 	@Override

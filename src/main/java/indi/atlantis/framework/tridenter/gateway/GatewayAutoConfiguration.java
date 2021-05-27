@@ -14,7 +14,7 @@ import com.github.paganini2008.devtools.cache.LruCache;
  * 
  * GatewayAutoConfiguration
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @Configuration

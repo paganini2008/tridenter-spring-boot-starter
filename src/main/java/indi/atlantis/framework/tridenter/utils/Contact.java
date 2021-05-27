@@ -13,7 +13,7 @@ import lombok.Data;
  * 
  * Contact
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */
@@ -23,7 +23,7 @@ import lombok.Data;
 public class Contact implements Serializable {
 
 	private static final long serialVersionUID = 4110243793757357219L;
-	private String name = "Jimmy Hoff";
+	private String name = "Fred Feng";
 	private String campany;
 	private String department;
 	private String position;

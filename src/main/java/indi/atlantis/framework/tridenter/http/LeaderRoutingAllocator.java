@@ -10,7 +10,7 @@ import indi.atlantis.framework.tridenter.election.LeaderNotFoundException;
  * 
  * LeaderRoutingAllocator
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -11,7 +11,7 @@ import indi.atlantis.framework.tridenter.http.LeaderService;
  * 
  * ApplicationClusterLeaderConfig
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @EnableRestClient(include = { LeaderService.class })

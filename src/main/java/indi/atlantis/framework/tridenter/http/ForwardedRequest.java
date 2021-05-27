@@ -7,7 +7,7 @@ import org.springframework.http.HttpMethod;
  * 
  * ForwardedRequest
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ForwardedRequest extends BasicRequest implements Request {

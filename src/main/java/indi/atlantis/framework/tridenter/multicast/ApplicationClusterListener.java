@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter.multicast;
  * 
  * ApplicationClusterListener
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public interface ApplicationClusterListener {

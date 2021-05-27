@@ -18,7 +18,7 @@ import indi.atlantis.framework.tridenter.multicast.RegistryCenter;
  * 
  * LoadBalanceRoutingAllocator
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * 
  * @since 1.0
  */

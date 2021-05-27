@@ -8,7 +8,7 @@ import indi.atlantis.framework.tridenter.ApplicationInfo;
  * 
  * ConsistencyRequestConfirmationEvent
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public class ConsistencyRequestConfirmationEvent extends ApplicationEvent {

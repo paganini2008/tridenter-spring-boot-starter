@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationEvent;
  * 
  * LeaderElection
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public interface LeaderElection {

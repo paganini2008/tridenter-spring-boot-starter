@@ -6,7 +6,7 @@ import java.util.Map;
  * 
  * ParameterizedRequest
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface ParameterizedRequest extends Request {

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  * BeanLifeCycle
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

@@ -7,7 +7,7 @@ import org.springframework.context.event.ApplicationContextEvent;
  * 
  * Base class for application cluster event
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public abstract class ApplicationClusterEvent extends ApplicationContextEvent {

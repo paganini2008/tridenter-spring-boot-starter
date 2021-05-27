@@ -14,7 +14,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * RequestTemplate
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @SuppressWarnings("unchecked")

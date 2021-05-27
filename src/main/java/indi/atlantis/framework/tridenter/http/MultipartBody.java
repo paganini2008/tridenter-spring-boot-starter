@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * 
  * MultipartBody
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @Target(ElementType.PARAMETER)

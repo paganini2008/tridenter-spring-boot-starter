@@ -12,7 +12,7 @@ import org.springframework.http.HttpMethod;
  * 
  * BasicRequest
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class BasicRequest implements Request {

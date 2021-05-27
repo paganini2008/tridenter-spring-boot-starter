@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
  * 
  * RestClientPerformer
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface RestClientPerformer {

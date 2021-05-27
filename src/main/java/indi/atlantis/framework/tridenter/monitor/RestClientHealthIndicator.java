@@ -20,7 +20,7 @@ import indi.atlantis.framework.tridenter.http.StatisticIndicator;
  * 
  * RestClientHealthIndicator
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class RestClientHealthIndicator extends AbstractHealthIndicator {

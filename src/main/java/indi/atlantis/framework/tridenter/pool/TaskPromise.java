@@ -7,7 +7,7 @@ import java.util.function.Supplier;
  * 
  * TaskPromise
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

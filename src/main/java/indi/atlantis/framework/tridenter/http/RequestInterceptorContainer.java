@@ -10,7 +10,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
  * 
  * RequestInterceptorContainer
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class RequestInterceptorContainer implements BeanPostProcessor {

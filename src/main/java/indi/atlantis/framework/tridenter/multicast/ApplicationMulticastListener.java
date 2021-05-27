@@ -6,7 +6,7 @@ import indi.atlantis.framework.tridenter.ApplicationInfo;
  * 
  * ApplicationMulticastListener
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

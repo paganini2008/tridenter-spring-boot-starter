@@ -10,7 +10,7 @@ import indi.atlantis.framework.tridenter.LeaderState;
  * 
  * ApplicationMulticastEvent
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class ApplicationMulticastEvent extends ApplicationClusterEvent {

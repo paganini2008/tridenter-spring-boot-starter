@@ -14,7 +14,7 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
  * 
  * RestClientBeanScaner
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

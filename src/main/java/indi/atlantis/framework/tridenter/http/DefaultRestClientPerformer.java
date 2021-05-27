@@ -15,7 +15,7 @@ import org.springframework.web.client.RestTemplate;
  * 
  * DefaultRestClientPerformer
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

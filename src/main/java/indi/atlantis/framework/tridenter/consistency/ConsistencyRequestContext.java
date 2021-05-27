@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * ConsistencyRequestContext
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 @Slf4j
@@ -93,7 +93,7 @@ public final class ConsistencyRequestContext {
 	 * 
 	 * ConsistencyRequestCommitmentFuture
 	 *
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 * @since 1.0
 	 */
 	private class ConsistencyRequestCommitmentFuture extends ClockTask implements Formulation {
@@ -161,7 +161,7 @@ public final class ConsistencyRequestContext {
 	 * 
 	 * ConsistencyRequestPreparationFuture
 	 *
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 * @since 1.0
 	 */
 	private class ConsistencyRequestPreparationFuture extends ClockTask implements Formulation {

@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
  * 
  * DefaultInstanceIdGenerator
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class DefaultInstanceIdGenerator implements InstanceIdGenerator {

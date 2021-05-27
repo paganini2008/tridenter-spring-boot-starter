@@ -11,7 +11,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
  * 
  * MultiProcessingCompletionListener
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

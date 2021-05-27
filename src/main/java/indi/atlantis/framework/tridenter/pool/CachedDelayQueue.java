@@ -16,7 +16,7 @@ import indi.atlantis.framework.tridenter.Constants;
  * 
  * CachedDelayQueue
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public class CachedDelayQueue implements DelayQueue {

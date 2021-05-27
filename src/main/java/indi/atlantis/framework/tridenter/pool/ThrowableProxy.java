@@ -12,7 +12,7 @@ import lombok.Setter;
  * 
  * ThrowableProxy
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

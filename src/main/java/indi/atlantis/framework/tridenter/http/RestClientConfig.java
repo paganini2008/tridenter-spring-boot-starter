@@ -34,7 +34,7 @@ import indi.atlantis.framework.tridenter.LoadBalancer;
  * 
  * RestClientConfig
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */
@@ -95,7 +95,7 @@ public class RestClientConfig {
 	 * 
 	 * ResponseStatisticConfig
 	 *
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 * @version 1.0
 	 */
 	@Configuration
@@ -117,7 +117,7 @@ public class RestClientConfig {
 	 * 
 	 * HttpClientConfig
 	 *
-	 * @author Jimmy Hoff
+	 * @author Fred Feng
 	 * 
 	 * @since 1.0
 	 */

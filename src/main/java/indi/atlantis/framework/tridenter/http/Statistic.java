@@ -13,7 +13,7 @@ import lombok.Data;
  * 
  * Statistic
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public final class Statistic {

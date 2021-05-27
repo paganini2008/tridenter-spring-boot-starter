@@ -8,7 +8,7 @@ import org.springframework.web.client.RestClientException;
  * 
  * DefaultFallbackProvider
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * 
  * @since 1.0
  */

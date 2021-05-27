@@ -16,7 +16,7 @@ import com.github.paganini2008.devtools.reflection.MethodUtils;
  * 
  * MultiProcessingMethodDetector
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

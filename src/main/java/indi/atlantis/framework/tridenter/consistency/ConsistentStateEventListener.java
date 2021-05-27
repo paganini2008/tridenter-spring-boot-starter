@@ -6,7 +6,7 @@ import org.springframework.context.ApplicationListener;
  * 
  * ConsistentStateEventListener
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @since 1.0
  */
 public class ConsistentStateEventListener implements ApplicationListener<ConsistencyRequestConfirmationEvent> {

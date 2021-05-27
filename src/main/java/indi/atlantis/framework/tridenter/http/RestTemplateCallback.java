@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
  * 
  * RestTemplateCallback
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @version 1.0
  */

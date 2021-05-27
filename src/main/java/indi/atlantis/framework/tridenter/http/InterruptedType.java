@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
  * 
  * InterruptedType
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public enum InterruptedType {

@@ -19,7 +19,7 @@ import io.netty.util.CharsetUtil;
 /**
  * 
  * HttpResponseUtils
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @version 1.0
  */

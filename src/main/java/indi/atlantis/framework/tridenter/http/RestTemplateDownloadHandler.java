@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * 
  * RestTemplateDownloadHandler
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @version 1.0
  */

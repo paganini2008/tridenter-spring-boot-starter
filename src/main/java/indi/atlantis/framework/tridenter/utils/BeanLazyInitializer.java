@@ -12,7 +12,7 @@ import com.github.paganini2008.devtools.Observable;
  * 
  * BeanLazyInitializer
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 @Component

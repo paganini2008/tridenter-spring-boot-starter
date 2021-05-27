@@ -7,7 +7,7 @@ import io.netty.handler.codec.http.FullHttpRequest;
  * 
  * ResourceResolver
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * @version 1.0
  */
 public interface ResourceResolver {

@@ -8,7 +8,7 @@ import org.springframework.http.HttpMethod;
  * 
  * Request
  * 
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

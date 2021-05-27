@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * This annonation that decorate a method may represent to call in the whole
  * application cluster.
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  * 
  * 
  * @version 1.0

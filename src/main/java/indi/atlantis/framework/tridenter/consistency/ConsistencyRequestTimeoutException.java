@@ -4,7 +4,7 @@ package indi.atlantis.framework.tridenter.consistency;
  * 
  * ConsistencyRequestTimeoutException
  *
- * @author Jimmy Hoff
+ * @author Fred Feng
  *
  * @since 1.0
  */

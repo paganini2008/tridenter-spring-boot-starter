@@ -12,7 +12,7 @@ import indi.atlantis.framework.tridenter.ApplicationClusterContext;
 import indi.atlantis.framework.tridenter.ApplicationClusterController;
 import indi.atlantis.framework.tridenter.ApplicationClusterLoadBalancer;
 import indi.atlantis.framework.tridenter.Constants;
-import indi.atlantis.framework.tridenter.DefaultInstanceIdGenerator;
+import indi.atlantis.framework.tridenter.Md5InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.LoadBalancer;
@@ -41,7 +41,7 @@ public class ApplicationMulticastConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	public InstanceIdGenerator instanceIdGenerator() {
-		return new DefaultInstanceIdGenerator();
+		return new Md5InstanceIdGenerator();
 	}
 
 	@Bean

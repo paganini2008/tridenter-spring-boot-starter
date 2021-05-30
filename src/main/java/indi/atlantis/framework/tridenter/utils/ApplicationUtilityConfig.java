@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Fred Feng
  * @version 1.0
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @Import({ ApplicationContextUtils.class, BeanExpressionUtils.class, BeanLazyInitializer.class })
 public class ApplicationUtilityConfig {
 
@@ -30,8 +30,8 @@ public class ApplicationUtilityConfig {
 	@Value("${spring.application.cluster.common.taskSchedulerThreads:-1}")
 	private int taskSchedulerThreads;
 
-	@ConditionalOnMissingBean(name = "applicationClusterTaskExecutor")
-	@Bean
+	@ConditionalOnMissingBean
+	@Bean(destroyMethod = "shutdown")
 	public ThreadPoolTaskExecutor applicationClusterTaskExecutor() {
 		final int nThreads = taskExecutorThreads > 0 ? taskExecutorThreads : Runtime.getRuntime().availableProcessors() * 2;
 		ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
@@ -41,7 +41,7 @@ public class ApplicationUtilityConfig {
 		return taskExecutor;
 	}
 
-	@ConditionalOnMissingBean(name = "applicationClusterTaskScheduler")
+	@ConditionalOnMissingBean
 	@Bean(destroyMethod = "shutdown")
 	public ThreadPoolTaskScheduler applicationClusterTaskScheduler() {
 		final int nThreads = taskExecutorThreads > 0 ? taskExecutorThreads : Runtime.getRuntime().availableProcessors() * 2;

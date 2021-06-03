@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
  * @author Fred Feng
  * @version 1.0
  */
-@Configuration(proxyBeanMethods = false)
+@Configuration
 @Import({ ApplicationContextUtils.class, BeanExpressionUtils.class, BeanLazyInitializer.class })
 public class ApplicationUtilityConfig {
 

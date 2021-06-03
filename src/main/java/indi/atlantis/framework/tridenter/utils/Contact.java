@@ -27,8 +27,8 @@ public class Contact implements Serializable {
 	private String campany;
 	private String department;
 	private String position;
-	private String homePage;
-	private String email;
+	private String homePage = "https://github.com/paganini2008";
+	private String email = "paganini.fy@gmail.com";
 	private String phone;
 	private String description;
 

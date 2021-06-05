@@ -70,10 +70,10 @@ public class ApplicationInfo implements Serializable, Comparable<ApplicationInfo
 
 	@Override
 	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
 		if (obj instanceof ApplicationInfo) {
-			if (obj == this) {
-				return true;
-			}
 			ApplicationInfo other = (ApplicationInfo) obj;
 			return getClusterName().equals(other.getClusterName()) && getId().equals(other.getId());
 		}

@@ -7,8 +7,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.github.paganini2008.springworld.reditools.common.ConnectionFailureHandler;
-import com.github.paganini2008.springworld.reditools.common.RedisKeepAliveResolver;
+import com.github.paganini2008.springdessert.reditools.common.ConnectionFailureHandler;
+import com.github.paganini2008.springdessert.reditools.common.RedisKeepAliveResolver;
 
 import indi.atlantis.framework.tridenter.http.RetryTemplateFactory;
 import lombok.extern.slf4j.Slf4j;

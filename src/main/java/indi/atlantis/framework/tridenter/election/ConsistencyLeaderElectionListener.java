@@ -8,7 +8,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import com.github.paganini2008.springworld.reditools.BeanNames;
+import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
@@ -33,7 +33,7 @@ public class ConsistencyLeaderElectionListener implements ApplicationMulticastLi
 	@Value("${spring.application.cluster.consistency.leader-election.minimumParticipants:3}")
 	private int minimumParticipants;
 
-	@Qualifier(BeanNames.REDIS_TEMPLATE)
+	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 

@@ -12,8 +12,8 @@ import org.springframework.context.ApplicationEvent;
 import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import com.github.paganini2008.springworld.reditools.BeanNames;
-import com.github.paganini2008.springworld.reditools.common.TtlKeeper;
+import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
+import com.github.paganini2008.springdessert.reditools.common.TtlKeeper;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
@@ -43,7 +43,7 @@ public class ConsistencyLeaderElection implements LeaderElection, ApplicationCon
 	@Autowired
 	private InstanceId instanceId;
 
-	@Qualifier(BeanNames.REDIS_TEMPLATE)
+	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 

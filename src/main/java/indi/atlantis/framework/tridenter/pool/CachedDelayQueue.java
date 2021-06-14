@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.github.paganini2008.devtools.multithreads.ThreadUtils;
-import com.github.paganini2008.springworld.reditools.BeanNames;
+import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
 
 import indi.atlantis.framework.tridenter.Constants;
 
@@ -22,7 +22,7 @@ import indi.atlantis.framework.tridenter.Constants;
 public class CachedDelayQueue implements DelayQueue {
 
 	@Autowired
-	@Qualifier(BeanNames.REDIS_TEMPLATE)
+	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
 	private RedisTemplate<String, Object> redisTemplate;
 
 	@Value("${spring.application.cluster.pool.pending-queue.maxSize:-1}")

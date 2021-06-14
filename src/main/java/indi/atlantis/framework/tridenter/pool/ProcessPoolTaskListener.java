@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.github.paganini2008.devtools.ClassUtils;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.reflection.MethodUtils;
-import com.github.paganini2008.springworld.reditools.common.SharedLatch;
+import com.github.paganini2008.springdessert.reditools.common.SharedLatch;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.InstanceId;

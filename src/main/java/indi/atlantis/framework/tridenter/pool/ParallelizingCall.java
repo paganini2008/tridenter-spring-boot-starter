@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 
 /**
  * 
- * CallParallelizing
+ * ParallelizingCall
  * 
  * @author Fred Feng
  *

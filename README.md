@@ -1,48 +1,31 @@
-###  Tridenter-Spring-Boot-Starter
-tridenter-spring-boot-starter is an extended tool for spring application. It can easily and quickly build a spring cluster application without other framework like spring cloud. No specified register center location, no extra system configurations , once import tridenter-spring-boot-starter, your application  has had ability of cluster interactive between applications
+###  Trident: Microservice Distributed Collaboration Framework 
+<code>Tridenter</code> is a distributed collaboration framework of microservice based on <code>SpringBoot</code> framework. It can make multiple independent spring boot applications easily and quickly form a cluster without relying on external registration centers (such as spring cloud).
 
-For examle, Here are three applications: Application A, Application B, Application C. 
-Now if you want to make them become a cluster and implement method invocation for each other, without tridenter-spring-boot-starter, the whole system has to add an extra role, register center, which has some abilities such as service register function and service discovery function and so on.
+Message multicast in cluster is a very important function of <code>tridenter</code>. The lower layer of Trident realizes multicast function through <code>redis (PubSub)</code> to realize mutual discovery of applications, and then forms application cluster. Each member of the cluster supports the ability to multicast and unicast messages.
 
-Let's look at how to make spring applications build a cluster first.
-Generally,  your system must introduce register center, which provide register service and discovery service. and then each application register themselves on the register center, thereby working as a cluster like consul or eureka in Spring Cloud.  
+Trident provides the leader election algorithm interface by using Trident's ability to support unicast of messages. It has two leader election algorithms, fast leader election algorithm (based on <code>redis</code> queue) and consistent election algorithm (<code>Paxos</code> algorithm)
 
-``` mermaid
-graph LR
-A["Spring Application A"]-->D["Registry Center (or Cluster)"]
-B["Spring Application B"]-->D["Registry Center (or Cluster)"]
-C["Spring Application C"]-->D["Registry Center (or Cluster)"]
-```
-Compare to building a spring cluster in common way,  using tridenter-spring-boot-starter in your application would be a cluster at once. No extra application as register center, no extra worry about register center is a cluster or not. tridenter-spring-boot-starter make applications in cluster have the ability that interact with each each.  No specified register center, all applications are register center.
+Meanwhile, <code>tridenter</code> provides process pool by using <code>tridenter</code> to support message unicast, and realizes the ability of method call and method fragmentation across processes
 
-All applications will play two roles in the whole cluster, more exactly, the first started application will be the leader of cluster, the following application work as follower.
+On the other hand, <code>tridenter</code> itself also provides the basic functions of micro service governance:
 
-``` mermaid
-graph LR
-A("Spring Application A (Leader) ")-->B("Spring Application B")
-A("Spring Application A (Leader)")-->C("Spring Application C")
-D("Spring Application B (Follower)")-->E("Spring Application A")
-D("Spring Application B (Follower)")-->F("Spring Application C")
-G("Spring Application C (Follower)")-->H("Spring Application A")
-G("Spring Application C (Follower)")-->I("Spring Application B")
+<code>Tridenter</code> has its own registration center. Using the principle of message multicast, applications are found and registered with each other. Therefore, each member in the cluster has a full list of members, that is, each application is a registration center, which reflects the idea of decentralized design. Each member realizes the ability of calling HTTP interface between applications through naming service, and provides various annotations and restful configuration to decouple service publisher and consumer
 
-```
+<code>Tridenter</code> has its own gateway function, which can publish the application as a gateway service independently, and can distribute HTTP requests and download tasks by proxy (upload is not supported temporarily)
 
-### Architecture
+<code>Tridenter</code> also has a variety of load balancing algorithms and current limiting degradation policies. Users can also customize load balancing algorithm or degradation policy
 
-| Component | Description                                                  |      |
-| --------- | ------------------------------------------------------------ | ---- |
-| Multicast | Make applications keep communicating with each other         |      |
-| Election  | Launch a election when cluster is started                    |      |
-| Http      | Provide ability that application send a http request in the cluster |      |
-| Gateway   | Provide an unified http request entrance                     |      |
-| Pool      | A process pool, which enhance the ability of invoking local method between applications |      |
-| Monitor   | Watch and collect the runtime info from the cluster          |      |
+<code>Tridenter</code> realizes the related interface of the actor. Besides monitoring the cluster status, it also has the function of statistical analysis of the interface, and preliminarily realizes the unified management and monitoring of the interface
+
+So, based on the Trident framework, we can also build a micro service system similar to Spring Cloud Framework
+
+<code>Tridenter</code> adopts the idea of decentralization, that is, developers don't need to know which is the master node, which node is the slave node, and should not explicitly define an application master node. This is determined by the leader election algorithm adopted by Trident. The default election algorithm is the fast election algorithm. According to the election algorithm, any application node in the cluster may become the master node. The first application initiated by default is the master node. However, if the consistency election algorithm is adopted, it may be different. According to the author's description, the consistency election algorithm is not stable at present, and it is recommended to use the fast election algorithm in the application.
+
 
 ###  Compatibility
 1. JDK 1.8 (or later)
-2. Spring Boot Framework 2.2.x (or later)
-3. Redis 4.x (or later)
+2. <code>SpringBoot Framework 2.2.x </code>(or later)
+3. <code>Redis 4.x</code> (or later)
 
 ### Install
 

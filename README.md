@@ -161,10 +161,10 @@ public class MyRouterCustomizer extends DefaultRouterCustomizer {
 }
 ```
 <code>ResourceType:</code>
-DEFAULT: Forward request
-REDIRECT: Jump
-STREAM: Binary stream
-FILE: save the file
+1. DEFAULT: Forward request
+2. REDIRECT: Redirect to other url
+3. STREAM: Binary stream
+4. FILE: save as file
 
 #### Current limit downgrade
 Current limiting refers to limiting the current on the client side, not the server side

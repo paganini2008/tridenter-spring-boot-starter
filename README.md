@@ -1,4 +1,5 @@
-###  Trident --- Microservice Distributed Collaboration Framework 
+#  Trident Framework
+### Microservice Distributed Collaboration Framework 
 <code>Tridenter</code> is a distributed collaboration framework of microservice based on <code>SpringBoot</code> framework. It can make multiple independent spring boot applications easily and quickly form a cluster without relying on external registration centers (such as Spring Cloud Framework).
 
 **Message multicast** in cluster is a very important function of <code>tridenter</code>. The lower layer of Trident realizes multicast function through <code>redis (PubSub)</code> to realize mutual discovery of applications, and then forms application cluster. Each member of the cluster supports the ability to multicast and unicast messages.

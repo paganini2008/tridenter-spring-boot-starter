@@ -31,11 +31,11 @@ So, based on the Trident framework, we can also build a micro service system sim
 ### Install
 
 ```xml
-		<dependency>
-			<groupId>indi.atlantis.framework</groupId>
-			<artifactId>tridenter-spring-boot-starter</artifactId>
-			<version>1.0-RC1</version>
-		</dependency>
+<dependency>
+	<groupId>indi.atlantis.framework</groupId>
+	<artifactId>tridenter-spring-boot-starter</artifactId>
+	<version>1.0-RC1</version>
+</dependency>
 ```
 
 ### Required Config
@@ -173,6 +173,7 @@ The current limit depends on 3 indicators:
 1. Response timeout rate
 2. Error rate
 3. Concurrency
+
 By default, when any of these three indicators exceeds 80%, the current limit will be triggered and the downgrade service will be invoked
 Current limit indicator statistics: <code>RequestStatisticIndicator</code>
 Downgrade service interface: <code>FallbackProvider</code>

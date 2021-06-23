@@ -39,15 +39,15 @@ So, based on the Trident framework, we can also build a micro service system sim
 ###  Compatibility
 1. JDK 1.8 (or later)
 2. <code>SpringBoot Framework 2.2.x </code>(or later)
-3. <code>Redis 4.x</code> (or later)
+3. <code>Redis 3.x</code> (or later)
 
 ### Install
 
 ```xml
 <dependency>
-	<groupId>indi.atlantis.framework</groupId>
-	<artifactId>tridenter-spring-boot-starter</artifactId>
-	<version>1.0-RC1</version>
+    <groupId>com.github.paganini2008.atlantis</groupId>
+    <artifactId>tridenter-spring-boot-starter</artifactId>
+    <version>1.0-RC1</version>
 </dependency>
 ```
 

@@ -1,6 +1,19 @@
 #  Trident Framework
-### Microservice Distributed Collaboration Framework 
-<code>Tridenter</code> is a distributed collaboration framework of microservice based on <code>SpringBoot</code> framework. It can make multiple independent spring boot applications easily and quickly form a cluster without relying on external registration centers (such as Spring Cloud Framework).
+## Microservice Distributed Collaboration Framework 
+### Description
+<code>Tridenter</code> is a distributed collaboration framework of microservice based on <code>SpringBoot</code> framework. It can make  independent <code>SpringBoot</code> applications easily and quickly form a cluster without relying on external registration centers (such as <code>SpringCloud</code> Framework).
+
+### Features
+1. Message Multicast
+2. Leader Election
+3. Registration Center
+4. Cluster Decentralization
+5. Load Balance
+6. Traffic limiting and degradation
+7. HTTP <code>RestClient</code>
+8. Gateway
+9. Process Pool
+10. Cluster Monitor
 
 **Message multicast** in cluster is a very important function of <code>tridenter</code>. The lower layer of Trident realizes multicast function through <code>redis (PubSub)</code> to realize mutual discovery of applications, and then forms application cluster. Each member of the cluster supports the ability to multicast and unicast messages.
 
@@ -14,13 +27,13 @@ On the other hand, <code>tridenter</code> itself also provides the basic functio
 
 <code>Tridenter</code> has its own **gateway function**, which can publish the application as a gateway service independently, and can distribute HTTP requests and download tasks by proxy (upload is not supported temporarily)
 
-<code>Tridenter</code> also has a variety of **load balancing algorithms** and **current limiting degradation policies**. Users can also customize load balancing algorithm or degradation policy
+<code>Tridenter</code> also has a variety of **load balancing algorithms** and **traffic limiting degradation policies**. Users can also customize load balancing algorithm or degradation policy
 
 <code>Tridenter</code> implements the health check interface of spring actuator. Besides monitoring the cluster status, it also has the function of statistical analysis of the interface, and preliminarily realizes the unified management and monitoring of the interface
 
 So, based on the Trident framework, we can also build a micro service system similar to Spring Cloud Framework
 
-<code>Tridenter</code> adopts the idea of decentralization, that is, developers don't need to know which is the master node, which node is the slave node, and should not explicitly define an application master node. This is determined by the leader election algorithm adopted by Trident. The default election algorithm is the fast election algorithm. According to the election algorithm, any application node in the cluster may become the master node. The first application initiated by default is the master node. However, if the consistency election algorithm is adopted, it may be different. According to the author's description, the consistency election algorithm is not stable at present, and it is recommended to use the fast election algorithm in the application.
+<code>Tridenter</code> adopts the idea of **decentralization**, that is, developers don't need to know which is the master node, which node is the slave node, and should not explicitly define an application master node. This is determined by the leader election algorithm adopted by Trident. The default election algorithm is the fast election algorithm. According to the election algorithm, any application node in the cluster may become the master node. The first application initiated by default is the master node. However, if the consistency election algorithm is adopted, it may be different. According to the author's description, the consistency election algorithm is not stable at present, and it is recommended to use the fast election algorithm in the application.
 
 
 ###  Compatibility

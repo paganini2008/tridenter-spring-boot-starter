@@ -48,5 +48,7 @@ public @interface MultiScheduling {
 	boolean repeatable() default true;
 
 	boolean alwaysExecuted() default true;
+	
+	Class<? extends Throwable>[] ignoredFor() default Exception.class;
 
 }

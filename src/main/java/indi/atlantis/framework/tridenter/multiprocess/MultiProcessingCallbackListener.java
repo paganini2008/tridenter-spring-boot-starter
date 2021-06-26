@@ -38,8 +38,7 @@ public class MultiProcessingCallbackListener implements ApplicationMessageListen
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
 		final Callback callback = (Callback) message;
 		final Signature signature = callback.getInvocation().getSignature();
-
-		final Object bean = ApplicationContextUtils.getBean(signature.getBeanName(), ClassUtils.forName(signature.getBeanClassName()));
+		Object bean = ApplicationContextUtils.getBean(signature.getBeanName(), ClassUtils.forName(signature.getBeanClassName()));
 		if (bean != null) {
 			try {
 				MethodUtils.invokeMethod(bean, callback.getMethodName(), callback.getArguments());

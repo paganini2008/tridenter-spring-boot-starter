@@ -26,8 +26,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.ClassUtils;
 
+import com.github.paganini2008.devtools.ExceptionUtils;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.date.DateUtils;
+
+import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 
 /**
  * 
@@ -49,6 +52,9 @@ public class MultiSchedulingInterpreter {
 	@Autowired
 	private MultiProcessingMethodInspector methodInspector;
 
+	@Autowired
+	private ApplicationMulticastGroup applicationMulticastGroup;
+
 	@Pointcut("execution(public * *(..))")
 	public void signature() {
 	}
@@ -60,7 +66,17 @@ public class MultiSchedulingInterpreter {
 				method.getName());
 		MethodInvocation invocation = new MethodInvocation(signature, pjp.getArgs());
 		if (processPool.hasScheduled(invocation)) {
-			return pjp.proceed();
+			try {
+				return pjp.proceed();
+			} catch (Throwable e) {
+				if (ExceptionUtils.ignoreException(e, multiScheduling.ignoredFor())) {
+					if (StringUtils.isNotBlank(signature.getFailureMethodName())) {
+						applicationMulticastGroup.unicast(applicationName, MultiProcessingCallbackListener.class.getName(),
+								new FailureCallback(invocation, e));
+					}
+				}
+				throw e;
+			}
 		} else {
 			if (StringUtils.isNotBlank(multiScheduling.cron())) {
 				processPool.schedule(invocation, multiScheduling.cron());

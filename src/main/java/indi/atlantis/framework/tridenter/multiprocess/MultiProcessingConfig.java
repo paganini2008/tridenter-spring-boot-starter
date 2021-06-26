@@ -88,7 +88,7 @@ public class MultiProcessingConfig {
 	}
 
 	@Bean
-	public ParallelizingCallInterpreter callParallelizingInterpreter() {
+	public ParallelizingCallInterpreter parallelizingCallInterpreter() {
 		return new ParallelizingCallInterpreter();
 	}
 

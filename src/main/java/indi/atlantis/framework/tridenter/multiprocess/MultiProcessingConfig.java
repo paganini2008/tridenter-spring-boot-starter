@@ -56,8 +56,9 @@ public class MultiProcessingConfig {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public SharedLatch sharedLatch(RedisCounter redisCounter) {
-		return new RedisSharedLatch(redisCounter, 8);
+	public SharedLatch sharedLatch(RedisCounter redisCounter,
+			@Value("${spring.application.cluster.multiprocessing.maxPermits:8}") int maxPermits) {
+		return new RedisSharedLatch(redisCounter, maxPermits);
 	}
 
 	@ConditionalOnMissingBean

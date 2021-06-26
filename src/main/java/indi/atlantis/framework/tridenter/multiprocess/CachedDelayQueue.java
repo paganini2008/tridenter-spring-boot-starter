@@ -40,7 +40,7 @@ public class CachedDelayQueue implements DelayQueue {
 	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
 	private RedisTemplate<String, Object> redisTemplate;
 
-	@Value("${spring.application.cluster.pool.delayQueueMaxSize:-1}")
+	@Value("${spring.application.cluster.multiprocess.delayQueueMaxSize:-1}")
 	private int queueMaxSize;
 
 	@Value("${spring.application.cluster.name}")

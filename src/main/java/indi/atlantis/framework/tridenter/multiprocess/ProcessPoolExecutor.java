@@ -41,7 +41,7 @@ public class ProcessPoolExecutor implements ProcessPool {
 	@Value("${spring.application.name}")
 	private String applicationName;
 
-	@Value("${spring.application.cluster.pool.latch.timeout:-1}")
+	@Value("${spring.application.cluster.multiprocess.latch.timeout:-1}")
 	private int timeout;
 
 	@Autowired

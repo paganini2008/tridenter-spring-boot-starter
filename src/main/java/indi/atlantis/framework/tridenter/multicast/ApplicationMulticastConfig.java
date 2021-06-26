@@ -34,7 +34,7 @@ import indi.atlantis.framework.tridenter.Md5InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.RedisConnectionFailureHandler;
 import indi.atlantis.framework.tridenter.consistency.ConsistencyRequestConfig;
 import indi.atlantis.framework.tridenter.http.RestClientConfig;
-import indi.atlantis.framework.tridenter.pool.ProcessPoolConfig;
+import indi.atlantis.framework.tridenter.multiprocess.MultiProcessingConfig;
 
 /**
  * 
@@ -45,8 +45,8 @@ import indi.atlantis.framework.tridenter.pool.ProcessPoolConfig;
  * @since 1.0
  */
 @Configuration
-@AutoConfigureBefore({ RestClientConfig.class, ProcessPoolConfig.class, ConsistencyRequestConfig.class })
-@Import({ ApplicationMulticastController.class, ApplicationClusterController.class, RestClientConfig.class, ProcessPoolConfig.class,
+@AutoConfigureBefore({ RestClientConfig.class, MultiProcessingConfig.class, ConsistencyRequestConfig.class })
+@Import({ ApplicationMulticastController.class, ApplicationClusterController.class, RestClientConfig.class, MultiProcessingConfig.class,
 		ConsistencyRequestConfig.class })
 public class ApplicationMulticastConfig {
 

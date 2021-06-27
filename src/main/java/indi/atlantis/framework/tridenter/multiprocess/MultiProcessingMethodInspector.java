@@ -45,31 +45,39 @@ public class MultiProcessingMethodInspector implements BeanPostProcessor {
 
 	@Override
 	public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-		processMultiProcessingMethod(ClassUtils.getUserClass(bean.getClass()), beanName, MultiProcessing.class);
-		processMultiProcessingMethod(ClassUtils.getUserClass(bean.getClass()), beanName, MultiScheduling.class);
+		Class<?> beanClass = ClassUtils.getUserClass(bean.getClass());
+		boolean hasMethods = inspectMultiProcessingMethods(beanClass, beanName, MultiProcessing.class);
+		hasMethods |= inspectMultiProcessingMethods(beanClass, beanName, MultiScheduling.class);
+		if (hasMethods) {
+			inspectMultiProcessingCallbackMethods(beanClass, beanName);
+		}
 		return bean;
 	}
 
-	private void processMultiProcessingMethod(Class<?> beanClass, String beanName, Class<? extends Annotation> annotationClass) {
+	private boolean inspectMultiProcessingMethods(Class<?> beanClass, String beanName, Class<? extends Annotation> annotationClass) {
 		List<Method> methodList = MethodUtils.getMethodsWithAnnotation(beanClass, annotationClass);
 		if (CollectionUtils.isNotEmpty(methodList)) {
 			for (Method method : methodList) {
 				metadata.put(beanClass, method.getName(), new MethodSignature(beanName, beanClass.getName(), method.getName()));
 			}
-			List<Method> callbackMethodList = MethodUtils.getMethodsWithAnnotation(beanClass, OnSuccess.class);
-			for (Method method : callbackMethodList) {
-				OnSuccess anno = method.getAnnotation(OnSuccess.class);
-				String ref = anno.value();
-				MethodSignature signature = (MethodSignature) metadata.get(beanClass, ref);
-				signature.setSuccessMethodName(method.getName());
-			}
-			callbackMethodList = MethodUtils.getMethodsWithAnnotation(beanClass, OnFailure.class);
-			for (Method method : callbackMethodList) {
-				OnFailure anno = method.getAnnotation(OnFailure.class);
-				String ref = anno.value();
-				MethodSignature signature = (MethodSignature) metadata.get(beanClass, ref);
-				signature.setFailureMethodName(method.getName());
-			}
+		}
+		return methodList.size() > 0;
+	}
+
+	private void inspectMultiProcessingCallbackMethods(Class<?> beanClass, String beanName) {
+		List<Method> callbackMethodList = MethodUtils.getMethodsWithAnnotation(beanClass, OnSuccess.class);
+		for (Method method : callbackMethodList) {
+			OnSuccess anno = method.getAnnotation(OnSuccess.class);
+			String ref = anno.value();
+			MethodSignature signature = (MethodSignature) metadata.get(beanClass, ref);
+			signature.setSuccessMethodName(method.getName());
+		}
+		callbackMethodList = MethodUtils.getMethodsWithAnnotation(beanClass, OnFailure.class);
+		for (Method method : callbackMethodList) {
+			OnFailure anno = method.getAnnotation(OnFailure.class);
+			String ref = anno.value();
+			MethodSignature signature = (MethodSignature) metadata.get(beanClass, ref);
+			signature.setFailureMethodName(method.getName());
 		}
 	}
 

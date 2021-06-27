@@ -24,8 +24,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.ClassUtils;
 
+import com.github.paganini2008.devtools.ClassUtils;
 import com.github.paganini2008.devtools.ExceptionUtils;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.date.DateUtils;
@@ -62,8 +62,8 @@ public class MultiSchedulingInterpreter {
 	@Around("signature() && @annotation(multiScheduling)")
 	public Object arround(ProceedingJoinPoint pjp, MultiScheduling multiScheduling) throws Throwable {
 		final Method method = ((org.aspectj.lang.reflect.MethodSignature) pjp.getSignature()).getMethod();
-		Signature signature = (Signature) methodInspector.getSignature(ClassUtils.getUserClass(method.getDeclaringClass()),
-				method.getName());
+		Signature signature = (Signature) methodInspector
+				.getSignature(org.springframework.util.ClassUtils.getUserClass(method.getDeclaringClass()), method.getName());
 		MethodInvocation invocation = new MethodInvocation(signature, pjp.getArgs());
 		if (processPool.hasScheduled(invocation)) {
 			try {
@@ -74,6 +74,7 @@ public class MultiSchedulingInterpreter {
 						applicationMulticastGroup.unicast(applicationName, MultiProcessingCallbackListener.class.getName(),
 								new FailureCallback(invocation, e));
 					}
+					return ClassUtils.getNullableValue(method.getReturnType());
 				}
 				throw e;
 			}

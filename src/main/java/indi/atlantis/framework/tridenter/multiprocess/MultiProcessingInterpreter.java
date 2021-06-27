@@ -81,6 +81,8 @@ public class MultiProcessingInterpreter {
 					}
 					if (StringUtils.isNotBlank(multiProcessing.defaultValue())) {
 						return BeanExpressionUtils.resolveExpression(multiProcessing.defaultValue(), method.getReturnType());
+					} else {
+						return ClassUtils.getNullableValue(method.getReturnType());
 					}
 				}
 				throw e;

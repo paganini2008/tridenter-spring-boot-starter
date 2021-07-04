@@ -18,11 +18,13 @@ package indi.atlantis.framework.tridenter.multiprocess;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.github.paganini2008.springdessert.reditools.common.RedisCounter;
 import com.github.paganini2008.springdessert.reditools.common.RedisSharedLatch;
@@ -72,6 +74,7 @@ public class MultiProcessingConfig {
 		return new ProcessPoolExecutor();
 	}
 
+	@ConditionalOnBean(TaskScheduler.class)
 	@Bean
 	public ScheduledProcessPool scheduledProcessPool() {
 		return new ScheduledProcessPoolExecutor();

@@ -17,8 +17,10 @@ package indi.atlantis.framework.tridenter.multiprocess;
 
 import java.util.concurrent.TimeUnit;
 
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +43,7 @@ import indi.atlantis.framework.tridenter.Constants;
  *
  * @version 1.0
  */
+@ConditionalOnClass(ProceedingJoinPoint.class)
 @Configuration
 @ConditionalOnProperty(value = "spring.application.cluster.multiprocessing.enabled", havingValue = "true", matchIfMissing = true)
 public class MultiProcessingConfig {

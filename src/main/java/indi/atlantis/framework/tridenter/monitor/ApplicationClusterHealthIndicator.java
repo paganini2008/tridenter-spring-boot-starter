@@ -31,7 +31,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
  * ApplicationClusterHealthIndicator
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 public class ApplicationClusterHealthIndicator extends AbstractHealthIndicator {
 

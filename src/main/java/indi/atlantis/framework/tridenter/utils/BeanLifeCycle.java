@@ -24,7 +24,7 @@ import org.springframework.beans.factory.InitializingBean;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 public interface BeanLifeCycle extends InitializingBean, DisposableBean {
 

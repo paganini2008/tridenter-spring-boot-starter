@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 public interface TaskPromise {
 

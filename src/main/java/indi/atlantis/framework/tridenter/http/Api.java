@@ -30,7 +30,7 @@ import org.springframework.http.MediaType;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

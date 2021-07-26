@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * ApplicationRegistryCenter
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 @Slf4j
 public class ApplicationRegistryCenter implements RegistryCenter, ApplicationListener<ApplicationMulticastEvent> {

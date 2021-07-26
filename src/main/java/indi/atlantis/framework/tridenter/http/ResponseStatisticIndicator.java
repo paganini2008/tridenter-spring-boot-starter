@@ -27,7 +27,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * ResponseStatisticIndicator
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 public class ResponseStatisticIndicator extends AbstractStatisticIndicator implements HandlerInterceptor, StatisticIndicator {
 

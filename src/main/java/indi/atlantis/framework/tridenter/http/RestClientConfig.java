@@ -51,7 +51,7 @@ import indi.atlantis.framework.tridenter.LoadBalancer;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 @Configuration
 public class RestClientConfig {
@@ -111,7 +111,7 @@ public class RestClientConfig {
 	 * ResponseStatisticConfig
 	 *
 	 * @author Fred Feng
-	 * @version 1.0
+	 * @since 2.0.1
 	 */
 	@Configuration
 	public static class ResponseStatisticConfig implements WebMvcConfigurer {
@@ -134,7 +134,7 @@ public class RestClientConfig {
 	 *
 	 * @author Fred Feng
 	 * 
-	 * @since 1.0
+	 * @since 2.0.1
 	 */
 	@ConditionalOnMissingBean(ClientHttpRequestFactory.class)
 	@Configuration

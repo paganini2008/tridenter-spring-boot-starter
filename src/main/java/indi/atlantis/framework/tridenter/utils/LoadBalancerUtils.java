@@ -29,7 +29,7 @@ import indi.atlantis.framework.tridenter.LoadBalancer;
  * LoadBalancerUtils
  *
  * @author Fred Feng
- * @version 1.0
+ * @since 2.0.1
  */
 public abstract class LoadBalancerUtils {
 
@@ -39,7 +39,7 @@ public abstract class LoadBalancerUtils {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @since 1.0
+	 * @since 2.0.1
 	 */
 	public static class RoundRobinLoadBalancer implements LoadBalancer {
 
@@ -60,7 +60,7 @@ public abstract class LoadBalancerUtils {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @since 1.0
+	 * @since 2.0.1
 	 */
 	public static class RandomLoadBalancer implements LoadBalancer {
 
@@ -79,7 +79,7 @@ public abstract class LoadBalancerUtils {
 	 * 
 	 * @author Fred Feng
 	 *
-	 * @since 1.0
+	 * @since 2.0.1
 	 */
 	public static class HashLoadBalancer implements LoadBalancer {
 

@@ -42,7 +42,7 @@ import indi.atlantis.framework.tridenter.multiprocess.MultiProcessingConfig;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 @Configuration
 @AutoConfigureBefore({ RestClientConfig.class, MultiProcessingConfig.class, ConsistencyRequestConfig.class })

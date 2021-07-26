@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
  * 
  * @author Fred Feng
  *
- * @version 1.0
+ * @since 2.0.1
  */
 public interface RestTemplateCallback<T> {
 

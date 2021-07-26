@@ -27,7 +27,7 @@ import indi.atlantis.framework.tridenter.LeaderState;
  * 
  * @author Fred Feng
  *
- * @since 1.0
+ * @since 2.0.1
  */
 public class ApplicationClusterRefreshedEvent extends ApplicationClusterEvent {
 

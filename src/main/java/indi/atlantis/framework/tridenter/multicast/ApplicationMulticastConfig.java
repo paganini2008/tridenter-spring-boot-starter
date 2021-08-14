@@ -35,6 +35,7 @@ import indi.atlantis.framework.tridenter.RedisConnectionFailureHandler;
 import indi.atlantis.framework.tridenter.consistency.ConsistencyRequestConfig;
 import indi.atlantis.framework.tridenter.http.RestClientConfig;
 import indi.atlantis.framework.tridenter.multiprocess.MultiProcessingConfig;
+import indi.atlantis.framework.tridenter.utils.EnableRedisClient;
 
 /**
  * 
@@ -44,10 +45,11 @@ import indi.atlantis.framework.tridenter.multiprocess.MultiProcessingConfig;
  *
  * @since 2.0.1
  */
-@Configuration
+@EnableRedisClient
 @AutoConfigureBefore({ RestClientConfig.class, MultiProcessingConfig.class, ConsistencyRequestConfig.class })
 @Import({ ApplicationMulticastController.class, ApplicationClusterController.class, RestClientConfig.class, MultiProcessingConfig.class,
 		ConsistencyRequestConfig.class })
+@Configuration
 public class ApplicationMulticastConfig {
 
 	@Value("${spring.application.cluster.name}")

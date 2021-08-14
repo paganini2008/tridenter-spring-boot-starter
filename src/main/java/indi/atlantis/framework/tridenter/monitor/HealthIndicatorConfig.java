@@ -15,7 +15,7 @@
 */
 package indi.atlantis.framework.tridenter.monitor;
 
-import org.springframework.boot.actuate.health.AbstractHealthIndicator;
+import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
@@ -31,7 +31,7 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastConfig;
  * @author Fred Feng
  * @since 2.0.1
  */
-@ConditionalOnClass(AbstractHealthIndicator.class)
+@ConditionalOnClass(HealthIndicator.class)
 @Configuration
 public class HealthIndicatorConfig {
 

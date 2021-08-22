@@ -145,7 +145,7 @@ public class ApplicationMulticastGroup {
 
 	public void unicast(String topic, Object message, int timeout) {
 		Assert.hasNoText(topic, "Topic must be required");
-		ApplicationInfo applicationInfo = loadBalancer.select(message, allCandidates);
+		ApplicationInfo applicationInfo = loadBalancer.select(null, allCandidates, message);
 		if (applicationInfo != null) {
 			doSendMessage(applicationInfo.getId(), topic, message, timeout);
 		}
@@ -158,7 +158,7 @@ public class ApplicationMulticastGroup {
 	public void unicast(String group, String topic, Object message, int timeout) {
 		Assert.hasNoText(topic, "Topic must be required");
 		if (groupCandidates.containsKey(group)) {
-			ApplicationInfo applicationInfo = loadBalancer.select(message, groupCandidates.get(group));
+			ApplicationInfo applicationInfo = loadBalancer.select(group, groupCandidates.get(group), message);
 			if (applicationInfo != null) {
 				doSendMessage(applicationInfo.getId(), topic, message, timeout);
 			}

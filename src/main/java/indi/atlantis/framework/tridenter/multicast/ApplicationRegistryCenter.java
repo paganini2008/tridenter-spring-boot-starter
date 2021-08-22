@@ -25,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.springframework.context.ApplicationListener;
 
 import com.github.paganini2008.devtools.collection.CaseInsensitiveMap;
+import com.github.paganini2008.devtools.collection.ListUtils;
 import com.github.paganini2008.devtools.collection.MapUtils;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
@@ -88,7 +89,7 @@ public class ApplicationRegistryCenter implements RegistryCenter, ApplicationLis
 
 	@Override
 	public List<ApplicationInfo> getApplications(String applicationName) {
-		return applications.get(applicationName);
+		return applications.containsKey(applicationName) ? applications.get(applicationName) : ListUtils.emptyList();
 	}
 
 	@Override

@@ -16,10 +16,14 @@
 package indi.atlantis.framework.tridenter.utils;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.collection.CollectionUtils;
-import com.github.paganini2008.devtools.multithreads.AtomicIntegerSequence;
+import com.github.paganini2008.devtools.collection.MapUtils;
+import com.github.paganini2008.devtools.multithreads.AtomicLongSequence;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.LoadBalancer;
@@ -43,13 +47,23 @@ public abstract class LoadBalancerUtils {
 	 */
 	public static class RoundRobinLoadBalancer implements LoadBalancer {
 
-		private final AtomicIntegerSequence counter = new AtomicIntegerSequence();
+		private final AtomicLongSequence counter = new AtomicLongSequence();
+		private final Map<String, AtomicLongSequence> counterSelector = new ConcurrentHashMap<String, AtomicLongSequence>();
 
-		public ApplicationInfo select(Object message, List<ApplicationInfo> candidates) {
+		public ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message) {
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}
-			return candidates.get(counter.getAndIncrement() % candidates.size());
+			return candidates.get((int) (getCounter(group).getAndIncrement() % candidates.size()));
+		}
+
+		private AtomicLongSequence getCounter(String group) {
+			if (StringUtils.isBlank(group)) {
+				return counter;
+			}
+			return MapUtils.get(counterSelector, group, () -> {
+				return new AtomicLongSequence();
+			});
 		}
 
 	}
@@ -64,7 +78,7 @@ public abstract class LoadBalancerUtils {
 	 */
 	public static class RandomLoadBalancer implements LoadBalancer {
 
-		public ApplicationInfo select(Object message, List<ApplicationInfo> candidates) {
+		public ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message) {
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}
@@ -83,7 +97,7 @@ public abstract class LoadBalancerUtils {
 	 */
 	public static class HashLoadBalancer implements LoadBalancer {
 
-		public ApplicationInfo select(Object message, List<ApplicationInfo> candidates) {
+		public ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message) {
 			if (CollectionUtils.isEmpty(candidates)) {
 				return null;
 			}

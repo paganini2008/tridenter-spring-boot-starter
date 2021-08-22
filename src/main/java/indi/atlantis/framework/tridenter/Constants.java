@@ -22,7 +22,7 @@ package indi.atlantis.framework.tridenter;
  * @author Fred Feng
  * @since 2.0.1
  */
-public class Constants {
+public abstract class Constants {
 
 	public static final String APPLICATION_CLUSTER_NAMESPACE = "spring:application:cluster:";
 

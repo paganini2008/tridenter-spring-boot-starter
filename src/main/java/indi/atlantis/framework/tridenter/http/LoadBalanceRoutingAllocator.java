@@ -64,11 +64,11 @@ public class LoadBalanceRoutingAllocator implements RoutingAllocator, Applicatio
 			break;
 		case ALL:
 			candidates = registryCenter.getApplications();
-			selectedApplication = loadBalancer.select(path, candidates);
+			selectedApplication = loadBalancer.select(null, candidates, path);
 			break;
 		default:
 			candidates = registryCenter.getApplications(provider);
-			selectedApplication = loadBalancer.select(path, candidates);
+			selectedApplication = loadBalancer.select(provider, candidates, path);
 			break;
 		}
 		if (selectedApplication == null) {

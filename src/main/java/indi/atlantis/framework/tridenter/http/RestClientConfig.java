@@ -137,7 +137,7 @@ public class RestClientConfig {
 	 * @since 2.0.1
 	 */
 	@ConditionalOnMissingBean(ClientHttpRequestFactory.class)
-	@Configuration
+	@Configuration(proxyBeanMethods = false)
 	public static class HttpClientConfig {
 
 		@Value("${spring.application.cluster.httpclient.pool.maxTotal:200}")

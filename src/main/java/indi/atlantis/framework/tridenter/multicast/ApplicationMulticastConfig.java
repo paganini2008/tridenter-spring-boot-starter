@@ -92,7 +92,7 @@ public class ApplicationMulticastConfig {
 	}
 
 	@Bean
-	public ApplicationMessageStarterListener applicationMessageListener() {
+	public ApplicationMessageStarterListener applicationMessageStarterListener() {
 		return new ApplicationMessageStarterListener();
 	}
 

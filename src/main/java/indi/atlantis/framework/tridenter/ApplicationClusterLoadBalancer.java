@@ -16,10 +16,14 @@
 package indi.atlantis.framework.tridenter;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 
+import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.collection.CollectionUtils;
+import com.github.paganini2008.devtools.collection.MapUtils;
 import com.github.paganini2008.springdessert.reditools.common.RedisAtomicLongSequence;
 
 /**
@@ -33,17 +37,30 @@ import com.github.paganini2008.springdessert.reditools.common.RedisAtomicLongSeq
 public class ApplicationClusterLoadBalancer implements LoadBalancer {
 
 	private final RedisAtomicLongSequence counter;
+	private final Map<String, RedisAtomicLongSequence> counterSelector;
+	private final RedisConnectionFactory redisConnectionFactory;
 
-	public ApplicationClusterLoadBalancer(String name, RedisConnectionFactory connectionFactory) {
-		this.counter = new RedisAtomicLongSequence(name, connectionFactory);
+	public ApplicationClusterLoadBalancer(String name, RedisConnectionFactory redisConnectionFactory) {
+		this.counter = new RedisAtomicLongSequence(name, redisConnectionFactory);
+		this.counterSelector = new ConcurrentHashMap<String, RedisAtomicLongSequence>();
+		this.redisConnectionFactory = redisConnectionFactory;
 	}
 
 	@Override
-	public ApplicationInfo select(Object message, List<ApplicationInfo> candidates) {
+	public ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message) {
 		if (CollectionUtils.isEmpty(candidates)) {
 			return null;
 		}
-		return candidates.get((int) (counter.getAndIncrement() % candidates.size()));
+		return candidates.get((int) (getCounter(group).getAndIncrement() % candidates.size()));
+	}
+
+	private RedisAtomicLongSequence getCounter(final String group) {
+		if (StringUtils.isBlank(group)) {
+			return counter;
+		}
+		return MapUtils.get(counterSelector, group, () -> {
+			return new RedisAtomicLongSequence(counter.getName() + ":" + group, redisConnectionFactory);
+		});
 	}
 
 }

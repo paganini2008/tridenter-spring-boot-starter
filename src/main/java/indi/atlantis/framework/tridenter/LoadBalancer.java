@@ -27,6 +27,6 @@ import java.util.List;
  */
 public interface LoadBalancer {
 
-	ApplicationInfo select(Object message, List<ApplicationInfo> candidates);
+	ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message);
 
 }

@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import java.util.List;
 import java.util.Map;
@@ -28,16 +28,16 @@ import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 
 /**
  * 
- * Court
+ * CcrPlatform
  *
  * @author Fred Feng
  *
  * @since 2.0.1
  */
-public class Court {
+public class CcrPlatform {
 
 	@Autowired
-	private ApplicationMulticastGroup multicastGroup;
+	private ApplicationMulticastGroup applicationMulticastGroup;
 
 	private final Observable watcher = Observable.unrepeatable();
 	private final Map<String, Proposal> juege = new ConcurrentHashMap<String, Proposal>();
@@ -70,25 +70,25 @@ public class Court {
 		});
 	}
 
-	public void canLearn(ConsistencyResponse response) {
-		ConsistencyRequest request = response.getRequest();
+	public void canLearn(CcrResponse response) {
+		CcrRequest request = response.getRequest();
 		String name = request.getName();
 		if (juege.containsKey(name)) {
-			List<ConsistencyResponse> list = juege.get(name).getCommitments();
+			List<CcrResponse> list = juege.get(name).getCommitments();
 			list.add(response);
-			if (list.size() == multicastGroup.countOfCandidate()) {
+			if (list.size() == applicationMulticastGroup.countOfCandidate()) {
 				watcher.notifyObservers(Formulation.COMMITMENT_PERIOD + name, name);
 			}
 		}
 	}
 
-	public void canCommit(ConsistencyResponse response) {
-		ConsistencyRequest request = response.getRequest();
+	public void canCommit(CcrResponse response) {
+		CcrRequest request = response.getRequest();
 		String name = request.getName();
 		if (juege.containsKey(name)) {
-			List<ConsistencyResponse> list = juege.get(name).getPreparations();
+			List<CcrResponse> list = juege.get(name).getPreparations();
 			list.add(response);
-			if (list.size() == multicastGroup.countOfCandidate()) {
+			if (list.size() == applicationMulticastGroup.countOfCandidate()) {
 				watcher.notifyObservers(Formulation.PREPARATION_PERIOD + name, name);
 			}
 		}
@@ -98,19 +98,19 @@ public class Court {
 
 		private final String name;
 		private final Object value;
-		private final List<ConsistencyResponse> preparations = new CopyOnWriteArrayList<ConsistencyResponse>();
-		private final List<ConsistencyResponse> commitments = new CopyOnWriteArrayList<ConsistencyResponse>();
+		private final List<CcrResponse> preparations = new CopyOnWriteArrayList<CcrResponse>();
+		private final List<CcrResponse> commitments = new CopyOnWriteArrayList<CcrResponse>();
 
 		Proposal(String name, Object value) {
 			this.name = name;
 			this.value = value;
 		}
 
-		public List<ConsistencyResponse> getPreparations() {
+		public List<CcrResponse> getPreparations() {
 			return preparations;
 		}
 
-		public List<ConsistencyResponse> getCommitments() {
+		public List<CcrResponse> getCommitments() {
 			return commitments;
 		}
 

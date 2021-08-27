@@ -13,10 +13,11 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
@@ -27,63 +28,43 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyRequestLearningRequest
+ * CcrRequestTimeoutListener
  *
  * @author Fred Feng
+ *
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyRequestLearningRequest implements ApplicationMessageListener, ApplicationContextAware {
+public class CcrRequestTimeoutListener implements ApplicationMessageListener, ApplicationContextAware {
+
+	@Qualifier("batchNoGenerator")
+	@Autowired
+	private CcrSerialNoGenerator batchNoGenerator;
 
 	@Autowired
-	private ConsistencyRequestRound requestRound;
-
-	@Autowired
-	private ConsistencyRequestSerial requestSerial;
-
-	@Autowired
-	private ConsistencyRequestSerialCache requestSerialCache;
-
-	@Autowired
-	private ApplicationMulticastGroup multicastGroup;
-
-	@Autowired
-	private Court court;
+	private ApplicationMulticastGroup applicationMulticastGroup;
 
 	@Override
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
-		final ConsistencyRequest request = (ConsistencyRequest) message;
+		final CcrRequest request = (CcrRequest) message;
 		final String name = request.getName();
-		if (request.getRound() != requestRound.currentRound(name)) {
+		if (request.getBatchNo() != batchNoGenerator.currentSerialNo(name)) {
 			if (log.isTraceEnabled()) {
 				log.trace("This round of proposal '{}' has been finished.", name);
 			}
 			return;
 		}
-		String anotherInstanceId = applicationInfo.getId();
+		final String anotherInstanceId = applicationInfo.getId();
 		if (log.isTraceEnabled()) {
 			log.trace(getTopic() + " " + anotherInstanceId + ", " + request);
 		}
-		if (log.isDebugEnabled()) {
-			log.debug("Selected ConsistencyRequest: " + request);
-		}
-		clean(name);
-		court.completeProposal(name);
-
-		applicationContext.publishEvent(new ConsistencyRequestConfirmationEvent(request, applicationInfo, true));
-		multicastGroup.send(anotherInstanceId, ConsistencyRequest.LEARNING_OPERATION_RESPONSE, request);
-
+		applicationContext.publishEvent(new CcrRequestConfirmationEvent(request, applicationInfo, false));
+		applicationMulticastGroup.send(anotherInstanceId, CcrRequest.TIMEOUT_RESPONSE, request);
 	}
 
 	@Override
 	public String getTopic() {
-		return ConsistencyRequest.LEARNING_OPERATION_REQUEST;
-	}
-
-	private void clean(String name) {
-		requestRound.clean(name);
-		requestSerial.clean(name);
-		requestSerialCache.clean(name);
+		return CcrRequest.TIMEOUT_REQUEST;
 	}
 
 	private ApplicationContext applicationContext;

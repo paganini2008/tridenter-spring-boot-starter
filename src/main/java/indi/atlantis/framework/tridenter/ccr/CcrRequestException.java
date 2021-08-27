@@ -13,44 +13,44 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 /**
  * 
- * ConsistencyRequestException
+ * CcrRequestException
  *
  * @author Fred Feng
  *
  * @since 2.0.1
  */
-public class ConsistencyRequestException extends IllegalStateException {
+public class CcrRequestException extends IllegalStateException {
 
 	private static final long serialVersionUID = -1376569536093800120L;
 
-	public ConsistencyRequestException(String name, long serial, long round) {
-		super(repr(name, serial, round));
+	public CcrRequestException(String name, long serialNo, long round) {
+		super(repr(name, serialNo, round));
 		this.name = name;
-		this.serial = serial;
+		this.serialNo = serialNo;
 		this.round = round;
 	}
 
-	public ConsistencyRequestException(String name, long serial, long round, Throwable e) {
-		super(repr(name, serial, round), e);
+	public CcrRequestException(String name, long serialNo, long round, Throwable e) {
+		super(repr(name, serialNo, round), e);
 		this.name = name;
-		this.serial = serial;
+		this.serialNo = serialNo;
 		this.round = round;
 	}
 
 	private final String name;
-	private final long serial;
+	private final long serialNo;
 	private final long round;
 
 	public String getName() {
 		return name;
 	}
 
-	public long getSerial() {
-		return serial;
+	public long getSerialNo() {
+		return serialNo;
 	}
 
 	public long getRound() {

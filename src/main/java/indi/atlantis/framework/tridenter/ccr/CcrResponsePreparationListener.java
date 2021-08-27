@@ -13,9 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
@@ -23,26 +24,27 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyRequestPreparationResponse
+ * CcrResponsePreparationListener
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyRequestPreparationResponse implements ApplicationMessageListener {
+public class CcrResponsePreparationListener implements ApplicationMessageListener {
 
 	@Autowired
-	private Court court;
+	private CcrPlatform ccrPlatform;
 
+	@Qualifier("batchNoGenerator")
 	@Autowired
-	private ConsistencyRequestRound requestRound;
+	private CcrSerialNoGenerator batchNoGenerator;
 
 	@Override
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
-		final ConsistencyResponse response = (ConsistencyResponse) message;
-		final ConsistencyRequest request = response.getRequest();
+		final CcrResponse response = (CcrResponse) message;
+		final CcrRequest request = response.getRequest();
 		final String name = request.getName();
-		if (request.getRound() != requestRound.currentRound(name)) {
+		if (request.getBatchNo() != batchNoGenerator.currentSerialNo(name)) {
 			if (log.isTraceEnabled()) {
 				log.trace("This round of proposal '{}' has been finished.", name);
 			}
@@ -52,13 +54,13 @@ public class ConsistencyRequestPreparationResponse implements ApplicationMessage
 			log.trace(getTopic() + " " + applicationInfo.getId() + ", " + response);
 		}
 		if (response.isAcceptable()) {
-			court.canCommit(response);
+			ccrPlatform.canCommit(response);
 		}
 	}
 
 	@Override
 	public String getTopic() {
-		return ConsistencyRequest.PREPARATION_OPERATION_RESPONSE;
+		return CcrRequest.PREPARATION_RESPONSE;
 	}
 
 }

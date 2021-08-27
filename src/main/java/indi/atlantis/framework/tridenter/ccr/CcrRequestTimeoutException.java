@@ -13,22 +13,29 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
-
-import org.springframework.context.ApplicationListener;
+package indi.atlantis.framework.tridenter.ccr;
 
 /**
  * 
- * ConsistentStateEventListener
+ * CcrRequestTimeoutException
  *
  * @author Fred Feng
+ *
  * @since 2.0.1
  */
-public class ConsistentStateEventListener implements ApplicationListener<ConsistencyRequestConfirmationEvent> {
+public class CcrRequestTimeoutException extends CcrRequestException {
 
-	@Override
-	public void onApplicationEvent(ConsistencyRequestConfirmationEvent event) {
+	private static final long serialVersionUID = -8547355390875394014L;
 
+	public CcrRequestTimeoutException(String name, long serial, long round, int timeout) {
+		super(name, serial, round);
+		this.timeout = timeout;
+	}
+
+	private final int timeout;
+
+	public int getTimeout() {
+		return timeout;
 	}
 
 }

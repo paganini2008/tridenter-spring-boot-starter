@@ -13,32 +13,32 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import com.github.paganini2008.devtools.collection.MultiMappedMap;
 
 /**
  * 
- * ConsistencyRequestSerialCache
+ * CcrRequestLocal
  *
  * @author Fred Feng
  * @since 2.0.1
  */
-public class ConsistencyRequestSerialCache {
+public class CcrRequestLocal {
 
 	private final MultiMappedMap<String, Long, Long> serials = new MultiMappedMap<String, Long, Long>();
 	private final MultiMappedMap<String, Long, Object> values = new MultiMappedMap<String, Long, Object>();
 
-	public Object setValue(String name, long round, long serial, Object value) {
-		serials.put(name, round, serial);
+	public Object setValue(String name, long batchNo, long serialNo, Object value) {
+		serials.put(name, batchNo, serialNo);
 		if (value != null) {
-			return values.put(name, round, value);
+			values.put(name, batchNo, value);
 		}
-		return null;
+		return values.get(name, batchNo);
 	}
 
-	public long getSerial(String name, long round) {
-		return serials.get(name, round, 0L);
+	public long getSerialNo(String name, long batchNo) {
+		return serials.get(name, batchNo, 0L);
 	}
 
 	public void clean(String name) {

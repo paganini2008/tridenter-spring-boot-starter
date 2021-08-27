@@ -33,14 +33,10 @@ import indi.atlantis.framework.tridenter.http.LeaderService;
 @Configuration
 public class ApplicationClusterLeaderConfig {
 
+	@ConditionalOnMissingBean
 	@Bean
 	public LeaderElectionListener leaderElectionListener() {
 		return new ApplicationLeaderElectionListener();
-	}
-
-	@Bean
-	public ApplicationLeaderRecoveryListener applicationLeaderRecoveryListener() {
-		return new ApplicationLeaderRecoveryListener();
 	}
 
 	@ConditionalOnMissingBean
@@ -53,6 +49,11 @@ public class ApplicationClusterLeaderConfig {
 	@Bean
 	public LeaderRecovery leaderRecovery() {
 		return new DefaultLeaderRecovery();
+	}
+	
+	@Bean
+	public ApplicationLeaderRecoveryListener applicationLeaderRecoveryListener() {
+		return new ApplicationLeaderRecoveryListener();
 	}
 
 }

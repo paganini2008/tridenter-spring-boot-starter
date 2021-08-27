@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import java.io.Serializable;
 
@@ -24,7 +24,7 @@ import lombok.ToString;
 
 /**
  * 
- * ConsistencyResponse
+ * CcResponse
  *
  * @author Fred Feng
  * @since 2.0.1
@@ -32,30 +32,30 @@ import lombok.ToString;
 @ToString
 @Setter
 @Getter
-public class ConsistencyResponse implements Serializable, Comparable<ConsistencyResponse> {
+public class CcrResponse implements Serializable, Comparable<CcrResponse> {
 	
 	private static final long serialVersionUID = 704634098311834803L;
 
-	public ConsistencyResponse() {
+	public CcrResponse() {
 	}
 
-	public ConsistencyResponse(ConsistencyRequest request, ApplicationInfo applicationInfo, boolean acceptable) {
+	public CcrResponse(CcrRequest request, ApplicationInfo applicationInfo, boolean acceptable) {
 		this.request = request;
 		this.applicationInfo = applicationInfo;
 		this.acceptable = acceptable;
 	}
 
-	private ConsistencyRequest request;
+	private CcrRequest request;
 	private ApplicationInfo applicationInfo;
 	private boolean acceptable;
 
 	@Override
-	public int compareTo(ConsistencyResponse other) {
-		long otherSerial = other.getRequest().getSerial();
-		if (otherSerial == request.getSerial()) {
+	public int compareTo(CcrResponse other) {
+		long otherSerialNo = other.getRequest().getSerialNo();
+		if (otherSerialNo == request.getSerialNo()) {
 			return other.getApplicationInfo().getId().compareTo(applicationInfo.getId());
 		}
-		return (int) (otherSerial - request.getSerial());
+		return (int) (otherSerialNo - request.getSerialNo());
 	}
 
 }

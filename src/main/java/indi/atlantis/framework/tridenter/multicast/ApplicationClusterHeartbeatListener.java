@@ -85,10 +85,9 @@ public class ApplicationClusterHeartbeatListener implements ApplicationListener<
 		final ApplicationInfo applicationInfo = event.getApplicationInfo();
 		MulticastEventType eventType = event.getMulticastEventType();
 		if (eventType == MulticastEventType.ON_ACTIVE) {
-			if (!instanceId.getApplicationInfo().equals(event.getApplicationInfo())) {
-				ApplicationHeartbeatTask heartbeatTask = new ApplicationHeartbeatTask(applicationInfo, restClientPerformer,
-						retryTemplateFactory, taskExecutor, requestInterceptorContainer, statisticIndicator, applicationMulticastGroup,
-						timeout);
+			if (!instanceId.getApplicationInfo().equals(applicationInfo)) {
+				ApplicationHeartbeatTask heartbeatTask = new ApplicationHeartbeatTask(applicationInfo, restClientPerformer, retryTemplateFactory,
+						taskExecutor, requestInterceptorContainer, statisticIndicator, applicationMulticastGroup, timeout);
 				applicationFutures.put(applicationInfo,
 						taskScheduler.scheduleWithFixedDelay(heartbeatTask, Duration.ofSeconds(DEFAULT_HEARTBEAT_INTERVAL)));
 				log.info("Keep heartbeating from application '{}' with fixed delay {} second.", applicationInfo.getId(),

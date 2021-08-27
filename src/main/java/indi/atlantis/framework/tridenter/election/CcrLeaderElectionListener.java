@@ -25,6 +25,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 
 import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
 
+import indi.atlantis.framework.tridenter.ApplicationClusterContext;
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;
@@ -34,18 +35,18 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyLeaderElectionListener
+ * CcrLeaderElectionListener
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyLeaderElectionListener implements ApplicationMulticastListener, ApplicationContextAware, LeaderElectionListener {
+public class CcrLeaderElectionListener implements ApplicationMulticastListener, ApplicationContextAware, LeaderElectionListener {
 
 	@Value("${spring.application.cluster.name}")
 	private String clusterName;
 
-	@Value("${spring.application.cluster.consistency.leader-election.minimumParticipants:3}")
+	@Value("${atlantis.framework.tridenter.election.ccr.minimumParticipants:3}")
 	private int minimumParticipants;
 
 	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
@@ -59,10 +60,13 @@ public class ConsistencyLeaderElectionListener implements ApplicationMulticastLi
 	private LeaderElection leaderElection;
 
 	@Autowired
-	private ApplicationMulticastGroup multicastGroup;
+	private ApplicationClusterContext applicationClusterContext;
 
 	@Autowired
-	private LeaderRecovery recoveryCallback;
+	private ApplicationMulticastGroup applicationMulticastGroup;
+
+	@Autowired
+	private LeaderRecovery leaderRecovery;
 
 	private ApplicationContext applicationContext;
 
@@ -81,16 +85,16 @@ public class ConsistencyLeaderElectionListener implements ApplicationMulticastLi
 			log.info("Join the existed cluster: " + leaderInfo.getClusterName());
 
 			applicationContext.publishEvent(new ApplicationClusterFollowerEvent(applicationContext, leaderInfo));
-			log.info("I am the follower of application cluster '{}'. Implement ApplicationListener to listen the event type {}",
-					clusterName, ApplicationClusterFollowerEvent.class.getName());
+			log.info("This is the follower of application cluster '{}'. Current application event type is '{}'", clusterName,
+					ApplicationClusterFollowerEvent.class.getName());
 			instanceId.setLeaderInfo(leaderInfo);
 			log.info("Leader's info: " + leaderInfo);
 
 			final String key = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
 			redisTemplate.opsForList().leftPush(key, instanceId.getApplicationInfo());
 		} else {
-			final int channelCount = multicastGroup.countOfCandidate();
-			if (channelCount >= minimumParticipants) {
+			final int nCandidates = applicationMulticastGroup.countOfCandidate();
+			if (nCandidates >= minimumParticipants) {
 				leaderElection.launch();
 			}
 		}
@@ -98,13 +102,13 @@ public class ConsistencyLeaderElectionListener implements ApplicationMulticastLi
 
 	@Override
 	public synchronized void onInactive(ApplicationInfo applicationInfo) {
-		if (applicationInfo.isLeader()) {
+		if (applicationClusterContext.getLeaderInfo() != null && applicationClusterContext.getLeaderInfo().equals(applicationInfo)) {
 			final String key = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
 			redisTemplate.opsForList().remove(key, 1, instanceId.getApplicationInfo());
 
 			instanceId.setLeaderInfo(null);
 
-			recoveryCallback.recover(applicationInfo);
+			leaderRecovery.recover(applicationInfo);
 		}
 	}
 

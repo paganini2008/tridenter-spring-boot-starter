@@ -43,7 +43,7 @@ public class MulticastMessageAcker implements ApplicationMessageListener {
 		ackQueue.put(message.getId(), message);
 	}
 
-	public void retrySendMessage(ApplicationMulticastGroup multicastGroup) {
+	public void retrySendMessage(ApplicationMulticastGroup applicationMulticastGroup) {
 		if (ackQueue.isEmpty()) {
 			return;
 		}
@@ -52,7 +52,7 @@ public class MulticastMessageAcker implements ApplicationMessageListener {
 			MulticastMessage message = q.poll();
 			if (System.currentTimeMillis() - message.getTimestamp() > message.getTimeout() * 1000) {
 				ackQueue.remove(message.getId());
-				multicastGroup.doSendMessage(message.getChannel(), message, message.getTimeout());
+				applicationMulticastGroup.doSendMessage(message.getChannel(), message, message.getTimeout());
 				if (log.isTraceEnabled()) {
 					log.trace("Resend MulticastMessage '{}'", message.getId());
 				}

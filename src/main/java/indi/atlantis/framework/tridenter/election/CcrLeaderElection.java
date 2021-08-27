@@ -33,26 +33,26 @@ import com.github.paganini2008.springdessert.reditools.common.TtlKeeper;
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.Constants;
 import indi.atlantis.framework.tridenter.InstanceId;
-import indi.atlantis.framework.tridenter.consistency.ConsistencyRequestConfirmationEvent;
-import indi.atlantis.framework.tridenter.consistency.ConsistencyRequestContext;
+import indi.atlantis.framework.tridenter.ccr.CcrRequestConfirmationEvent;
+import indi.atlantis.framework.tridenter.ccr.CcrRequestLauncher;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyLeaderElection
+ * CcrLeaderElection
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyLeaderElection implements LeaderElection, ApplicationContextAware, SmartApplicationListener {
+public class CcrLeaderElection implements LeaderElection, ApplicationContextAware, SmartApplicationListener {
 
 	private ApplicationContext applicationContext;
 
 	@Value("${spring.application.cluster.name}")
 	private String clusterName;
 
-	@Value("${spring.application.cluster.leader.lease:10}")
+	@Value("${atlantis.framework.tridenter.election.leader.lease:10}")
 	private int leaderLease;
 
 	@Autowired
@@ -66,18 +66,18 @@ public class ConsistencyLeaderElection implements LeaderElection, ApplicationCon
 	private TtlKeeper ttlKeeper;
 
 	@Autowired
-	private ConsistencyRequestContext requestContext;
+	private CcrRequestLauncher requestLauncher;
 
 	@Override
 	public void launch() {
 		final String leaderIdentify = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
-		requestContext.propose(leaderIdentify, instanceId.getApplicationInfo(), DEFAULT_TIMEOUT);
+		requestLauncher.propose(leaderIdentify, instanceId.getApplicationInfo(), DEFAULT_TIMEOUT);
 		log.info("Start leader election. Identify: " + leaderIdentify);
 	}
 
 	@Override
 	public void onTriggered(ApplicationEvent applicationEvent) {
-		final ConsistencyRequestConfirmationEvent event = (ConsistencyRequestConfirmationEvent) applicationEvent;
+		final CcrRequestConfirmationEvent event = (CcrRequestConfirmationEvent) applicationEvent;
 		ApplicationInfo leaderInfo = (ApplicationInfo) event.getRequest().getValue();
 		if (instanceId.getApplicationInfo().equals(leaderInfo)) {
 			applicationContext.publishEvent(new ApplicationClusterLeaderEvent(applicationContext));
@@ -103,7 +103,7 @@ public class ConsistencyLeaderElection implements LeaderElection, ApplicationCon
 
 	@Override
 	public boolean supportsEventType(Class<? extends ApplicationEvent> eventType) {
-		return eventType == ConsistencyRequestConfirmationEvent.class;
+		return eventType == CcrRequestConfirmationEvent.class;
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class ConsistencyLeaderElection implements LeaderElection, ApplicationCon
 
 	@Override
 	public void onApplicationEvent(ApplicationEvent applicationEvent) {
-		final ConsistencyRequestConfirmationEvent event = (ConsistencyRequestConfirmationEvent) applicationEvent;
+		final CcrRequestConfirmationEvent event = (CcrRequestConfirmationEvent) applicationEvent;
 		final String leaderIdentify = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
 		if (leaderIdentify.equals(event.getRequest().getName())) {
 			if (event.isOk()) {

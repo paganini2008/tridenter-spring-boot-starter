@@ -45,7 +45,7 @@ public class ApplicationClusterController {
 	private InstanceId instanceId;
 
 	@Autowired
-	private ApplicationClusterContext leaderContext;
+	private ApplicationClusterContext applicationClusterContext;
 
 	@GetMapping("/ping")
 	public ResponseEntity<ApplicationInfo> ping() {
@@ -54,7 +54,7 @@ public class ApplicationClusterController {
 
 	@GetMapping("/state")
 	public ResponseEntity<LeaderState> state() {
-		return ResponseEntity.ok(leaderContext.getLeaderState());
+		return ResponseEntity.ok(applicationClusterContext.getLeaderState());
 	}
 
 	@GetMapping("/list")

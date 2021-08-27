@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApplicationMulticastController {
 
 	@Autowired
-	private ApplicationMulticastGroup multicastGroup;
+	private ApplicationMulticastGroup applicationMulticastGroup;
 
 	@Value("${spring.application.name}")
 	private String applicationName;
@@ -44,14 +44,14 @@ public class ApplicationMulticastController {
 	@GetMapping("/multicast")
 	public ResponseEntity<String> multicast(@RequestParam(name = "t", required = false, defaultValue = "*") String topic,
 			@RequestParam("c") String content) {
-		multicastGroup.multicast(topic, content);
+		applicationMulticastGroup.multicast(topic, content);
 		return ResponseEntity.ok("ok");
 	}
 
 	@GetMapping("/unicast")
 	public ResponseEntity<String> unicast(@RequestParam(name = "t", required = false, defaultValue = "*") String topic,
 			@RequestParam("c") String content) {
-		multicastGroup.unicast(topic, content);
+		applicationMulticastGroup.unicast(topic, content);
 		return ResponseEntity.ok("ok");
 	}
 

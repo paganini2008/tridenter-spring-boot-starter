@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import org.springframework.context.ApplicationEvent;
 
@@ -21,17 +21,17 @@ import indi.atlantis.framework.tridenter.ApplicationInfo;
 
 /**
  * 
- * ConsistencyRequestCompletionEvent
+ * CcrRequestCompletionEvent
  *
  * @author Fred Feng
  *
  * @since 2.0.1
  */
-public class ConsistencyRequestCompletionEvent extends ApplicationEvent {
+public class CcrRequestCompletionEvent extends ApplicationEvent {
 
 	private static final long serialVersionUID = -6200632827461240339L;
 
-	public ConsistencyRequestCompletionEvent(ConsistencyRequest consistencyRequest, ApplicationInfo applicationInfo) {
+	public CcrRequestCompletionEvent(CcrRequest consistencyRequest, ApplicationInfo applicationInfo) {
 		super(consistencyRequest);
 		this.applicationInfo = applicationInfo;
 	}

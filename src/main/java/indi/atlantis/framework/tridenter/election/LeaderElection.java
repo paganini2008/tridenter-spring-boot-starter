@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationEvent;
  */
 public interface LeaderElection {
 
-	static final int DEFAULT_TIMEOUT = 60;
+	static final long DEFAULT_TIMEOUT = 60000;
 
 	void launch();
 

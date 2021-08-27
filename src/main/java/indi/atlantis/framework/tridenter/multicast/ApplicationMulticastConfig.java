@@ -32,7 +32,7 @@ import indi.atlantis.framework.tridenter.InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.LoadBalancer;
 import indi.atlantis.framework.tridenter.Md5InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.RedisConnectionFailureHandler;
-import indi.atlantis.framework.tridenter.consistency.ConsistencyRequestConfig;
+import indi.atlantis.framework.tridenter.ccr.CcrRequestConfig;
 import indi.atlantis.framework.tridenter.http.RestClientConfig;
 import indi.atlantis.framework.tridenter.multiprocess.MultiProcessingConfig;
 import indi.atlantis.framework.tridenter.utils.EnableRedisClient;
@@ -46,9 +46,9 @@ import indi.atlantis.framework.tridenter.utils.EnableRedisClient;
  * @since 2.0.1
  */
 @EnableRedisClient
-@AutoConfigureBefore({ RestClientConfig.class, MultiProcessingConfig.class, ConsistencyRequestConfig.class })
+@AutoConfigureBefore({ RestClientConfig.class, MultiProcessingConfig.class, CcrRequestConfig.class })
 @Import({ ApplicationMulticastController.class, ApplicationClusterController.class, RestClientConfig.class, MultiProcessingConfig.class,
-		ConsistencyRequestConfig.class })
+		CcrRequestConfig.class })
 @Configuration
 public class ApplicationMulticastConfig {
 

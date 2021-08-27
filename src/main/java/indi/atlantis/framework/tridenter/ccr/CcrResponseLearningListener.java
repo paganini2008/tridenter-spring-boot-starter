@@ -13,9 +13,13 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
@@ -23,43 +27,48 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyRequestCommitmentResponse
+ * CcrResponseLearningListener
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyRequestCommitmentResponse implements ApplicationMessageListener {
+public class CcrResponseLearningListener implements ApplicationMessageListener, ApplicationContextAware {
 
+	@Qualifier("batchNoGenerator")
 	@Autowired
-	private Court court;
-
-	@Autowired
-	private ConsistencyRequestRound requestRound;
+	private CcrSerialNoGenerator batchNoGenerator;
 
 	@Override
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
-		final ConsistencyResponse response = (ConsistencyResponse) message;
-		final ConsistencyRequest request = response.getRequest();
+		final CcrRequest request = (CcrRequest) message;
 		final String name = request.getName();
-		if (request.getRound() != requestRound.currentRound(name)) {
+		if (request.getBatchNo() != batchNoGenerator.currentSerialNo(name)) {
 			if (log.isTraceEnabled()) {
 				log.trace("This round of proposal '{}' has been finished.", name);
 			}
 			return;
 		}
-		String anotherInstanceId = applicationInfo.getId();
+		final String anotherInstanceId = applicationInfo.getId();
 		if (log.isTraceEnabled()) {
-			log.trace(getTopic() + " " + anotherInstanceId + ", " + response);
+			log.trace(getTopic() + " " + anotherInstanceId + ", " + request);
 		}
-		if (response.isAcceptable()) {
-			court.canLearn(response);
+		if (log.isDebugEnabled()) {
+			log.debug("InstanceId '" + anotherInstanceId + "' learns " + request);
 		}
+		applicationContext.publishEvent(new CcrRequestCompletionEvent(request, applicationInfo));
 	}
 
 	@Override
 	public String getTopic() {
-		return ConsistencyRequest.COMMITMENT_OPERATION_RESPONSE;
+		return CcrRequest.LEARNING_RESPONSE;
+	}
+
+	private ApplicationContext applicationContext;
+
+	@Override
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		this.applicationContext = applicationContext;
 	}
 
 }

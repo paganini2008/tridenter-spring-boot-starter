@@ -13,53 +13,80 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMessageListener;
+import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyRequestLearningResponse
+ * CcrRequestLearningListener
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyRequestLearningResponse implements ApplicationMessageListener, ApplicationContextAware {
+public class CcrRequestLearningListener implements ApplicationMessageListener, ApplicationContextAware {
+
+	@Qualifier("batchNoGenerator")
+	@Autowired
+	private CcrSerialNoGenerator batchNoGenerator;
+
+	@Qualifier("serialNoGenerator")
+	@Autowired
+	private CcrSerialNoGenerator serialNoGenerator;
 
 	@Autowired
-	private ConsistencyRequestRound requestRound;
+	private CcrRequestLocal ccrRequestLocal;
+
+	@Autowired
+	private ApplicationMulticastGroup applicationMulticastGroup;
+
+	@Autowired
+	private CcrPlatform ccrPlatform;
 
 	@Override
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
-		final ConsistencyRequest request = (ConsistencyRequest) message;
+		final CcrRequest request = (CcrRequest) message;
 		final String name = request.getName();
-		if (request.getRound() != requestRound.currentRound(name)) {
+		if (request.getBatchNo() != batchNoGenerator.currentSerialNo(name)) {
 			if (log.isTraceEnabled()) {
 				log.trace("This round of proposal '{}' has been finished.", name);
 			}
 			return;
 		}
-		String anotherInstanceId = applicationInfo.getId();
+		final String anotherInstanceId = applicationInfo.getId();
 		if (log.isTraceEnabled()) {
 			log.trace(getTopic() + " " + anotherInstanceId + ", " + request);
 		}
 		if (log.isDebugEnabled()) {
-			log.debug("InstanceId '" + anotherInstanceId + "' learns " + request);
+			log.debug("Selected CcrRequest: " + request);
 		}
-		applicationContext.publishEvent(new ConsistencyRequestCompletionEvent(request, applicationInfo));
+		clean(name);
+		ccrPlatform.completeProposal(name);
+
+		applicationContext.publishEvent(new CcrRequestConfirmationEvent(request, applicationInfo, true));
+		applicationMulticastGroup.send(anotherInstanceId, CcrRequest.LEARNING_RESPONSE, request);
+
 	}
 
 	@Override
 	public String getTopic() {
-		return ConsistencyRequest.LEARNING_OPERATION_RESPONSE;
+		return CcrRequest.LEARNING_REQUEST;
+	}
+
+	private void clean(String name) {
+		batchNoGenerator.clean(name);
+		serialNoGenerator.clean(name);
+		ccrRequestLocal.clean(name);
 	}
 
 	private ApplicationContext applicationContext;

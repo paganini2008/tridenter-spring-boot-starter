@@ -51,10 +51,9 @@ public class ApplicationHeartbeatTask implements Runnable {
 	private final int timeout;
 	private final ApplicationInfo applicationInfo;
 
-	ApplicationHeartbeatTask(ApplicationInfo applicationInfo, RestClientPerformer restClientPerformer,
-			RetryTemplateFactory retryTemplateFactory, ThreadPoolTaskExecutor taskExecutor,
-			RequestInterceptorContainer requestInterceptorContainer, StatisticIndicator statisticIndicator,
-			ApplicationMulticastGroup applicationMulticastGroup, int timeout) {
+	ApplicationHeartbeatTask(ApplicationInfo applicationInfo, RestClientPerformer restClientPerformer, RetryTemplateFactory retryTemplateFactory,
+			ThreadPoolTaskExecutor taskExecutor, RequestInterceptorContainer requestInterceptorContainer,
+			StatisticIndicator statisticIndicator, ApplicationMulticastGroup applicationMulticastGroup, int timeout) {
 		this.applicationInfo = applicationInfo;
 		this.requestTemplate = new RequestTemplate(new DirectRoutingAllocator(), restClientPerformer, retryTemplateFactory, taskExecutor,
 				requestInterceptorContainer, statisticIndicator);

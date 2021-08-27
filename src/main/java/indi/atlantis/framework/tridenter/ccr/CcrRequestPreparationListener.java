@@ -13,9 +13,10 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.consistency;
+package indi.atlantis.framework.tridenter.ccr;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.InstanceId;
@@ -25,61 +26,59 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ConsistencyRequestPreparationRequest
+ * CcrRequestPreparationListener
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class ConsistencyRequestPreparationRequest implements ApplicationMessageListener {
+public class CcrRequestPreparationListener implements ApplicationMessageListener {
+
+	@Qualifier("batchNoGenerator")
+	@Autowired
+	private CcrSerialNoGenerator batchNoGenerator;
 
 	@Autowired
-	private ConsistencyRequestRound requestRound;
-
-	@Autowired
-	private ConsistencyRequestSerialCache requestSerialCache;
+	private CcrRequestLocal ccrRequestLocal;
 
 	@Autowired
 	private InstanceId instanceId;
 
 	@Autowired
-	private ApplicationMulticastGroup multicastGroup;
+	private ApplicationMulticastGroup applicationMulticastGroup;
 
 	@Override
 	public void onMessage(ApplicationInfo applicationInfo, String id, Object message) {
-		final ConsistencyRequest request = (ConsistencyRequest) message;
+		final CcrRequest request = (CcrRequest) message;
 		final String name = request.getName();
-		if (request.getRound() != requestRound.currentRound(name)) {
+		if (request.getBatchNo() != batchNoGenerator.currentSerialNo(name)) {
 			if (log.isTraceEnabled()) {
 				log.trace("This round of proposal '{}' has been finished.", name);
 			}
 			return;
 		}
 
-		String anotherInstanceId = applicationInfo.getId();
+		final String anotherInstanceId = applicationInfo.getId();
 		if (log.isTraceEnabled()) {
 			log.trace(getTopic() + " " + anotherInstanceId + ", " + message);
 		}
-		long round = request.getRound();
-		long serial = request.getSerial();
-		long maxSerial = requestSerialCache.getSerial(name, round);
-		if (serial > maxSerial) {
-			Object preValue = requestSerialCache.setValue(name, round, serial, request.getValue());
-			if (preValue != null) {
-				System.out.println("preValue: " + preValue);
-				request.setValue(preValue);
-			}
-			multicastGroup.send(anotherInstanceId, ConsistencyRequest.PREPARATION_OPERATION_RESPONSE,
+		long batchNo = request.getBatchNo();
+		long serialNo = request.getSerialNo();
+		long maxSerialNo = ccrRequestLocal.getSerialNo(name, batchNo);
+		if (serialNo > maxSerialNo) {
+			Object value = ccrRequestLocal.setValue(name, batchNo, serialNo, request.getValue());
+			request.setValue(value);
+			applicationMulticastGroup.send(anotherInstanceId, CcrRequest.PREPARATION_RESPONSE,
 					request.ack(instanceId.getApplicationInfo(), true));
 		} else {
-			multicastGroup.send(anotherInstanceId, ConsistencyRequest.PREPARATION_OPERATION_RESPONSE,
+			applicationMulticastGroup.send(anotherInstanceId, CcrRequest.PREPARATION_RESPONSE,
 					request.ack(instanceId.getApplicationInfo(), false));
 		}
 	}
 
 	@Override
 	public String getTopic() {
-		return ConsistencyRequest.PREPARATION_OPERATION_REQUEST;
+		return CcrRequest.PREPARATION_REQUEST;
 	}
 
 }

@@ -16,6 +16,7 @@
 package indi.atlantis.framework.tridenter.http;
 
 import org.springframework.http.HttpMethod;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.LeaderState;
@@ -39,6 +40,12 @@ public interface LeaderService {
 
 	@Api(path = "/application/cluster/list", method = HttpMethod.GET)
 	ApplicationInfo[] list();
+
+	@Api(path = "/application/cluster/online/{appId}", method = HttpMethod.POST)
+	String online(@PathVariable("appId") String appId);
+
+	@Api(path = "/application/cluster/offline/{appId}", method = HttpMethod.POST)
+	String offline(@PathVariable("appId") String appId);
 
 	@Api(path = "/application/cluster/recovery", method = HttpMethod.GET)
 	ApplicationInfo[] recovery();

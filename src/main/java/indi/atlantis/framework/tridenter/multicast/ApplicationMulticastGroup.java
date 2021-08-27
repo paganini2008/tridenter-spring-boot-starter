@@ -57,6 +57,7 @@ public class ApplicationMulticastGroup {
 
 	private final List<ApplicationInfo> allCandidates = new CopyOnWriteArrayList<ApplicationInfo>();
 	private final Map<String, List<ApplicationInfo>> groupCandidates = new ConcurrentHashMap<String, List<ApplicationInfo>>();
+	private final Map<String, ApplicationInfo> offlineCandidates = new ConcurrentHashMap<String, ApplicationInfo>();
 
 	@Autowired
 	private RedisMessageSender redisMessageSender;
@@ -120,6 +121,27 @@ public class ApplicationMulticastGroup {
 
 	}
 
+	public void offline(String appId) {
+		ApplicationInfo matched = null;
+		for (ApplicationInfo applicationInfo : getCandidates()) {
+			if (applicationInfo.getId().equals(appId)) {
+				matched = applicationInfo;
+				break;
+			}
+		}
+		if (matched != null) {
+			removeCandidate(matched);
+			offlineCandidates.put(appId, matched);
+		}
+	}
+
+	public void online(String appId) {
+		ApplicationInfo applicationInfo = offlineCandidates.get(appId);
+		if (applicationInfo != null) {
+			registerCandidate(applicationInfo);
+		}
+	}
+
 	public int countOfCandidate() {
 		return getCandidates().length;
 	}
@@ -137,6 +159,10 @@ public class ApplicationMulticastGroup {
 			return new TreeSet<ApplicationInfo>(groupCandidates.get(group)).toArray(new ApplicationInfo[0]);
 		}
 		return new ApplicationInfo[0];
+	}
+
+	public ApplicationInfo[] getOfflineCandidates() {
+		return new TreeSet<ApplicationInfo>(offlineCandidates.values()).toArray(new ApplicationInfo[0]);
 	}
 
 	public void unicast(String topic, Object message) {

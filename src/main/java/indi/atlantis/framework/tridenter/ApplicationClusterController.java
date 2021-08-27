@@ -19,8 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.github.paganini2008.devtools.StringUtils;
 
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 
@@ -58,9 +63,22 @@ public class ApplicationClusterController {
 	}
 
 	@GetMapping("/list")
-	public ResponseEntity<ApplicationInfo[]> list() {
-		ApplicationInfo[] infos = applicationMulticastGroup.getCandidates();
+	public ResponseEntity<ApplicationInfo[]> list(@RequestParam(name = "group", required = false) String group) {
+		ApplicationInfo[] infos = StringUtils.isNotBlank(group) ? applicationMulticastGroup.getCandidates(group)
+				: applicationMulticastGroup.getCandidates();
 		return ResponseEntity.ok(infos);
+	}
+
+	@PostMapping("/offline/{appId}")
+	public ResponseEntity<String> offline(@PathVariable("appId") String appId) {
+		applicationMulticastGroup.offline(appId);
+		return ResponseEntity.ok(appId);
+	}
+
+	@PostMapping("/online/{appId}")
+	public ResponseEntity<String> online(@PathVariable("appId") String appId) {
+		applicationMulticastGroup.online(appId);
+		return ResponseEntity.ok(appId);
 	}
 
 }

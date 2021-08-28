@@ -107,7 +107,7 @@ public class RedisClientConfiguration {
 		throw new UnsupportedOperationException("Create LettuceConnectionFactory");
 	}
 
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(name = "redisPoolConfig")
 	@Bean
 	public GenericObjectPoolConfig redisPoolConfig() {
 		GenericObjectPoolConfig redisPoolConfig = new GenericObjectPoolConfig();
@@ -122,7 +122,7 @@ public class RedisClientConfiguration {
 		return redisPoolConfig;
 	}
 
-	@ConditionalOnMissingBean
+	@ConditionalOnMissingBean(name = "redisConfiguration")
 	@Bean
 	public RedisConfiguration redisConfiguration(RedisSettings redisSettings) {
 		RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();

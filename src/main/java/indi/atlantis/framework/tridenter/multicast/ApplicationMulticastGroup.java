@@ -16,7 +16,9 @@
 package indi.atlantis.framework.tridenter.multicast;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
@@ -25,6 +27,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -162,7 +166,11 @@ public class ApplicationMulticastGroup {
 	}
 
 	public ApplicationInfo[] getOfflineCandidates() {
-		return new TreeSet<ApplicationInfo>(offlineCandidates.values()).toArray(new ApplicationInfo[0]);
+		List<ApplicationInfo> candidates = new ArrayList<ApplicationInfo>(offlineCandidates.values());
+		Function<ApplicationInfo, String> function = info -> info.getClusterName();
+		candidates = candidates.stream().sorted(Comparator.comparing(function).thenComparing(ApplicationInfo::getApplicationName))
+				.collect(Collectors.toList());
+		return candidates.toArray(new ApplicationInfo[0]);
 	}
 
 	public void unicast(String topic, Object message) {

@@ -69,6 +69,12 @@ public class ApplicationClusterController {
 		return ResponseEntity.ok(infos);
 	}
 
+	@GetMapping("/offline/list")
+	public ResponseEntity<ApplicationInfo[]> offlineList() {
+		ApplicationInfo[] infos = applicationMulticastGroup.getOfflineCandidates();
+		return ResponseEntity.ok(infos);
+	}
+
 	@PostMapping("/offline/{appId}")
 	public ResponseEntity<String> offline(@PathVariable("appId") String appId) {
 		applicationMulticastGroup.offline(appId);

@@ -18,7 +18,6 @@ package indi.atlantis.framework.tridenter.ccr;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.support.atomic.RedisAtomicLong;
 
@@ -35,13 +34,12 @@ public class CcrSerialNoGenerator {
 
 	private final Map<String, RedisAtomicLong> serials = new ConcurrentHashMap<String, RedisAtomicLong>();
 
-	@Autowired
-	private RedisConnectionFactory connectionFactory;
-
 	private final String redisPathPrefix;
+	private final RedisConnectionFactory connectionFactory;
 
-	public CcrSerialNoGenerator(String redisPathPrefix) {
+	public CcrSerialNoGenerator(String redisPathPrefix, RedisConnectionFactory connectionFactory) {
 		this.redisPathPrefix = redisPathPrefix;
+		this.connectionFactory = connectionFactory;
 	}
 
 	public long nextSerialNo(String name) {

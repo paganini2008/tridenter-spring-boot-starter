@@ -108,4 +108,24 @@ public abstract class LoadBalancerUtils {
 
 	}
 
+	/**
+	 * 
+	 * NoOpLoadBalancer
+	 *
+	 * @author Fred Feng
+	 *
+	 * @since 2.0.4
+	 */
+	public static class NoOpLoadBalancer implements LoadBalancer {
+
+		@Override
+		public ApplicationInfo select(String group, List<ApplicationInfo> candidates, Object message) {
+			if (CollectionUtils.isEmpty(candidates)) {
+				return null;
+			}
+			return candidates.get(0);
+		}
+
+	}
+
 }

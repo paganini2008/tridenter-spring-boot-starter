@@ -16,24 +16,26 @@
 package indi.atlantis.framework.tridenter.utils;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import com.github.paganini2008.devtools.Assert;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.beans.BeanUtils;
+import com.github.paganini2008.devtools.collection.MapUtils;
 
+import indi.atlantis.framework.tridenter.ApplicationClusterController;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -44,9 +46,10 @@ import lombok.extern.slf4j.Slf4j;
  *
  * @since 2.0.1
  */
-@SuppressWarnings("unchecked")
-@Component
 @Slf4j
+@SuppressWarnings("all")
+@Component
+@Import(ApplicationClusterController.class)
 public class ApplicationContextUtils implements ApplicationContextAware {
 
 	private static final SpringContextHolder contextHolder = new SpringContextHolder();
@@ -92,7 +95,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 		return contextHolder.getEnvironment();
 	}
 
-	public static void publishEvent(ApplicationEvent event) {
+	public static synchronized void publishEvent(ApplicationEvent event) {
 		getApplicationContext().publishEvent(event);
 	}
 
@@ -100,40 +103,34 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 		return getApplicationContext().getBeanDefinitionCount();
 	}
 
+	public static synchronized String[] getAllBeanNames() {
+		return getApplicationContext().getBeanDefinitionNames();
+	}
+
 	public static synchronized Map<String, Object> getAllBeans() {
 		Map<String, Object> map = new HashMap<String, Object>();
-		String[] beanNames = getApplicationContext().getBeanDefinitionNames();
+		String[] beanNames = getAllBeanNames();
 		for (String beanName : beanNames) {
 			map.put(beanName, getBean(beanName));
 		}
 		return map;
 	}
 
-	public static synchronized <T> List<T> getBeans(Class<T> requiredType, Function<T, Boolean> f) {
-		List<T> list = new ArrayList<T>();
-		for (T bean : getBeansOfType(requiredType).values()) {
-			if (f.apply(bean)) {
-				list.add(bean);
-			}
-		}
-		return list;
+	public static Map<String, Object> findBeansOfType(Class<?> requiredType, Function<Object, Boolean> f) {
+		return getBeansOfType(requiredType).entrySet().stream().filter(e -> f == null || f.apply(e.getValue()))
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 	}
 
-	public static synchronized <T> T getBean(Class<T> requiredType, Function<T, Boolean> f) {
-		for (T bean : getBeansOfType(requiredType).values()) {
-			if (f.apply(bean)) {
-				return bean;
-			}
-		}
-		return null;
+	public static Object findBeanOfType(Class<?> requiredType, Function<Object, Boolean> f) {
+		return getBeansOfType(requiredType).entrySet().stream().filter(e -> f == null || f.apply(e.getValue())).findFirst();
 	}
 
-	public static synchronized <T> Map<String, T> getBeansOfType(Class<T> requiredType) {
+	public static synchronized Map<String, ?> getBeansOfType(Class<?> requiredType) {
 		try {
 			return getApplicationContext().getBeansOfType(requiredType);
 		} catch (RuntimeException e) {
 			log.warn("Not Found Beans of Type: {}, Reason: {}", requiredType.getName(), e.getMessage());
-			return new HashMap<String, T>();
+			return MapUtils.emptyMap();
 		}
 	}
 
@@ -147,12 +144,21 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 		}
 	}
 
+	public static Map<String, Object> findBeansWithAnnotation(Class<? extends Annotation> annotationType, Function<Object, Boolean> f) {
+		return getBeansWithAnnotation(annotationType).entrySet().stream().filter(e -> f == null || f.apply(e.getValue()))
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
+	}
+
+	public static Object findBeanWithAnnotation(Class<? extends Annotation> annotationType, Function<Object, Boolean> f) {
+		return getBeansWithAnnotation(annotationType).entrySet().stream().filter(e -> f == null || f.apply(e.getValue())).findFirst();
+	}
+
 	public static synchronized Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		try {
 			return getApplicationContext().getBeansWithAnnotation(annotationType);
 		} catch (RuntimeException e) {
 			log.warn("Not Found Beans of annotation type: {}, Reason: {}", annotationType.getName(), e.getMessage());
-			return new HashMap<String, Object>();
+			return MapUtils.emptyMap();
 		}
 	}
 

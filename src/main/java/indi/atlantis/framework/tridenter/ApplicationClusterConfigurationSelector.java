@@ -27,7 +27,7 @@ import indi.atlantis.framework.tridenter.election.ApplicationClusterLeaderConfig
 import indi.atlantis.framework.tridenter.gateway.GatewayAutoConfiguration;
 import indi.atlantis.framework.tridenter.monitor.HealthIndicatorConfig;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastConfig;
-import indi.atlantis.framework.tridenter.utils.ApplicationUtilityConfig;
+import indi.atlantis.framework.tridenter.utils.ApplicationContextUtilityConfig;
 
 /**
  * 
@@ -41,7 +41,7 @@ public class ApplicationClusterConfigurationSelector implements ImportSelector {
 	@Override
 	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 		List<String> importedClassNames = new ArrayList<String>();
-		importedClassNames.add(ApplicationUtilityConfig.class.getName());
+		importedClassNames.add(ApplicationContextUtilityConfig.class.getName());
 
 		AnnotationAttributes annotationAttributes = AnnotationAttributes
 				.fromMap(importingClassMetadata.getAnnotationAttributes(EnableApplicationCluster.class.getName()));

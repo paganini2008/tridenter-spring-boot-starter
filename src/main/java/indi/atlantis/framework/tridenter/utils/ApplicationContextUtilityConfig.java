@@ -30,14 +30,14 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * ApplicationUtilityConfig
+ * ApplicationContextUtilityConfig
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Configuration
 @Import({ ApplicationContextUtils.class, BeanExpressionUtils.class, BeanLazyInitializer.class })
-public class ApplicationUtilityConfig {
+public class ApplicationContextUtilityConfig {
 
 	@Value("${spring.application.cluster.common.taskExecutorThreads:-1}")
 	private int taskExecutorThreads;

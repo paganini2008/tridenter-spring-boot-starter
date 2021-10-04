@@ -19,6 +19,8 @@ import java.io.File;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -32,7 +34,7 @@ import com.github.paganini2008.devtools.cache.LruCache;
  * @author Fred Feng
  * @since 2.0.1
  */
-@Configuration
+@Configuration(proxyBeanMethods = false)
 public class GatewayAutoConfiguration {
 
 	@Bean
@@ -42,23 +44,8 @@ public class GatewayAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public EmbeddedServer embeddedServer() {
-		return new NettyEmbeddedServer();
-	}
-
-	@Bean
-	public HttpRequestDispatcher httpRequestDispatcher() {
-		return new HttpRequestDispatcher();
-	}
-
-	@Bean
-	public ResourceResolver dynamicResourceResolver() {
-		return new DynamicResourceResolver();
-	}
-
-	@Bean
-	public ResourceResolver staticResourceResolver() {
-		return new StaticResourceResolver();
+	public RouterCustomizer routerCustomizer() {
+		return new DefaultRouterCustomizer();
 	}
 
 	@ConditionalOnMissingBean(name = "staticResourceCache")
@@ -78,17 +65,51 @@ public class GatewayAutoConfiguration {
 		return cache.expiredCache(3, TimeUnit.MINUTES);
 	}
 
-	@ConditionalOnMissingBean(name = "dynamicResourceCache")
+	@ConditionalOnMissingBean(name = "dynamicRequestCache")
 	@Bean
-	public Cache dynamicResourceCache() {
+	public Cache dynamicRequestCache() {
 		LruCache cache = new LruCache(256);
 		return cache.expiredCache(3, TimeUnit.MINUTES);
 	}
 
-	@ConditionalOnMissingBean
-	@Bean
-	public RouterCustomizer routerCustomizer() {
-		return new DefaultRouterCustomizer();
+	/**
+	 * 
+	 * NettyAutoConfiguration
+	 *
+	 * @author Fred Feng
+	 *
+	 * @since 2.0.4
+	 */
+	@EnableConfigurationProperties(EmbeddedServerProperties.class)
+	@ConditionalOnProperty(name = "spring.application.cluster.gateway.transporter", havingValue = "netty", matchIfMissing = true)
+	@Configuration(proxyBeanMethods = false)
+	public static class NettyAutoConfiguration {
+
+		@ConditionalOnMissingBean(name = "embeddedServer")
+		@Bean
+		public EmbeddedServer embeddedServer() {
+			return new NettyEmbeddedServer();
+		}
+
+		@Bean
+		public NettyHttpRequestDispatcher httpRequestDispatcher() {
+			return new NettyHttpRequestDispatcher();
+		}
+
+		@Bean
+		public NettyMultiPartHandler multiPartHandler() {
+			return new NettyMultiPartHandler();
+		}
+
+		@Bean
+		public NettyHttpObjectResolver httpRequestResolver() {
+			return new NettyHttpRequestResolver();
+		}
+
+		@Bean
+		public NettyHttpObjectResolver staticResourceResolver() {
+			return new NettyStaticResourceResolver();
+		}
 	}
 
 }

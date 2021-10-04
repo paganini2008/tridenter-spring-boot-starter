@@ -17,11 +17,13 @@ package indi.atlantis.framework.tridenter.http;
 
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestFactory;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
@@ -42,6 +44,10 @@ public class DefaultRestClientPerformer extends CharsetDefinedRestTemplate imple
 
 	public DefaultRestClientPerformer(ClientHttpRequestFactory clientHttpRequestFactory, Charset charset) {
 		super(clientHttpRequestFactory, charset);
+	}
+
+	public DefaultRestClientPerformer(List<HttpMessageConverter<?>> messageConverters, Charset charset) {
+		super(messageConverters, charset);
 	}
 
 	@Override

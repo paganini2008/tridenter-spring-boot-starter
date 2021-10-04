@@ -13,21 +13,18 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter;
+package indi.atlantis.framework.tridenter.xa;
 
 /**
  * 
- * Constants
+ * XaState
  *
  * @author Fred Feng
- * @since 2.0.1
+ *
+ * @since 2.0.4
  */
-public abstract class Constants {
+public enum XaState {
 
-	public static final String APPLICATION_CLUSTER_NAMESPACE = "spring:application:cluster:";
-
-	public final static int RANDOM_PORT_RANGE_START = 50000;
-
-	public final static int RANDOM_PORT_RANGE_END = 60000;
+	CHECK_IN, CHECK_OUT, PREPARED, COMMIT, ROLLBACK, FINISHED;
 
 }

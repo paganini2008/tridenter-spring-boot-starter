@@ -15,35 +15,29 @@
 */
 package indi.atlantis.framework.tridenter;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.UUID;
 
-import org.springframework.context.annotation.Import;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.DigestUtils;
+
+import com.github.paganini2008.devtools.CharsetUtils;
 
 /**
  * 
- * EnableApplicationCluster
- *
+ * DigestInstanceIdGenerator
+ * 
  * @author Fred Feng
  * @since 2.0.1
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Documented
-@Import(ApplicationClusterFeatureSelector.class)
-public @interface EnableApplicationCluster {
+public class DigestInstanceIdGenerator implements InstanceIdGenerator {
 
-	boolean enableMulticast() default true;
+	@Value("${spring.application.cluster.name}")
+	private String clusterName;
 
-	boolean enableLeaderElection() default true;
-
-	boolean enableGateway() default false;
-
-	boolean enableMonitor() default false;
-
-	boolean enableXA() default false;
+	@Override
+	public String generateInstanceId() {
+		String identifier = clusterName + "@" + UUID.randomUUID().toString().replace("-", "");
+		return DigestUtils.md5DigestAsHex(identifier.getBytes(CharsetUtils.UTF_8));
+	}
 
 }

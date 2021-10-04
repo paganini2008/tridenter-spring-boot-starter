@@ -42,7 +42,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import com.github.paganini2008.devtools.CharsetUtils;
 
 import indi.atlantis.framework.tridenter.ApplicationClusterLoadBalancer;
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 import indi.atlantis.framework.tridenter.LoadBalancer;
 
 /**
@@ -62,7 +62,7 @@ public class RestClientConfig {
 	@ConditionalOnMissingBean(name = "applicationClusterLoadBalancer")
 	@Bean
 	public LoadBalancer applicationClusterLoadBalancer(RedisConnectionFactory connectionFactory) {
-		final String name = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":counter";
+		final String name = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":counter";
 		return new ApplicationClusterLoadBalancer(name, connectionFactory);
 	}
 

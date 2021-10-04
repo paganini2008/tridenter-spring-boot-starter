@@ -13,7 +13,7 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter;
+package indi.atlantis.framework.tridenter.xa;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -21,29 +21,19 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import org.springframework.context.annotation.Import;
-
 /**
  * 
- * EnableApplicationCluster
+ * XA
  *
  * @author Fred Feng
- * @since 2.0.1
+ *
+ * @since 2.0.4
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Documented
-@Import(ApplicationClusterFeatureSelector.class)
-public @interface EnableApplicationCluster {
+public @interface XA {
 
-	boolean enableMulticast() default true;
-
-	boolean enableLeaderElection() default true;
-
-	boolean enableGateway() default false;
-
-	boolean enableMonitor() default false;
-
-	boolean enableXA() default false;
+	long timeout() default -1L;
 
 }

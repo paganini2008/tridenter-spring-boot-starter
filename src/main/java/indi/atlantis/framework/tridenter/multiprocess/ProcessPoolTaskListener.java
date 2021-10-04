@@ -21,7 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.github.paganini2008.devtools.ClassUtils;
 import com.github.paganini2008.devtools.StringUtils;
 import com.github.paganini2008.devtools.reflection.MethodUtils;
-import com.github.paganini2008.springdessert.reditools.common.SharedLatch;
+import com.github.paganini2008.springdessert.reditools.common.ProcessLock;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
 import indi.atlantis.framework.tridenter.InstanceId;
@@ -50,7 +50,7 @@ public class ProcessPoolTaskListener implements ApplicationMessageListener {
 	private ProcessPool processPool;
 
 	@Autowired
-	private SharedLatch sharedLatch;
+	private ProcessLock processLock;
 
 	@Autowired
 	private InvocationBarrier invocationBarrier;
@@ -83,7 +83,7 @@ public class ProcessPoolTaskListener implements ApplicationMessageListener {
 				applicationMulticastGroup.unicast(applicationName, MultiProcessingCompletionListener.class.getName(),
 						new Return(invocation, result));
 
-				sharedLatch.release();
+				processLock.release();
 
 				Invocation nextInvocation = (Invocation) delayQueue.pop();
 				if (nextInvocation != null) {

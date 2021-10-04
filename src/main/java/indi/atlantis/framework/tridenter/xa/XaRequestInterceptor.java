@@ -13,20 +13,27 @@
 * See the License for the specific language governing permissions and
 * limitations under the License.
 */
-package indi.atlantis.framework.tridenter.gateway;
+package indi.atlantis.framework.tridenter.xa;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpRequest;
+import indi.atlantis.framework.tridenter.http.Request;
+import indi.atlantis.framework.tridenter.http.RequestInterceptor;
 
 /**
  * 
- * ResourceResolver
+ * XaRequestInterceptor
  *
  * @author Fred Feng
- * @since 2.0.1
+ *
+ * @since 2.0.4
  */
-public interface ResourceResolver {
+public class XaRequestInterceptor implements RequestInterceptor {
 
-	void resolve(FullHttpRequest httpRequest, Router router, String path, ChannelHandlerContext ctx) throws Exception;
+	@Override
+	public boolean beforeSubmit(String provider, Request request) {
+		if (XaId.has()) {
+			request.getHeaders().set(XaId.INDENTIFIER, XaId.get());
+		}
+		return true;
+	}
 
 }

@@ -55,6 +55,8 @@ import io.netty.channel.ChannelProgressiveFutureListener;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpUtil;
@@ -64,13 +66,13 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * StaticResourceResolver
+ * NettyStaticResourceResolver
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Slf4j
-public class StaticResourceResolver implements ResourceResolver {
+public class NettyStaticResourceResolver implements NettyHttpObjectResolver {
 
 	@Autowired
 	private RequestTemplate requestTemplate;
@@ -80,13 +82,14 @@ public class StaticResourceResolver implements ResourceResolver {
 	private Cache cache;
 
 	@Override
-	public void resolve(FullHttpRequest httpRequest, Router router, String url, ChannelHandlerContext ctx) throws Exception {
+	public void resolve(HttpObject httpObject, Router router, String url, ChannelHandlerContext ctx) throws Exception {
+		HttpRequest httpRequest = (HttpRequest) httpObject;
 		if (log.isTraceEnabled()) {
 			log.trace("Send request to path: {}", url);
 		}
 		switch (router.resourceType()) {
 		case REDIRECT:
-			HttpResponseUtils.sendRedirect(ctx, url);
+			NettyHttpUtils.sendRedirect(ctx, url);
 			break;
 		case STREAM:
 		case FILE:
@@ -98,7 +101,7 @@ public class StaticResourceResolver implements ResourceResolver {
 
 	}
 
-	private void applyResource(FullHttpRequest httpRequest, Router router, String url, ChannelHandlerContext ctx) throws Exception {
+	private void applyResource(HttpRequest httpRequest, Router router, String url, ChannelHandlerContext ctx) throws Exception {
 		Request request = makeRequest(httpRequest, router, url);
 		String fileName = PathUtils.getName(url.contains("?") ? url.substring(0, url.indexOf("?")) : url);
 		if (StringUtils.isBlank(fileName)) {
@@ -179,7 +182,7 @@ public class StaticResourceResolver implements ResourceResolver {
 		}
 	}
 
-	private Request makeRequest(FullHttpRequest httpRequest, Router router, String rawPath) {
+	private Request makeRequest(HttpRequest httpRequest, Router router, String rawPath) {
 		HttpHeaders httpHeaders = copyHttpHeaders(httpRequest);
 		if (MapUtils.isNotEmpty(router.defaultHeaders())) {
 			httpHeaders.addAll(router.defaultHeaders());
@@ -187,7 +190,7 @@ public class StaticResourceResolver implements ResourceResolver {
 		if (CollectionUtils.isNotEmpty(router.ignoredHeaders())) {
 			MapUtils.removeKeys(httpHeaders, router.ignoredHeaders());
 		}
-		ByteBuf byteBuf = httpRequest.content();
+		ByteBuf byteBuf = ((FullHttpRequest) httpRequest).content();
 		byte[] body = null;
 		int length = byteBuf.readableBytes();
 		if (length > 0) {
@@ -202,7 +205,7 @@ public class StaticResourceResolver implements ResourceResolver {
 		return request;
 	}
 
-	protected HttpHeaders copyHttpHeaders(FullHttpRequest httpRequest) {
+	protected HttpHeaders copyHttpHeaders(HttpRequest httpRequest) {
 		HttpHeaders headers = new HttpHeaders();
 		for (Map.Entry<String, String> headerEntry : httpRequest.headers()) {
 			headers.add(headerEntry.getKey(), headerEntry.getValue());

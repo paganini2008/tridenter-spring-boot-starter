@@ -39,9 +39,9 @@ public class Contact implements Serializable {
 
 	private static final long serialVersionUID = 4110243793757357219L;
 	private String name = "Fred Feng";
-	private String campany;
+	private String campany = "Working from home";
 	private String department;
-	private String position;
+	private String position = "Software engineer";
 	private String homePage = "https://github.com/paganini2008";
 	private String email = "paganini.fy@gmail.com";
 	private String phone;

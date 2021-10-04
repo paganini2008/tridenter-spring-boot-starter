@@ -23,44 +23,57 @@ import com.github.paganini2008.devtools.StringUtils;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpObject;
+import io.netty.handler.codec.http.HttpRequest;
+import io.netty.handler.codec.http.HttpUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
  * 
- * HttpRequestDispatcher
+ * NettyHttpRequestDispatcher
  *
  * @author Fred Feng
  * @since 2.0.1
  */
 @Sharable
 @Slf4j
-public class HttpRequestDispatcher extends ChannelInboundHandlerAdapter {
+public class NettyHttpRequestDispatcher extends ChannelInboundHandlerAdapter {
 
 	@Autowired
 	private RouterManager routerManager;
 
 	@Qualifier("staticResourceResolver")
 	@Autowired
-	private ResourceResolver staticResourceResolver;
+	private NettyHttpObjectResolver staticResourceResolver;
 
-	@Qualifier("dynamicResourceResolver")
+	@Qualifier("httpRequestResolver")
 	@Autowired
-	private ResourceResolver dynamicResourceResolver;
+	private NettyHttpObjectResolver dynamicResourceResolver;
 
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object data) throws Exception {
-		final FullHttpRequest httpRequest = (FullHttpRequest) data;
-		final String path = httpRequest.uri();
-		Router router = routerManager.match(path);
-		String url = router.url();
-		if (StringUtils.isNotBlank(url)) {
-			staticResourceResolver.resolve(httpRequest, router, url, ctx);
-		} else {
-			String rawPath = router.trimPath(path);
-			dynamicResourceResolver.resolve(httpRequest, router, rawPath, ctx);
+		if (!(data instanceof HttpObject)) {
+			return;
 		}
-
+		if (data instanceof HttpRequest) {
+			final HttpRequest httpRequest = (HttpRequest) data;
+			final String path = httpRequest.uri();
+			Router router = routerManager.match(path);
+			String url = router.url();
+			if (StringUtils.isNotBlank(url)) {
+				staticResourceResolver.resolve(httpRequest, router, url, ctx);
+			} else {
+				String rawPath = router.trimPath(path);
+				CharSequence mineType = HttpUtil.getMimeType(httpRequest);
+				if (StringUtils.isNotBlank(mineType) && mineType.toString().contains("multipart/form-data")) {
+					ctx.fireChannelRead(data);
+				} else {
+					dynamicResourceResolver.resolve(httpRequest, router, rawPath, ctx);
+				}
+			}
+		} else {
+			ctx.fireChannelRead(data);
+		}
 	}
 
 	@Override

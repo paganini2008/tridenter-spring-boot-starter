@@ -25,7 +25,7 @@ import com.github.paganini2008.springdessert.reditools.messager.RedisMessageHand
 import com.github.paganini2008.springdessert.reditools.messager.RedisMessageSender;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastEvent.MulticastEventType;
 
@@ -65,7 +65,7 @@ public class ApplicationMulticastStarterListener implements RedisMessageHandler,
 
 	@Override
 	public String getChannel() {
-		return Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":active";
+		return ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":active";
 	}
 
 	@Override

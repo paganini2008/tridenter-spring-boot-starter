@@ -48,6 +48,9 @@ public class BasicRequest implements Request {
 	private HttpEntity<Object> body;
 
 	public HttpEntity<Object> getBody() {
+		if (body == null) {
+			return new HttpEntity<Object>(headers);
+		}
 		return body;
 	}
 

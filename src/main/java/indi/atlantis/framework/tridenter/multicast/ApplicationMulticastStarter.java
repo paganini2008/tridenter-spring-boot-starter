@@ -15,7 +15,7 @@
 */
 package indi.atlantis.framework.tridenter.multicast;
 
-import static indi.atlantis.framework.tridenter.Constants.APPLICATION_CLUSTER_NAMESPACE;
+import static indi.atlantis.framework.tridenter.ClusterConstants.APPLICATION_CLUSTER_NAMESPACE;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

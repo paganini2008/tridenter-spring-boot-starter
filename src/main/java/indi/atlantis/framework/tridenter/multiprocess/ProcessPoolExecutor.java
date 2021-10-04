@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
-import com.github.paganini2008.springdessert.reditools.common.SharedLatch;
+import com.github.paganini2008.springdessert.reditools.common.ProcessLock;
 import com.github.paganini2008.springdessert.reditools.messager.RedisMessageSender;
 
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
@@ -41,11 +41,11 @@ public class ProcessPoolExecutor implements ProcessPool {
 	@Value("${spring.application.name}")
 	private String applicationName;
 
-	@Value("${spring.application.cluster.multiprocess.latch.timeout:-1}")
+	@Value("${spring.application.cluster.multiprocessing.lock.timeout:-1}")
 	private int timeout;
 
 	@Autowired
-	private SharedLatch sharedLatch;
+	private ProcessLock processLock;
 
 	@Autowired
 	private ApplicationMulticastGroup applicationMulticastGroup;
@@ -61,10 +61,10 @@ public class ProcessPoolExecutor implements ProcessPool {
 	@Override
 	public void execute(Invocation invocation) {
 		checkIfRunning();
-		boolean acquired = timeout > 0 ? sharedLatch.acquire(timeout, TimeUnit.SECONDS) : sharedLatch.acquire();
+		boolean acquired = timeout > 0 ? processLock.acquire(timeout, TimeUnit.SECONDS) : processLock.acquire();
 		if (acquired) {
 			if (log.isTraceEnabled()) {
-				log.trace("Now processPool's concurrency is " + sharedLatch.cons());
+				log.trace("Now processPool's concurrency is " + processLock.cons());
 			}
 			applicationMulticastGroup.unicast(applicationName, ProcessPoolTaskListener.class.getName(), invocation);
 		} else {
@@ -77,10 +77,10 @@ public class ProcessPoolExecutor implements ProcessPool {
 	@Override
 	public TaskPromise submit(Invocation invocation) {
 		checkIfRunning();
-		boolean acquired = timeout > 0 ? sharedLatch.acquire(timeout, TimeUnit.SECONDS) : sharedLatch.acquire();
+		boolean acquired = timeout > 0 ? processLock.acquire(timeout, TimeUnit.SECONDS) : processLock.acquire();
 		if (acquired) {
 			if (log.isTraceEnabled()) {
-				log.trace("Now processPool's concurrency is " + sharedLatch.cons());
+				log.trace("Now processPool's concurrency is " + processLock.cons());
 			}
 			applicationMulticastGroup.unicast(applicationName, ProcessPoolTaskListener.class.getName(), invocation);
 		} else {
@@ -110,7 +110,7 @@ public class ProcessPoolExecutor implements ProcessPool {
 		}
 		running.set(false);
 		delayQueue.waitForTermination();
-		sharedLatch.join();
+		processLock.join();
 	}
 
 }

@@ -15,8 +15,6 @@
 */
 package indi.atlantis.framework.tridenter.multiprocess;
 
-import java.util.concurrent.TimeUnit;
-
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -28,12 +26,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.github.paganini2008.springdessert.reditools.common.RedisCounter;
-import com.github.paganini2008.springdessert.reditools.common.RedisSharedLatch;
-import com.github.paganini2008.springdessert.reditools.common.SharedLatch;
-import com.github.paganini2008.springdessert.reditools.common.TtlKeeper;
+import com.github.paganini2008.springdessert.reditools.common.ProcessLock;
+import com.github.paganini2008.springdessert.reditools.common.RedisProcessLock;
 
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 
 /**
  * 
@@ -52,18 +48,16 @@ public class MultiProcessingConfig {
 	private String clusterName;
 
 	@Bean
-	public RedisCounter redisCounter(RedisConnectionFactory redisConnectionFactory, TtlKeeper ttlKeeper) {
-		final String fullName = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":pool";
-		RedisCounter redisCounter = new RedisCounter(fullName, redisConnectionFactory);
-		redisCounter.keepAlive(ttlKeeper, 5, TimeUnit.SECONDS);
-		return redisCounter;
+	public ProcessLockTtlKeeper processLockTtlKeeper() {
+		return new ProcessLockTtlKeeper();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public SharedLatch sharedLatch(RedisCounter redisCounter,
-			@Value("${spring.application.cluster.multiprocessing.maxPermits:8}") int maxPermits) {
-		return new RedisSharedLatch(redisCounter, maxPermits);
+	public ProcessLock processLock(RedisConnectionFactory connectionFactory,
+			@Value("${spring.application.cluster.multiprocessing.lock.maxPermits:16}") int maxPermits) {
+		final String lockName = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":pool";
+		return new RedisProcessLock(lockName, connectionFactory, 60, maxPermits);
 	}
 
 	@ConditionalOnMissingBean

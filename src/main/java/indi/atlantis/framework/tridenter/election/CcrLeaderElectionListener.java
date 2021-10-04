@@ -27,7 +27,7 @@ import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
 
 import indi.atlantis.framework.tridenter.ApplicationClusterContext;
 import indi.atlantis.framework.tridenter.ApplicationInfo;
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastGroup;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastListener;
@@ -90,7 +90,7 @@ public class CcrLeaderElectionListener implements ApplicationMulticastListener, 
 			instanceId.setLeaderInfo(leaderInfo);
 			log.info("Leader's info: " + leaderInfo);
 
-			final String key = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
+			final String key = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
 			redisTemplate.opsForList().leftPush(key, instanceId.getApplicationInfo());
 		} else {
 			final int nCandidates = applicationMulticastGroup.countOfCandidate();
@@ -103,7 +103,7 @@ public class CcrLeaderElectionListener implements ApplicationMulticastListener, 
 	@Override
 	public synchronized void onInactive(ApplicationInfo applicationInfo) {
 		if (applicationClusterContext.getLeaderInfo() != null && applicationClusterContext.getLeaderInfo().equals(applicationInfo)) {
-			final String key = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
+			final String key = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
 			redisTemplate.opsForList().remove(key, 1, instanceId.getApplicationInfo());
 
 			instanceId.setLeaderInfo(null);

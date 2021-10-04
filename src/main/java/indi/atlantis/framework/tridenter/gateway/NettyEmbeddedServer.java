@@ -23,10 +23,10 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 import com.github.paganini2008.devtools.StringUtils;
 
+import indi.atlantis.framework.tridenter.gateway.EmbeddedServerProperties.Netty;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ChannelInitializer;
@@ -63,48 +63,22 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 	private EventLoopGroup workerGroup;
 
 	@Autowired
-	private HttpRequestDispatcher httpRequestDispatcher;
+	private EmbeddedServerProperties serverProperties;
 
-	@Value("${spring.application.gateway.embeddedserver.port:7000}")
-	private int port;
+	@Autowired
+	private NettyHttpRequestDispatcher httpRequestDispatcher;
 
-	@Value("${spring.application.gateway.embeddedserver.threads:8}")
-	private int threadCount;
-
-	@Value("${spring.application.gateway.embeddedserver.hostName:}")
-	private String hostName;
-
-	@Value("${spring.application.gateway.embeddedserver.idleTimeout:60}")
-	private int idleTimeout;
-
-	@Value("${spring.application.gateway.embeddedserver.maxContentLength:65536}")
-	private int maxContentLength;
-
-	@Value("${spring.application.gateway.embeddedserver.maxInitialLineLength:4096}")
-	private int maxInitialLineLength;
-
-	@Value("${spring.application.gateway.embeddedserver.maxHeaderSize:8192}")
-	private int maxHeaderSize;
-
-	@Value("${spring.application.gateway.embeddedserver.maxChunkSize:8192}")
-	private int maxChunkSize;
-
-	@Value("${spring.application.gateway.embeddedserver.cors:true}")
-	private boolean corsEnabled;
-
-	@Value("${spring.application.gateway.embeddedserver.cors.maxAge:0}")
-	private long maxAge;
-
-	@Value("${spring.application.gateway.embeddedserver.gzip:false}")
-	private boolean gzipEnabled;
+	@Autowired
+	private NettyMultiPartHandler multiPartHandler;
 
 	@PostConstruct
 	public int start() {
 		if (isStarted()) {
 			throw new IllegalStateException("Netty has been started.");
 		}
-		bossGroup = new NioEventLoopGroup(threadCount);
-		workerGroup = new NioEventLoopGroup(threadCount);
+		Netty netty = serverProperties.getNetty();
+		bossGroup = new NioEventLoopGroup(netty.getBossGroupThreads());
+		workerGroup = new NioEventLoopGroup(netty.getWorkGroupThreads());
 		ServerBootstrap bootstrap = new ServerBootstrap();
 		bootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class).option(ChannelOption.SO_BACKLOG, 128);
 		bootstrap.childOption(ChannelOption.TCP_NODELAY, true).childOption(ChannelOption.SO_REUSEADDR, true)
@@ -113,33 +87,36 @@ public class NettyEmbeddedServer implements EmbeddedServer {
 		bootstrap.childHandler(new ChannelInitializer<SocketChannel>() {
 			public void initChannel(SocketChannel ch) throws Exception {
 				ChannelPipeline pipeline = ch.pipeline();
-				pipeline.addLast(new IdleStateHandler(idleTimeout, 0, 0, TimeUnit.SECONDS));
-				if (gzipEnabled) {
+				pipeline.addLast(new IdleStateHandler(netty.getIdleTimeout(), 0, 0, TimeUnit.SECONDS));
+				if (netty.isGzipEnabled()) {
 					pipeline.addLast(new HttpContentCompressor());
 				}
-				pipeline.addLast("httpDecoder", new HttpRequestDecoder(maxInitialLineLength, maxHeaderSize, maxChunkSize));
-				pipeline.addLast("httpAggregator", new HttpObjectAggregator(maxContentLength));
+				pipeline.addLast("httpDecoder",
+						new HttpRequestDecoder(netty.getMaxInitialLineLength(), netty.getMaxHeaderSize(), netty.getMaxChunkSize()));
+				pipeline.addLast("httpAggregator", new HttpObjectAggregator(netty.getMaxContentLength()));
 				ch.pipeline().addLast("httpEncoder", new HttpResponseEncoder());
 				pipeline.addLast(new ChunkedWriteHandler());
-				if (corsEnabled) {
+				if (netty.isCorsEnabled()) {
 					CorsConfig corsConfig = CorsConfigBuilder.forAnyOrigin().allowNullOrigin().allowCredentials().allowedRequestHeaders("*")
-							.allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE).maxAge(maxAge)
-							.build();
+							.allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.PUT, HttpMethod.DELETE)
+							.maxAge(netty.getMaxAge()).build();
 					pipeline.addLast(new CorsHandler(corsConfig));
 				}
 				pipeline.addLast(httpRequestDispatcher);
+				pipeline.addLast(multiPartHandler);
 			}
 		});
+		InetSocketAddress socketAddress = StringUtils.isNotBlank(serverProperties.getHostName())
+				? new InetSocketAddress(serverProperties.getHostName(), serverProperties.getPort())
+				: new InetSocketAddress(serverProperties.getPort());
 		try {
-			InetSocketAddress socketAddress = StringUtils.isNotBlank(hostName) ? new InetSocketAddress(hostName, port)
-					: new InetSocketAddress(port);
 			bootstrap.bind(socketAddress).sync();
 			started.set(true);
 			log.info("Netty is started ok on port: " + socketAddress);
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
 		}
-		return port;
+		return socketAddress.getPort();
 	}
 
 	@PreDestroy

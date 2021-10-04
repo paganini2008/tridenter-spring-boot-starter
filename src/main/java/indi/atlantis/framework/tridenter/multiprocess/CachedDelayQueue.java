@@ -25,7 +25,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import com.github.paganini2008.devtools.multithreads.ThreadUtils;
 import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
 
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 
 /**
  * 
@@ -40,7 +40,7 @@ public class CachedDelayQueue implements DelayQueue {
 	@Qualifier(RedisComponentNames.REDIS_TEMPLATE)
 	private RedisTemplate<String, Object> redisTemplate;
 
-	@Value("${spring.application.cluster.multiprocess.delayQueueMaxSize:-1}")
+	@Value("${spring.application.cluster.multiprocessing.delayQueueMaxSize:-1}")
 	private int queueMaxSize;
 
 	@Value("${spring.application.cluster.name}")
@@ -72,7 +72,7 @@ public class CachedDelayQueue implements DelayQueue {
 	}
 
 	private String getKey() {
-		return Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":pool:delay-queue";
+		return ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":pool:delay-queue";
 	}
 
 }

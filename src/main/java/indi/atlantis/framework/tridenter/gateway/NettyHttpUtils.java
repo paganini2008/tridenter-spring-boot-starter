@@ -33,12 +33,12 @@ import io.netty.util.CharsetUtil;
 
 /**
  * 
- * HttpResponseUtils
+ * NettyHttpUtils
  * @author Fred Feng
  *
  * @since 2.0.1
  */
-public abstract class HttpResponseUtils {
+public abstract class NettyHttpUtils {
 
 	public static void sendRedirect(ChannelHandlerContext ctx, String newUrl) {
 		FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, FOUND);

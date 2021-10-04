@@ -27,21 +27,22 @@ import indi.atlantis.framework.tridenter.election.ApplicationClusterLeaderConfig
 import indi.atlantis.framework.tridenter.gateway.GatewayAutoConfiguration;
 import indi.atlantis.framework.tridenter.monitor.HealthIndicatorConfig;
 import indi.atlantis.framework.tridenter.multicast.ApplicationMulticastConfig;
-import indi.atlantis.framework.tridenter.utils.ApplicationContextUtilityConfig;
+import indi.atlantis.framework.tridenter.utils.ApplicationContextCommonConfig;
+import indi.atlantis.framework.tridenter.xa.XaConfig;
 
 /**
  * 
- * ApplicationClusterConfigurationSelector
+ * ApplicationClusterFeatureSelector
  *
  * @author Fred Feng
  * @since 2.0.1
  */
-public class ApplicationClusterConfigurationSelector implements ImportSelector {
+public class ApplicationClusterFeatureSelector implements ImportSelector {
 
 	@Override
 	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
 		List<String> importedClassNames = new ArrayList<String>();
-		importedClassNames.add(ApplicationContextUtilityConfig.class.getName());
+		importedClassNames.add(ApplicationContextCommonConfig.class.getName());
 
 		AnnotationAttributes annotationAttributes = AnnotationAttributes
 				.fromMap(importingClassMetadata.getAnnotationAttributes(EnableApplicationCluster.class.getName()));
@@ -56,6 +57,9 @@ public class ApplicationClusterConfigurationSelector implements ImportSelector {
 		}
 		if (annotationAttributes.getBoolean("enableMonitor")) {
 			importedClassNames.add(HealthIndicatorConfig.class.getName());
+		}
+		if (annotationAttributes.getBoolean("enableXA")) {
+			importedClassNames.add(XaConfig.class.getName());
 		}
 		return importedClassNames.toArray(new String[0]);
 	}

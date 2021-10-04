@@ -26,11 +26,11 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import indi.atlantis.framework.tridenter.ApplicationClusterContext;
 import indi.atlantis.framework.tridenter.ApplicationClusterController;
 import indi.atlantis.framework.tridenter.ApplicationClusterLoadBalancer;
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.InstanceIdGenerator;
 import indi.atlantis.framework.tridenter.LoadBalancer;
-import indi.atlantis.framework.tridenter.Md5InstanceIdGenerator;
+import indi.atlantis.framework.tridenter.DigestInstanceIdGenerator;
 import indi.atlantis.framework.tridenter.RedisConnectionFailureHandler;
 import indi.atlantis.framework.tridenter.ccr.CcrRequestConfig;
 import indi.atlantis.framework.tridenter.http.RestClientConfig;
@@ -58,7 +58,7 @@ public class ApplicationMulticastConfig {
 	@Bean
 	@ConditionalOnMissingBean
 	public InstanceIdGenerator instanceIdGenerator() {
-		return new Md5InstanceIdGenerator();
+		return new DigestInstanceIdGenerator();
 	}
 
 	@Bean
@@ -109,7 +109,7 @@ public class ApplicationMulticastConfig {
 	@ConditionalOnMissingBean(name = "applicationMulticastLoadBalancer")
 	@Bean
 	public LoadBalancer applicationMulticastLoadBalancer(RedisConnectionFactory connectionFactory) {
-		final String name = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":counter:multicast";
+		final String name = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":counter:multicast";
 		return new ApplicationClusterLoadBalancer(name, connectionFactory);
 	}
 

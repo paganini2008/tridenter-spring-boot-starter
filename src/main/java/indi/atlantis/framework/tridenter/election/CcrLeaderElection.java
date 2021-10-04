@@ -28,10 +28,10 @@ import org.springframework.context.event.SmartApplicationListener;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import com.github.paganini2008.springdessert.reditools.RedisComponentNames;
-import com.github.paganini2008.springdessert.reditools.common.TtlKeeper;
+import com.github.paganini2008.springdessert.reditools.common.RedisTtlKeeper;
 
 import indi.atlantis.framework.tridenter.ApplicationInfo;
-import indi.atlantis.framework.tridenter.Constants;
+import indi.atlantis.framework.tridenter.ClusterConstants;
 import indi.atlantis.framework.tridenter.InstanceId;
 import indi.atlantis.framework.tridenter.ccr.CcrRequestConfirmationEvent;
 import indi.atlantis.framework.tridenter.ccr.CcrRequestLauncher;
@@ -63,14 +63,14 @@ public class CcrLeaderElection implements LeaderElection, ApplicationContextAwar
 	private RedisTemplate<String, Object> redisTemplate;
 
 	@Autowired
-	private TtlKeeper ttlKeeper;
+	private RedisTtlKeeper ttlKeeper;
 
 	@Autowired
 	private CcrRequestLauncher requestLauncher;
 
 	@Override
 	public void launch() {
-		final String leaderIdentify = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
+		final String leaderIdentify = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
 		requestLauncher.propose(leaderIdentify, instanceId.getApplicationInfo(), DEFAULT_TIMEOUT);
 		log.info("Start leader election. Identify: " + leaderIdentify);
 	}
@@ -92,10 +92,10 @@ public class CcrLeaderElection implements LeaderElection, ApplicationContextAwar
 		instanceId.setLeaderInfo(leaderInfo);
 		log.info("Leader's info: " + leaderInfo);
 
-		final String key = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
+		final String key = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName;
 		redisTemplate.opsForList().leftPush(key, instanceId.getApplicationInfo());
 		if (instanceId.isLeader()) {
-			ttlKeeper.keepAlive(key, leaderLease, 1, TimeUnit.SECONDS);
+			ttlKeeper.watchKey(key, leaderLease, TimeUnit.SECONDS);
 		}
 
 		applicationContext.publishEvent(new ApplicationClusterRefreshedEvent(applicationContext, leaderInfo));
@@ -114,7 +114,7 @@ public class CcrLeaderElection implements LeaderElection, ApplicationContextAwar
 	@Override
 	public void onApplicationEvent(ApplicationEvent applicationEvent) {
 		final CcrRequestConfirmationEvent event = (CcrRequestConfirmationEvent) applicationEvent;
-		final String leaderIdentify = Constants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
+		final String leaderIdentify = ClusterConstants.APPLICATION_CLUSTER_NAMESPACE + clusterName + ":leader";
 		if (leaderIdentify.equals(event.getRequest().getName())) {
 			if (event.isOk()) {
 				onTriggered(event);

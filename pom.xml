@@ -5,7 +5,7 @@
 
 	<groupId>com.github.paganini2008.atlantis</groupId>
 	<artifactId>tridenter-spring-boot-starter</artifactId>
-	<version>1.0-RC3</version>
+	<version>1.0.1</version>
 
 	<packaging>jar</packaging>
 	<name>tridenter-spring-boot-starter</name>
@@ -103,7 +103,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>

@@ -15,20 +15,15 @@
 */
 package io.atlantisframework.tridenter.utils;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.util.ErrorHandler;
-
-import com.github.paganini2008.springdessert.reditools.common.RedisTtlKeeper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -73,12 +68,6 @@ public class ApplicationContextCommonConfig {
 		threadPoolTaskScheduler.setAwaitTerminationSeconds(60);
 		threadPoolTaskScheduler.setErrorHandler(defaultErrorHandler());
 		return threadPoolTaskScheduler;
-	}
-
-	@Bean
-	public RedisTtlKeeper redisTtlKeeper(RedisConnectionFactory connectionFactory,
-			@Qualifier("applicationClusterTaskScheduler") TaskScheduler taskScheduler) {
-		return new RedisTtlKeeper(connectionFactory, taskScheduler);
 	}
 
 	@Bean

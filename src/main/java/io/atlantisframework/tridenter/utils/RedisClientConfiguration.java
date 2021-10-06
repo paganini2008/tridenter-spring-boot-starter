@@ -21,6 +21,7 @@ import java.util.Map;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -42,12 +43,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.TaskScheduler;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.github.paganini2008.devtools.StringUtils;
+import com.github.paganini2008.springdessert.reditools.common.RedisTtlKeeper;
 
 import io.lettuce.core.RedisClient;
 import lombok.Getter;
@@ -158,6 +161,12 @@ public class RedisClientConfiguration {
 		redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
 		redisTemplate.afterPropertiesSet();
 		return redisTemplate;
+	}
+	
+	@Bean
+	public RedisTtlKeeper redisTtlKeeper(RedisConnectionFactory connectionFactory,
+			@Qualifier("applicationClusterTaskScheduler") TaskScheduler taskScheduler) {
+		return new RedisTtlKeeper(connectionFactory, taskScheduler);
 	}
 
 }

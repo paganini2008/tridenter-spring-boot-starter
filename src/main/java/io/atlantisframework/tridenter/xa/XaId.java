@@ -70,9 +70,6 @@ public class XaId implements HandlerInterceptor {
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
 		String xaId = request.getHeader(INDENTIFIER);
 		if (StringUtils.isNotBlank(xaId)) {
-			if (log.isDebugEnabled()) {
-				log.debug("Get header: {}", xaId);
-			}
 			threadLocal.set(xaId);
 		}
 		return true;

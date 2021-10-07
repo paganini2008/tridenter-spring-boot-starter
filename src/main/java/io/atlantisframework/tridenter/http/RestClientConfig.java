@@ -72,10 +72,16 @@ public class RestClientConfig {
 		return new LoadBalanceRoutingAllocator();
 	}
 
-	@ConditionalOnMissingBean
+	@Bean
+	public LoadBalanceHttpClientInterceptor loadBalanceHttpClientInterceptor() {
+		return new LoadBalanceHttpClientInterceptor();
+	}
+
 	@Bean
 	public RestClientPerformer restClientPerformer(ClientHttpRequestFactory clientHttpRequestFactory) {
-		return new DefaultRestClientPerformer(clientHttpRequestFactory, CharsetUtils.UTF_8);
+		DefaultRestClientPerformer restClientPerformer = new DefaultRestClientPerformer(clientHttpRequestFactory, CharsetUtils.UTF_8);
+		restClientPerformer.getInterceptors().add(loadBalanceHttpClientInterceptor());
+		return restClientPerformer;
 	}
 
 	@Bean

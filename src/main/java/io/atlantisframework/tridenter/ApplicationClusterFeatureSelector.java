@@ -17,10 +17,15 @@ package io.atlantisframework.tridenter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportSelector;
 import org.springframework.core.annotation.AnnotationAttributes;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.type.AnnotationMetadata;
 
 import io.atlantisframework.tridenter.election.ApplicationClusterLeaderConfig;
@@ -37,7 +42,10 @@ import io.atlantisframework.tridenter.xa.XaConfig;
  * @author Fred Feng
  * @since 2.0.1
  */
-public class ApplicationClusterFeatureSelector implements ImportSelector {
+public class ApplicationClusterFeatureSelector implements ImportSelector, EnvironmentAware {
+
+	private static final String APPLICATION_CLUSTER_REDIS_PUBSUB_CHANNEL = "APPLICATION_CLUSTER_REDIS_PUBSUB_CHANNEL";
+	private static final String APPLICATION_CLUSTER_REDIS_PUBSUB_CHANNEL_SUFFIX = "-redis-pubsub";
 
 	@Override
 	public String[] selectImports(AnnotationMetadata importingClassMetadata) {
@@ -63,4 +71,13 @@ public class ApplicationClusterFeatureSelector implements ImportSelector {
 		}
 		return importedClassNames.toArray(new String[0]);
 	}
+
+	@Override
+	public void setEnvironment(Environment environment) {
+		final String applicationClusterName = environment.getRequiredProperty("spring.application.cluster.name");
+		((ConfigurableEnvironment) environment).getPropertySources()
+				.addLast(new MapPropertySource(APPLICATION_CLUSTER_REDIS_PUBSUB_CHANNEL, Collections.singletonMap(
+						"spring.redis.messager.pubsub.channel", applicationClusterName + APPLICATION_CLUSTER_REDIS_PUBSUB_CHANNEL_SUFFIX)));
+	}
+
 }

@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -35,26 +34,23 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisPassword;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisClientConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.TaskScheduler;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.github.paganini2008.devtools.StringUtils;
-import com.github.paganini2008.springdessert.reditools.common.RedisTtlKeeper;
 
-import io.lettuce.core.RedisClient;
 import lombok.Getter;
 import lombok.Setter;
+import redis.clients.jedis.Jedis;
 
 /**
  * 
@@ -94,20 +90,21 @@ public class RedisClientConfiguration {
 
 	}
 
-	@ConditionalOnClass({ GenericObjectPool.class, RedisClient.class })
+	@ConditionalOnClass({ GenericObjectPool.class, Jedis.class })
 	@Bean("redisConnectionFactory")
 	public RedisConnectionFactory lettuceRedisConnectionFactory(RedisConfiguration redisConfiguration,
 			GenericObjectPoolConfig redisPoolConfig) {
-		LettuceClientConfiguration redisClientConfiguration = LettucePoolingClientConfiguration.builder()
-				.commandTimeout(Duration.ofMillis(60000)).shutdownTimeout(Duration.ofMillis(60000)).poolConfig(redisPoolConfig).build();
+		JedisClientConfiguration.JedisClientConfigurationBuilder jedisClientConfigurationBuilder = JedisClientConfiguration.builder();
+		jedisClientConfigurationBuilder.connectTimeout(Duration.ofMillis(60000)).readTimeout(Duration.ofMillis(60000)).usePooling()
+				.poolConfig(redisPoolConfig);
 		if (redisConfiguration instanceof RedisStandaloneConfiguration) {
-			return new LettuceConnectionFactory((RedisStandaloneConfiguration) redisConfiguration, redisClientConfiguration);
+			return new JedisConnectionFactory((RedisStandaloneConfiguration) redisConfiguration, jedisClientConfigurationBuilder.build());
 		} else if (redisConfiguration instanceof RedisSentinelConfiguration) {
-			return new LettuceConnectionFactory((RedisSentinelConfiguration) redisConfiguration, redisClientConfiguration);
+			return new JedisConnectionFactory((RedisSentinelConfiguration) redisConfiguration, jedisClientConfigurationBuilder.build());
 		} else if (redisConfiguration instanceof RedisClusterConfiguration) {
-			return new LettuceConnectionFactory((RedisClusterConfiguration) redisConfiguration, redisClientConfiguration);
+			return new JedisConnectionFactory((RedisClusterConfiguration) redisConfiguration, jedisClientConfigurationBuilder.build());
 		}
-		throw new UnsupportedOperationException("Create LettuceConnectionFactory");
+		throw new UnsupportedOperationException("Create JedisConnectionFactory");
 	}
 
 	@ConditionalOnMissingBean(name = "redisPoolConfig")
@@ -161,12 +158,6 @@ public class RedisClientConfiguration {
 		redisTemplate.setHashValueSerializer(jackson2JsonRedisSerializer);
 		redisTemplate.afterPropertiesSet();
 		return redisTemplate;
-	}
-	
-	@Bean
-	public RedisTtlKeeper redisTtlKeeper(RedisConnectionFactory connectionFactory,
-			@Qualifier("applicationClusterTaskScheduler") TaskScheduler taskScheduler) {
-		return new RedisTtlKeeper(connectionFactory, taskScheduler);
 	}
 
 }

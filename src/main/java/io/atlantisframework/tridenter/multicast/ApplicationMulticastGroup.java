@@ -104,6 +104,10 @@ public class ApplicationMulticastGroup {
 		log.info("Registered candidate: {}, Proportion: {}/{}", applicationInfo, candidates.size(), allCandidates.size());
 	}
 
+	public boolean hasRegistered(String applicationName) {
+		return groupCandidates.containsKey(applicationName);
+	}
+
 	public boolean hasRegistered(ApplicationInfo applicationInfo) {
 		return groupCandidates.containsKey(applicationInfo.getApplicationName())
 				? groupCandidates.get(applicationInfo.getApplicationName()).contains(applicationInfo)

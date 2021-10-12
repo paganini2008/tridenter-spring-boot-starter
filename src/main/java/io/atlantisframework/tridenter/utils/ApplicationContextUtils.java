@@ -23,9 +23,13 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ApplicationEvent;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
@@ -128,7 +132,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized Map<String, ?> getBeansOfType(Class<?> requiredType) {
 		try {
 			return getApplicationContext().getBeansOfType(requiredType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Not Found Beans of Type: {}, Reason: {}", requiredType.getName(), e.getMessage());
 			return MapUtils.emptyMap();
 		}
@@ -138,9 +142,9 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 			boolean allowEagerInit) {
 		try {
 			return getApplicationContext().getBeansOfType(requiredType, includeNonSingletons, allowEagerInit);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Not Found Beans of Type: {}, Reason: {}", requiredType.getName(), e.getMessage());
-			return new HashMap<String, T>();
+			return MapUtils.emptyMap();
 		}
 	}
 
@@ -156,7 +160,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
 		try {
 			return getApplicationContext().getBeansWithAnnotation(annotationType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Not Found Beans of annotation type: {}, Reason: {}", annotationType.getName(), e.getMessage());
 			return MapUtils.emptyMap();
 		}
@@ -165,7 +169,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized <T> T getBean(String name) {
 		try {
 			return (T) getApplicationContext().getBean(name);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Bean '{}' have not found, Reason: {}", name, e.getMessage());
 			return null;
 		}
@@ -174,7 +178,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized <T> T getBean(Class<T> requiredType) {
 		try {
 			return getApplicationContext().getBean(requiredType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Bean '{}' have not found, Reason: {}", requiredType.getName(), e.getMessage());
 			return null;
 		}
@@ -183,7 +187,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized <T> T getOrCreateBean(String name, Class<T> requiredType) {
 		try {
 			return getApplicationContext().getBean(name, requiredType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			return instantiateClass(requiredType);
 		}
 	}
@@ -191,7 +195,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized <T> T getOrCreateBean(Class<T> requiredType) {
 		try {
 			return getApplicationContext().getBean(requiredType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			return instantiateClass(requiredType);
 		}
 	}
@@ -202,7 +206,7 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 		}
 		try {
 			return getApplicationContext().getBean(name, requiredType);
-		} catch (RuntimeException e) {
+		} catch (BeansException e) {
 			log.warn("Bean '{}' have not found, Reason: {}", requiredType.getName(), e.getMessage());
 			return null;
 		}
@@ -216,6 +220,41 @@ public class ApplicationContextUtils implements ApplicationContextAware {
 	public static synchronized <T> T instantiateClass(Class<T> clazz, Object... arguments) {
 		T bean = BeanUtils.instantiate(clazz, arguments);
 		return autowireBean(bean);
+	}
+
+	public static synchronized boolean containsBean(String beanName) {
+		return getApplicationContext().containsBean(beanName);
+	}
+
+	public static <T> T registerBean(String beanName, Class<T> clazz, String[] referenceNames) {
+		return registerBean(beanName, clazz, (builder, bd) -> {
+			for (String referenceName : referenceNames) {
+				builder.addConstructorArgReference(referenceName);
+			}
+		});
+	}
+
+	public static <T> T registerBean(String beanName, Class<T> clazz, Object[] args) {
+		return registerBean(beanName, clazz, (builder, bd) -> {
+			for (Object arg : args) {
+				builder.addConstructorArgValue(arg);
+			}
+		});
+	}
+
+	public static <T> T registerBean(String beanName, Class<T> clazz, final BeanDefinitionCustomizer customizer) {
+		if (getApplicationContext().containsBean(beanName)) {
+			throw new IllegalStateException("Duplicated beanName");
+		}
+		BeanDefinitionBuilder beanDefinitionBuilder = BeanDefinitionBuilder.genericBeanDefinition(clazz);
+		beanDefinitionBuilder.applyCustomizers(bd -> {
+			customizer.customize(beanDefinitionBuilder, bd);
+		});
+		BeanDefinition beanDefinition = beanDefinitionBuilder.getRawBeanDefinition();
+		BeanDefinitionRegistry beanFactory = (BeanDefinitionRegistry) ((ConfigurableApplicationContext) getApplicationContext())
+				.getBeanFactory();
+		beanFactory.registerBeanDefinition(beanName, beanDefinition);
+		return getBean(beanName, clazz);
 	}
 
 	public static String getRequiredProperty(String key) {

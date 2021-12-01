@@ -21,7 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.client.RestClientException;
 
-import com.github.paganini2008.devtools.date.DateUtils;
+import com.github.paganini2008.devtools.time.DateUtils;
 
 import io.atlantisframework.tridenter.ApplicationInfo;
 import io.atlantisframework.tridenter.http.DirectRoutingAllocator;

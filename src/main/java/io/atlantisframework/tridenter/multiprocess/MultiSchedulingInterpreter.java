@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Value;
 import com.github.paganini2008.devtools.ClassUtils;
 import com.github.paganini2008.devtools.ExceptionUtils;
 import com.github.paganini2008.devtools.StringUtils;
-import com.github.paganini2008.devtools.date.DateUtils;
+import com.github.paganini2008.devtools.time.DateUtils;
 
 import io.atlantisframework.tridenter.multicast.ApplicationMulticastGroup;
 

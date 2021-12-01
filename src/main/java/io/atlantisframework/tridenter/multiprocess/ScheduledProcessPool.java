@@ -18,7 +18,7 @@ package io.atlantisframework.tridenter.multiprocess;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import com.github.paganini2008.devtools.date.DateUtils;
+import com.github.paganini2008.devtools.time.DateUtils;
 
 /**
  * 

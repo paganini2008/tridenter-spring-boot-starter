@@ -33,7 +33,7 @@ import org.springframework.util.MultiValueMap;
 import com.github.paganini2008.devtools.collection.LruMap;
 import com.github.paganini2008.devtools.collection.MapUtils;
 import com.github.paganini2008.devtools.collection.MultiMappedMap;
-import com.github.paganini2008.devtools.date.DateUtils;
+import com.github.paganini2008.devtools.time.DateUtils;
 
 import lombok.Getter;
 import lombok.Setter;

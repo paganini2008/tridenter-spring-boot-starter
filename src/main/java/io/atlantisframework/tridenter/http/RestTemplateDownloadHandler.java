@@ -25,9 +25,9 @@ import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
-import com.github.paganini2008.devtools.date.Duration;
 import com.github.paganini2008.devtools.io.FileUtils;
 import com.github.paganini2008.devtools.io.IOUtils;
+import com.github.paganini2008.devtools.time.Duration;
 
 import lombok.extern.slf4j.Slf4j;
 

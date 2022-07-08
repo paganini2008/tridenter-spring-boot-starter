@@ -1,47 +1,27 @@
-#  Trident Framework
-## Microservice Distributed Collaboration Framework 
-### Description
-<code>Tridenter</code> is a distributed collaboration framework of microservice based on <code>SpringBoot</code> framework. It can make  independent <code>SpringBoot</code> applications easily and quickly form a cluster without relying on external registration centers (such as <code>SpringCloud</code> Framework).
+#  Tridenter Framework
+
+**Tridenter** is a distributed collaboration framework  based on <code>SpringBoot</code> framework. It can make  <code>SpringBoot</code> applications easily and quickly form a cluster without relying on external registration center (such as <code>Eureka</code> ,<code>Consul </code>).
 
 ### Features
-1. Message Multicast
-2. Leader Election
-3. Registration Center
-4. Cluster Decentralization
-5. Load Balance
-6. Traffic limiting and degradation
-7. HTTP <code>RestClient</code>
-8. Gateway
-9. Process Pool
-10. Cluster Monitor
+* Decentralized cluster mode
+* Message multicast and unicast among cluster member
+* Leader election
+* Support load-balance algorithm
+* Multiprocessing Programing (Process Pool and Scheduled Process Pool)
+* Service Registration Center
+* Http API Traffic control and downgrade
+* Simple <code>RestClient</code>
+* Http API gateway
+* Cluster monitoring and alarming
+* Distributed Transaction (XA)
 
-**Message multicast** in cluster is a very important function of <code>tridenter</code>. The lower layer of Trident realizes multicast function through <code>redis (PubSub)</code> to realize mutual discovery of applications, and then forms application cluster. Each member of the cluster supports the ability to multicast and unicast messages.
+##  Compatibility
 
-Trident provides the **leader election** algorithm interface by using Trident's ability to support unicast of messages. It has two leader election algorithms, fast leader election algorithm (based on <code>redis</code> queue) and consistent election algorithm (<code>Paxos</code> algorithm)
+* Jdk 1.8 (or later)
+* <code>SpringBoot </code> Framework 2.2.x (or later)
+* <code>Redis 3.x</code> (or later)
 
-Meanwhile, <code>tridenter</code> provides process pool by using <code>tridenter</code> to support message unicast, and realizes the ability of method call and method fragmentation across processes
-
-On the other hand, <code>tridenter</code> itself also provides the basic functions of micro **service governance**:
-
-<code>Tridenter</code> has its own **registration center**. Using the principle of message multicast, applications are found and registered with each other. Therefore, each member in the cluster has a full list of members, that is, each application is a registration center, which reflects the idea of decentralized design. Each member realizes the ability of calling HTTP interface between applications through naming service, and provides various annotations and restful configuration to decouple service publisher and consumer
-
-<code>Tridenter</code> has its own **gateway function**, which can publish the application as a gateway service independently, and can distribute HTTP requests and download tasks by proxy (upload is not supported temporarily)
-
-<code>Tridenter</code> also has a variety of **load balancing algorithms** and **traffic limiting degradation policies**. Users can also customize load balancing algorithm or degradation policy
-
-<code>Tridenter</code> implements the health check interface of spring actuator. Besides monitoring the cluster status, it also has the function of statistical analysis of the interface, and preliminarily realizes the unified management and monitoring of the interface
-
-So, based on the Trident framework, we can also build a micro service system similar to Spring Cloud Framework
-
-<code>Tridenter</code> adopts the idea of **decentralization**, that is, developers don't need to know which is the master node, which node is the slave node, and should not explicitly define an application master node. This is determined by the leader election algorithm adopted by Trident. The default election algorithm is the fast election algorithm. According to the election algorithm, any application node in the cluster may become the master node. The first application initiated by default is the master node. However, if the consistency election algorithm is adopted, it may be different. According to the author's description, the consistency election algorithm is not stable at present, and it is recommended to use the fast election algorithm in the application.
-
-
-###  Compatibility
-1. JDK 1.8 (or later)
-2. <code>SpringBoot Framework 2.2.x </code>(or later)
-3. <code>Redis 3.x</code> (or later)
-
-### Install
+## Install
 
 ```xml
 <dependency>
@@ -51,7 +31,8 @@ So, based on the Trident framework, we can also build a micro service system sim
 </dependency>
 ```
 
-### Required Config
+## Settings
+
 ```properties
 spring.application.name=demo
 spring.application.cluster.name=demo-cluster
@@ -60,13 +41,48 @@ spring.application.cluster.name=demo-cluster
 spring.redis.host=localhost
 spring.redis.port=6379
 spring.redis.password=123456
-spring.redis.dbIndex=0
+
 ```
 
-### Distributed Capabilities
-####  Process pool
-Multiple applications with the same name (<code>${spring.application.name}</code>) can be formed into a process pool, just like the thread pool allocates different threads to call a method, the process pool can call methods across applications, provided that the method is existing
-**Example Code:**
+## Decentralization or Centralization？
+
+Centralization
+
+``` mermaid
+flowchart LR
+   
+   A(("SpringBoot Application A")) <--> R(("Registration Center"))
+   B(("SpringBoot Application B")) <--> R(("Registration Center"))
+   C(("SpringBoot Application C")) <--> R(("Registration Center")):::registryClass
+   classDef registryClass fill:#f96;
+```
+
+
+Decentralization
+
+``` mermaid
+
+flowchart LR
+   A(("SpringBoot Application A")):::leaderClass <--> C(("SpringBoot Application C"))
+   A(("SpringBoot Application A (Leader)")) <--> B(("SpringBoot Application B"))
+   B(("SpringBoot Application B")) <--> C(("SpringBoot Application C"))
+   classDef leaderClass fill:#f96;
+   
+```
+
+**Tridenter** is designed as **decentralization**, that is, developers don't need to know which is the master node, which node is the slave node, and need not explicitly define an application as master node. It depends on  the leader election algorithm adopted by Tridenter. The default election algorithm is the fast election algorithm. According to the election algorithm, any application node in the cluster may become the master node. The first started application by default is the master node. 
+
+
+
+
+## Quick Start
+
+####  1. Process pool
+
+Multiple applications with the same name (<code>${spring.application.name}</code>) can be formed into a process pool, just like the thread pool allocates different threads to call a method, the process pool can call methods across applications as well.
+
+**Example**
+
 ``` java
 	@MultiProcessing(value = "calc", defaultValue = "11")
 	public int calc(int a, int b) {
@@ -88,9 +104,11 @@ Multiple applications with the same name (<code>${spring.application.name}</code
 		log.error("{}", info);
 	}
 ```
-#### Method slicing
-Method slicing is also called method parallel processing. In fact, each parameter of a set of parameters is distributed to different applications to run using the process pool, and then merged and output, and the fragmentation rule interface needs to be implemented
-**Example Code:**
+
+#### 2. Method slicing
+Method slicing is also called method parallel processing. If one method receive a group of parameters, each parameter will be dispatch and run in the other applications of same cluster, and then merge all results and output.
+
+**Example**
 
 ``` java
     @ParallelizingCall(value = "loop-test", usingParallelization = TestCallParallelization.class)
@@ -122,9 +140,10 @@ Method slicing is also called method parallel processing. In fact, each paramete
 
 	}
 ```
-### Microservice capabilities
-#### Rest Client
-**Example Code:**
+
+#### 3. Rest Client
+
+**Example**
 
 ``` java
 @RestClient(provider = "test-service")
@@ -136,13 +155,16 @@ public interface TestRestClient {
 
 }
 ```
-Description:
-1. Annotate the interface modified by <code>@RestClient</code> to indicate that this is an Http client
-2. In the annotation, the provider attribute represents the service provider, which can be an application name in the cluster (${spring.application.name}) or a specific http address
-3. Support Spring annotations <code>(GetMapping, PostMapping, PutMapping, DeleteMapping)</code>, in addition, the annotation <code>@Api</code> can provide more fine-grained parameter settings
+Support Spring annotations like <code>GetMapping, PostMapping, PutMapping, DeleteMapping</code>, more parameter settings can refer to  <code>@Api</code>
 
 
-#### Gateway
+
+#### 4. Gateway
+
+**Example 1** 
+
+Start Gateway Application
+
 ``` java
 @EnableGateway
 @SpringBootApplication
@@ -156,8 +178,12 @@ public class GatewayMain {
 	}
 }
 ```
-Just quote the annotation <code>@EnableGateway</code>, the bottom layer of the <code>tridenter gateway</code> is implemented with Netty4
-**Configure routing:**
+
+
+
+**Example 2**
+
+Configure routes
 
 ``` java
 @Primary
@@ -180,22 +206,20 @@ public class MyRouterCustomizer extends DefaultRouterCustomizer {
 3. STREAM: Binary stream
 4. FILE: save as file
 
-#### Current limit downgrade
-Current limiting refers to limiting the current on the client side, not the server side
-The current limit depends on 3 indicators:
-1. Response timeout rate
-2. Error rate
-3. Concurrency
+#### 5. Http API traffic control and downgrade
 
-By default, when any of these three indicators exceeds 80%, the current limit will be triggered and the downgrade service will be invoked
-Current limit indicator statistics: <code>RequestStatisticIndicator</code>
-Downgrade service interface: <code>FallbackProvider</code>
+**Traffic control** depends on 3 metrics:
 
-#### Health monitoring
-Currently <code>tridenter</code> provides 3 subclasses of <code>HealthIndicator</code>
-1. <code>ApplicationClusterHealthIndicator</code>
+* Response timeout rate
+* Error rate
+* Concurrency
+
+Generally, when any of these three metrics exceeds 80%, the current limit will be triggered and the downgrade service API will be invoked.
+
+#### 6. Health monitoring
+* <code>ApplicationClusterHealthIndicator</code>
      Display the overall health status of the cluster
-2. <code>TaskExecutorHealthIndicator</code>
+* <code>TaskExecutorHealthIndicator</code>
      Display the health status of the cluster thread pool
-3. <code>RestClientHealthIndicator</code>
+* <code>RestClientHealthIndicator</code>
     Display the health status of the Rest client (response timeout rate, error rate, concurrency)

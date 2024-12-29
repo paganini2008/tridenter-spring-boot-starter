@@ -2,10 +2,10 @@ package com.github.doodler.common.transmitter;
 
 /**
  * 
- * KeepAliveTimeoutException
- *
- * @author Fred Feng
- * @since 2.0.1
+ * @Description: KeepAliveTimeoutException
+ * @Author: Fred Feng
+ * @Date: 29/12/2024
+ * @Version 1.0.0
  */
 public class KeepAliveTimeoutException extends RuntimeException {
 

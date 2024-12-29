@@ -15,13 +15,15 @@ package com.github.doodler.common.transmitter.netty;
 
 import java.net.SocketAddress;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
-import com.github.doodler.common.transmitter.CurrentRequests;
 import com.github.doodler.common.transmitter.Packet;
+import com.github.doodler.common.transmitter.RequestFutureHolder;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -35,6 +37,8 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
  */
 public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAdapter
         implements ChannelContext<Channel> {
+
+    protected Logger log = LoggerFactory.getLogger(getClass());
 
     private ConnectionKeeper connectionKeeper;
     private ChannelEventListener<Channel> channelEventListener;
@@ -52,6 +56,10 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
         addChannel(ctx.channel());
 
         fireChannelEvent(ctx.channel(), EventType.CONNECTED, null);
+
+        if (log.isInfoEnabled()) {
+            log.info("Current active channel's count: " + countOfChannels());
+        }
     }
 
     @Override
@@ -61,6 +69,10 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
 
         fireReconnectionIfNecessary(remoteAddress);
         fireChannelEvent(ctx.channel(), EventType.CLOSED, null);
+
+        if (log.isInfoEnabled()) {
+            log.info("Current active channel's count: " + countOfChannels());
+        }
     }
 
     @Override
@@ -82,7 +94,7 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
         } else {
             String requestId = ctx.channel().attr(NettyClient.REQUEST_ID).get();
             if (StringUtils.isNotBlank(requestId)) {
-                CurrentRequests.getRequest(requestId).complete(data);
+                RequestFutureHolder.getRequest(requestId).complete(data);
             }
         }
     }

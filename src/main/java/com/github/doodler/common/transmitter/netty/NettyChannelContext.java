@@ -8,9 +8,14 @@ import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.Partitioner;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+/**
+ * 
+ * @Description: NettyChannelContext
+ * @Author: Fred Feng
+ * @Date: 29/12/2024
+ * @Version 1.0.0
+ */
 @Sharable
 public class NettyChannelContext extends NettyChannelContextSupport
         implements ChannelContext<Channel> {
@@ -21,9 +26,6 @@ public class NettyChannelContext extends NettyChannelContextSupport
     public void addChannel(Channel channel, int weight) {
         for (int i = 0; i < weight; i++) {
             channelHolds.add(channel);
-        }
-        if (log.isTraceEnabled()) {
-            log.trace("Current channel's count: " + countOfChannels());
         }
     }
 

@@ -6,11 +6,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.github.doodler.common.transmitter.KeepAlivePolicy;
 import com.github.doodler.common.transmitter.MessageCodecFactory;
 import com.github.doodler.common.transmitter.NioServer;
 import com.github.doodler.common.transmitter.TransmitterNioProperties;
-import com.github.doodler.common.transmitter.TransportClientException;
+import com.github.doodler.common.transmitter.TransmitterServerException;
 import com.github.doodler.common.utils.NetUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -56,7 +55,7 @@ public class NettyServer implements NioServer {
     @Override
     public SocketAddress start() {
         if (isStarted()) {
-            throw new IllegalStateException("NettyServer has been started.");
+            throw new TransmitterServerException("NettyServer has been started.");
         }
         TransmitterNioProperties.NioServer serverConfig = nioProperties.getServer();
         final int nThreads = serverConfig.getThreadCount() > 0 ? serverConfig.getThreadCount()
@@ -91,7 +90,7 @@ public class NettyServer implements NioServer {
             started.set(true);
             log.info("Netty is started on: " + socketAddress);
         } catch (Exception e) {
-            throw new TransportClientException(e.getMessage(), e);
+            throw new TransmitterServerException(e.getMessage(), e);
         }
         return socketAddress;
     }
@@ -99,10 +98,10 @@ public class NettyServer implements NioServer {
     @Override
     public void stop() {
         if (workerGroup == null || bossGroup == null) {
-            return;
+            throw new TransmitterServerException("NettyServer is not started.");
         }
         if (!isStarted()) {
-            throw new TransportClientException("NettyServer is not started.");
+            throw new TransmitterServerException("NettyServer is not started.");
         }
         try {
             Future<?> workerFuture = workerGroup.shutdownGracefully();

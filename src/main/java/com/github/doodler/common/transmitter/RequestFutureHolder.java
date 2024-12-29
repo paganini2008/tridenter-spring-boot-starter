@@ -7,12 +7,12 @@ import com.github.doodler.common.utils.MapUtils;
 
 /**
  * 
- * @Description: CurrentRequests
+ * @Description: RequestFutureHolder
  * @Author: Fred Feng
  * @Date: 29/12/2024
  * @Version 1.0.0
  */
-public abstract class CurrentRequests {
+public abstract class RequestFutureHolder {
 
     private static final Map<String, CompletableFuture<Object>> futures = new ConcurrentHashMap<>();
 

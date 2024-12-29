@@ -1,6 +1,7 @@
-package com.github.doodler.common.transmitter;
+package com.github.doodler.common.transmitter.netty;
 
 import io.netty.channel.ChannelHandler.Sharable;
+import com.github.doodler.common.transmitter.KeepAliveTimeoutException;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;

@@ -31,7 +31,7 @@ public class NioServerBootstrap implements ManagedBeanLifeCycle, MetadataCollect
         if (localAddress == null) {
             throw new IllegalStateException("NioServer is not started.");
         }
-        String serverLocation = localAddress.getHostName() + ":" + localAddress.getPort();
+        String serverLocation = localAddress.getHostString() + ":" + localAddress.getPort();
         return Map.of(TransmitterConstants.TRANSMITTER_SERVER_LOCATION, serverLocation);
     }
 

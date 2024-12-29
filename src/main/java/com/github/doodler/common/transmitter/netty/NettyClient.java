@@ -11,14 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
-import com.github.doodler.common.transmitter.CurrentRequests;
 import com.github.doodler.common.transmitter.HandshakeCallback;
 import com.github.doodler.common.transmitter.MessageCodecFactory;
 import com.github.doodler.common.transmitter.NioClient;
 import com.github.doodler.common.transmitter.Packet;
 import com.github.doodler.common.transmitter.Partitioner;
+import com.github.doodler.common.transmitter.RequestFutureHolder;
 import com.github.doodler.common.transmitter.TransmitterNioProperties;
-import com.github.doodler.common.transmitter.TransportClientException;
+import com.github.doodler.common.transmitter.TransmitterClientException;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -119,7 +119,7 @@ public class NettyClient implements NioClient {
                         }
                     }).sync();
         } catch (InterruptedException e) {
-            throw new TransportClientException(e.getMessage(), e);
+            throw new TransmitterClientException(e.getMessage(), e);
         }
 
     }
@@ -145,13 +145,34 @@ public class NettyClient implements NioClient {
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();
             channel.attr(REQUEST_ID).set(requestId);
-            CompletableFuture<Object> completableFuture = CurrentRequests.getRequest(requestId);
+            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
             doSend(requestId, channel, data, MODE_SYNC);
             try {
                 return completableFuture.get();
             } catch (Exception e) {
+                throw new TransmitterClientException(e.getMessage(), e);
             } finally {
-                CurrentRequests.removeRequest(requestId);
+                RequestFutureHolder.removeRequest(requestId);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Object sendAndReturn(SocketAddress address, Object data, long timeout,
+            TimeUnit timeUnit) {
+        Channel channel = channelContext.getChannel(address);
+        if (channel != null) {
+            String requestId = UUID.randomUUID().toString();
+            channel.attr(REQUEST_ID).set(requestId);
+            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
+            doSend(requestId, channel, data, MODE_SYNC);
+            try {
+                return completableFuture.get(timeout, timeUnit);
+            } catch (Exception e) {
+                throw new TransmitterClientException(e.getMessage(), e);
+            } finally {
+                RequestFutureHolder.removeRequest(requestId);
             }
         }
         return null;
@@ -171,13 +192,34 @@ public class NettyClient implements NioClient {
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();
             channel.attr(REQUEST_ID).set(requestId);
-            CompletableFuture<Object> completableFuture = CurrentRequests.getRequest(requestId);
+            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
             doSend(requestId, channel, data, MODE_SYNC);
             try {
                 return completableFuture.get();
             } catch (Exception e) {
+                throw new TransmitterClientException(e.getMessage(), e);
             } finally {
-                CurrentRequests.removeRequest(requestId);
+                RequestFutureHolder.removeRequest(requestId);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Object sendAndReturn(Object data, Partitioner partitioner, long timeout,
+            TimeUnit timeUnit) {
+        Channel channel = channelContext.selectChannel(data, partitioner);
+        if (channel != null) {
+            String requestId = UUID.randomUUID().toString();
+            channel.attr(REQUEST_ID).set(requestId);
+            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
+            doSend(requestId, channel, data, MODE_SYNC);
+            try {
+                return completableFuture.get(timeout, timeUnit);
+            } catch (Exception e) {
+                throw new TransmitterClientException(e.getMessage(), e);
+            } finally {
+                RequestFutureHolder.removeRequest(requestId);
             }
         }
         return null;
@@ -197,7 +239,7 @@ public class NettyClient implements NioClient {
                 channel.writeAndFlush(packet);
             }
         } catch (Exception e) {
-            throw new TransportClientException(e.getMessage(), e);
+            throw new TransmitterClientException(e.getMessage(), e);
         }
     }
 
@@ -207,12 +249,12 @@ public class NettyClient implements NioClient {
                 channel.close();
             });
         } catch (Exception e) {
-            throw new TransportClientException(e.getMessage(), e);
+            throw new TransmitterClientException(e.getMessage(), e);
         }
         try {
             workerGroup.shutdownGracefully();
         } catch (Exception e) {
-            throw new TransportClientException(e.getMessage(), e);
+            throw new TransmitterClientException(e.getMessage(), e);
         }
         opened.set(false);
     }

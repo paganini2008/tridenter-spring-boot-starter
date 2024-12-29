@@ -1,7 +1,8 @@
 package com.github.doodler.common.transmitter;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.concurrent.TimeUnit;
+import com.github.doodler.common.utils.NetUtils;
 
 /**
  * 
@@ -18,18 +19,25 @@ public interface Client {
 
     void send(Object data, Partitioner partitioner);
 
-    default Object sendAndReturn(String serverLocation, Object data) {
-        int index = serverLocation.indexOf(":");
-        if (index == -1) {
-            throw new IllegalArgumentException(serverLocation);
-        }
-        String hostName = serverLocation.substring(0, index);
-        int port = Integer.parseInt(serverLocation.substring(index + 1));
-        return sendAndReturn(new InetSocketAddress(hostName, port), data);
+    default void send(String serverLocation, Object data) {
+        send(NetUtils.parse(serverLocation), data);
     }
 
     Object sendAndReturn(SocketAddress address, Object data);
 
+    Object sendAndReturn(SocketAddress address, Object data, long timeout, TimeUnit timeUnit);
+
     Object sendAndReturn(Object data, Partitioner partitioner);
+
+    Object sendAndReturn(Object data, Partitioner partitioner, long timeout, TimeUnit timeUnit);
+
+    default Object sendAndReturn(String serverLocation, Object data) {
+        return sendAndReturn(NetUtils.parse(serverLocation), data);
+    }
+
+    default Object sendAndReturn(String serverLocation, Object data, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(NetUtils.parse(serverLocation), data, timeout, timeUnit);
+    }
 
 }

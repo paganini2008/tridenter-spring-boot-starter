@@ -1,4 +1,4 @@
-package com.github.doodler.common.transmitter;
+package com.github.doodler.common.transmitter.rpc;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -22,7 +22,7 @@ public class TransmitterMethodLookupProcessor implements BeanPostProcessor {
     public Object postProcessBeforeInitialization(Object bean, String beanName)
             throws BeansException {
         List<Method> methodList =
-                MethodUtils.getMethodsListWithAnnotation(bean.getClass(), Transmitter.class);
+                MethodUtils.getMethodsListWithAnnotation(bean.getClass(), RpcClient.class);
         if (CollectionUtils.isEmpty(methodList)) {
             return bean;
         }

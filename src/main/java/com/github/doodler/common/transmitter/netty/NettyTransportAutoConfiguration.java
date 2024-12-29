@@ -5,7 +5,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.github.doodler.common.transmitter.ChannelEventListener;
-import com.github.doodler.common.transmitter.KeepAlivePolicy;
 import com.github.doodler.common.transmitter.MessageCodecFactory;
 import com.github.doodler.common.transmitter.NioClient;
 import com.github.doodler.common.transmitter.NioServer;

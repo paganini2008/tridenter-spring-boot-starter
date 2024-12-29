@@ -2,7 +2,7 @@ package com.github.doodler.common.transmitter.netty;
 
 import java.util.List;
 import com.github.doodler.common.transmitter.Packet;
-import com.github.doodler.common.transmitter.TransportClientException;
+import com.github.doodler.common.transmitter.TransmitterClientException;
 import com.github.doodler.common.transmitter.serializer.Serializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,7 +30,7 @@ public abstract class NettyEncoderDecoders {
         protected void encode(ChannelHandlerContext ctx, Packet input, ByteBuf out)
                 throws Exception {
             if (input == null) {
-                throw new TransportClientException("Input could not be null");
+                throw new TransmitterClientException("Input could not be null");
             }
             byte[] data = serializer.serialize(input);
             out.writeInt(data.length);
@@ -56,7 +56,7 @@ public abstract class NettyEncoderDecoders {
             in.markReaderIndex();
             int dataLength = in.readInt();
             if (dataLength < 4) {
-                throw new TransportClientException(
+                throw new TransmitterClientException(
                         "Data length should be greater than 4: " + dataLength);
             }
             if (in.readableBytes() < dataLength) {

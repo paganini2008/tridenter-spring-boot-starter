@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NettyServerKeepAlivePolicy extends KeepAlivePolicy {
 
     @Autowired
-    private TransmitterNioProperties transmitterProperties;
+    private TransmitterNioProperties transmitterNioProperties;
 
     @Autowired(required = false)
     private ChannelEventListener<Channel> channelEventListener;
@@ -31,7 +31,7 @@ public class NettyServerKeepAlivePolicy extends KeepAlivePolicy {
     protected void whenReaderIdle(ChannelHandlerContext ctx) {
         if (log.isInfoEnabled()) {
             log.info("A keep-alive message was not received within {} second(s).",
-                    transmitterProperties.getServer().getReaderIdleTimeout());
+                    transmitterNioProperties.getServer().getReaderIdleTimeout());
         }
     }
 

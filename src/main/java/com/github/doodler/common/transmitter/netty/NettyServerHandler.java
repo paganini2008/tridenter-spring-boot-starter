@@ -6,6 +6,7 @@ import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
+import com.github.doodler.common.transmitter.TransmitterConstants;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -50,7 +51,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
-        eventPublisher.publish((Packet) message);
+        Packet packet = (Packet) message;
+        if (TransmitterConstants.METHOD_ASYNC.equals(packet.getMode())) {
+            eventPublisher.publish(packet);
+        } else {
+
+        }
     }
 
     private void fireChannelEvent(Channel channel, EventType eventType, Throwable cause) {

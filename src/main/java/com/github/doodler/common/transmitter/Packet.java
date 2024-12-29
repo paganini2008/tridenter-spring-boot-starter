@@ -35,6 +35,7 @@ public class Packet extends HashMap<String, Object> {
 
     public Packet(String topic, String content) {
         setField("timestamp", System.currentTimeMillis());
+        setMode(TransmitterConstants.METHOD_ASYNC);
         setTopic(topic);
         setContent(content);
     }
@@ -59,6 +60,10 @@ public class Packet extends HashMap<String, Object> {
         setField("partitioner", partitioner);
     }
 
+    public void setMode(String mode) {
+        setField("mode", mode);
+    }
+
     public String getTopic() {
         return getStringField("topic");
     }
@@ -76,7 +81,11 @@ public class Packet extends HashMap<String, Object> {
     }
 
     public String getPartitioner() {
-        return getField("partitioner", String.class);
+        return getStringField("partitioner");
+    }
+
+    public String getMode() {
+        return getStringField("mode");
     }
 
     public boolean hasField(String fieldName) {

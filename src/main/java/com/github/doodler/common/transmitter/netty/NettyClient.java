@@ -167,6 +167,7 @@ public class NettyClient implements NioClient {
         opened.set(false);
     }
 
+    @Override
     public boolean isConnected(SocketAddress remoteAddress) {
         Channel channel = channelContext.getChannel(remoteAddress);
         return channel != null && channel.isActive();

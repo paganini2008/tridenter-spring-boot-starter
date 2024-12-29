@@ -37,7 +37,6 @@ public class TransmitterNioProperties {
         private int readerIdleTimeout = 60;
         private int writerIdleTimeout = 0;
         private int allIdleTimeout = 0;
-        private String defaultCollectionName = "default";
     }
 
 

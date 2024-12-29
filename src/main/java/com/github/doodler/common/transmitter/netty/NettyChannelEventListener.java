@@ -31,12 +31,12 @@ public class NettyChannelEventListener implements ChannelEventListener<Channel> 
                             channel.remoteAddress());
                     break;
                 case PING:
-                    log.trace("{} ->> {} send a ping.", channel.localAddress(),
-                            channel.remoteAddress());
+                    log.trace("{} ->> {} send a ping.", channel.remoteAddress(),
+                            channel.localAddress());
                     break;
                 case PONG:
-                    log.trace("{} ->> {} send a pong.", channel.localAddress(),
-                            channel.remoteAddress());
+                    log.trace("{} ->> {} send a pong.", channel.remoteAddress(),
+                            channel.localAddress());
                     break;
                 case ERROR:
                     log.trace("{} ->> {} has loss connection for fatal reason.",

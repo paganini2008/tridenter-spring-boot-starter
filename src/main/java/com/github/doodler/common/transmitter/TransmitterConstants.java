@@ -11,8 +11,10 @@ public interface TransmitterConstants {
 
     String TRANSMITTER_SERVER_LOCATION = "TRANSMITTER-SERVER-LOCATION";
 
-    String METHOD_SYNC = "sync";
+    String MODE_SYNC = "sync";
 
-    String METHOD_ASYNC = "async";
+    String MODE_ASYNC = "async";
+
+
 
 }

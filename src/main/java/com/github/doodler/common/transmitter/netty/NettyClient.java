@@ -1,12 +1,17 @@
 package com.github.doodler.common.transmitter.netty;
 
+import static com.github.doodler.common.transmitter.TransmitterConstants.MODE_ASYNC;
+import static com.github.doodler.common.transmitter.TransmitterConstants.MODE_SYNC;
 import java.net.SocketAddress;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
+import com.github.doodler.common.transmitter.CurrentRequests;
 import com.github.doodler.common.transmitter.HandshakeCallback;
 import com.github.doodler.common.transmitter.MessageCodecFactory;
 import com.github.doodler.common.transmitter.NioClient;
@@ -26,6 +31,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.netty.util.AttributeKey;
 import io.netty.util.concurrent.GenericFutureListener;
 
 /**
@@ -36,6 +42,8 @@ import io.netty.util.concurrent.GenericFutureListener;
  * @Version 1.0.0
  */
 public class NettyClient implements NioClient {
+
+    static final AttributeKey<String> REQUEST_ID = AttributeKey.valueOf("requestId");
 
     private final NettyChannelContext channelContext = new NettyChannelContext();
     private final AtomicBoolean opened = new AtomicBoolean(false);
@@ -119,7 +127,7 @@ public class NettyClient implements NioClient {
     @Override
     public void send(Object data) {
         channelContext.getChannels().forEach(channel -> {
-            doSend(channel, data);
+            doSend(null, channel, data, MODE_ASYNC);
         });
     }
 
@@ -127,24 +135,66 @@ public class NettyClient implements NioClient {
     public void send(SocketAddress address, Object data) {
         Channel channel = channelContext.getChannel(address);
         if (channel != null) {
-            doSend(channel, data);
+            doSend(null, channel, data, MODE_ASYNC);
         }
+    }
+
+    @Override
+    public Object sendAndReturn(SocketAddress address, Object data) {
+        Channel channel = channelContext.getChannel(address);
+        if (channel != null) {
+            String requestId = UUID.randomUUID().toString();
+            channel.attr(REQUEST_ID).set(requestId);
+            CompletableFuture<Object> completableFuture = CurrentRequests.getRequest(requestId);
+            doSend(requestId, channel, data, MODE_SYNC);
+            try {
+                return completableFuture.get();
+            } catch (Exception e) {
+            } finally {
+                CurrentRequests.removeRequest(requestId);
+            }
+        }
+        return null;
     }
 
     @Override
     public void send(Object data, Partitioner partitioner) {
         Channel channel = channelContext.selectChannel(data, partitioner);
         if (channel != null) {
-            doSend(channel, data);
+            doSend(null, channel, data, MODE_ASYNC);
         }
     }
 
-    protected void doSend(Channel channel, Object data) {
+    @Override
+    public Object sendAndReturn(Object data, Partitioner partitioner) {
+        Channel channel = channelContext.selectChannel(data, partitioner);
+        if (channel != null) {
+            String requestId = UUID.randomUUID().toString();
+            channel.attr(REQUEST_ID).set(requestId);
+            CompletableFuture<Object> completableFuture = CurrentRequests.getRequest(requestId);
+            doSend(requestId, channel, data, MODE_SYNC);
+            try {
+                return completableFuture.get();
+            } catch (Exception e) {
+            } finally {
+                CurrentRequests.removeRequest(requestId);
+            }
+        }
+        return null;
+    }
+
+    private void doSend(String requestId, Channel channel, Object data, String mode) {
         try {
+            Packet packet = null;
             if (data instanceof CharSequence) {
-                channel.writeAndFlush(Packet.byString(((CharSequence) data).toString()));
+                packet = Packet.wrap(((CharSequence) data).toString());
             } else if (data instanceof Packet) {
-                channel.writeAndFlush(data);
+                packet = (Packet) data;
+            }
+            if (packet != null) {
+                packet.setMode(mode);
+                packet.setField("requestId", requestId);
+                channel.writeAndFlush(packet);
             }
         } catch (Exception e) {
             throw new TransportClientException(e.getMessage(), e);

@@ -32,7 +32,7 @@ public class NioClientBootstrap {
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReadyEvent(ApplicationReadyEvent event) {
         if (nioProperties.isConnectWithSelf()) {
-            String serverLocation = applicationInfoManager.getMetadata()
+            final String serverLocation = applicationInfoManager.getMetadata()
                     .get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION);
             if (StringUtils.isBlank(serverLocation)) {
                 throw new TransmitterException("Unable to connect with myself");

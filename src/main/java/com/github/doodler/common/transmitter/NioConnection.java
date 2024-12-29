@@ -19,7 +19,7 @@ public interface NioConnection {
         }
         String hostName = serverLocation.substring(0, index);
         int port = Integer.parseInt(serverLocation.substring(index + 1));
-        connect(InetSocketAddress.createUnresolved(hostName, port), handshakeCallback);
+        connect(new InetSocketAddress(hostName, port), handshakeCallback);
     }
 
     void connect(SocketAddress remoteAddress, HandshakeCallback handshakeCallback);

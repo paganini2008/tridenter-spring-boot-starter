@@ -14,11 +14,13 @@
 package com.github.doodler.common.transmitter.netty;
 
 import java.net.SocketAddress;
+import org.apache.commons.lang3.StringUtils;
 import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
+import com.github.doodler.common.transmitter.CurrentRequests;
 import com.github.doodler.common.transmitter.Packet;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -77,6 +79,11 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
     public void channelRead(ChannelHandlerContext ctx, Object data) throws Exception {
         if (isPong(data)) {
             fireChannelEvent(ctx.channel(), EventType.PONG, null);
+        } else {
+            String requestId = ctx.channel().attr(NettyClient.REQUEST_ID).get();
+            if (StringUtils.isNotBlank(requestId)) {
+                CurrentRequests.getRequest(requestId).complete(data);
+            }
         }
     }
 

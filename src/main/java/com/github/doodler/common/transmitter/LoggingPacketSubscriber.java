@@ -20,4 +20,13 @@ public class LoggingPacketSubscriber implements EventSubscriber<Packet> {
         }
     }
 
+    @Override
+    public void handleError(Throwable e) {
+        if (log.isErrorEnabled()) {
+            log.error(e.getMessage(), e);
+        }
+    }
+
+
+
 }

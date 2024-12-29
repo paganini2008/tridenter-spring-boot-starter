@@ -6,7 +6,9 @@ import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
+import com.github.doodler.common.transmitter.PacketReader;
 import com.github.doodler.common.transmitter.TransmitterConstants;
+import com.github.doodler.common.utils.IdUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -30,6 +32,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Autowired(required = false)
     private ChannelEventListener<Channel> channelEventListener;
 
+    @Autowired(required = false)
+    private PacketReader packetReader;
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
@@ -52,10 +57,23 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
         Packet packet = (Packet) message;
-        if (TransmitterConstants.METHOD_ASYNC.equals(packet.getMode())) {
-            eventPublisher.publish(packet);
+        if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
+            Packet result = packet.copy();
+            if (packetReader != null) {
+                Object returnData = packetReader.response(packet);
+                if (returnData != null) {
+                    if (returnData instanceof Packet) {
+                        result = (Packet) returnData;
+                    } else {
+                        result.setObject(returnData);
+                    }
+                }
+            }
+            result.setField("server", ctx.channel().localAddress().toString());
+            result.setField("salt", IdUtils.getShortUuid());
+            ctx.writeAndFlush(result);
         } else {
-
+            eventPublisher.publish(packet);
         }
     }
 

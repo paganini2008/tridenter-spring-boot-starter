@@ -34,25 +34,24 @@ public class Packet extends HashMap<String, Object> {
     }
 
     public Packet(String topic, String content) {
-        setField("timestamp", System.currentTimeMillis());
-        setMode(TransmitterConstants.METHOD_ASYNC);
+        setTimestamp(System.currentTimeMillis());
         setTopic(topic);
         setContent(content);
+    }
+
+    public void setTimestamp(long ms) {
+        setField("timestamp", ms);
     }
 
     public void setTopic(String topic) {
         setField("topic", topic);
     }
 
-    public void setCollection(String collection) {
-        setField("collection", collection);
-    }
-
     public void setContent(String content) {
         setField("content", content);
     }
 
-    public void setLength(int length) {
+    public void setLength(long length) {
         setField("length", length);
     }
 
@@ -64,20 +63,24 @@ public class Packet extends HashMap<String, Object> {
         setField("mode", mode);
     }
 
-    public String getTopic() {
-        return getStringField("topic");
+    public void setObject(Object data) {
+        setField("data", data);
     }
 
-    public String getCollection() {
-        return getStringField("collection");
+    public String getTopic() {
+        return getStringField("topic");
     }
 
     public String getContent() {
         return getStringField("content");
     }
 
+    public Long getLength() {
+        return getLongField("length");
+    }
+
     public long getTimestamp() {
-        return getField("timestamp", Long.class);
+        return getLongField("timestamp");
     }
 
     public String getPartitioner() {
@@ -88,16 +91,34 @@ public class Packet extends HashMap<String, Object> {
         return getStringField("mode");
     }
 
+    public Object getObject() {
+        return getField("data");
+    }
+
     public boolean hasField(String fieldName) {
         return containsKey(fieldName);
     }
 
     public void setField(String fieldName, Object value) {
-        put(fieldName, value);
+        if (value != null) {
+            put(fieldName, value);
+        }
     }
 
     public Object getField(String fieldName) {
         return get(fieldName);
+    }
+
+    public Double getDoubleField(String fieldName) {
+        return getField(fieldName, Double.class);
+    }
+
+    public Integer getIntegerField(String fieldName) {
+        return getField(fieldName, Integer.class);
+    }
+
+    public Long getLongField(String fieldName) {
+        return getField(fieldName, Long.class);
     }
 
     public String getStringField(String fieldName) {
@@ -140,7 +161,7 @@ public class Packet extends HashMap<String, Object> {
         return STR_PONG.equalsIgnoreCase(getContent());
     }
 
-    public static Packet byString(String content) {
+    public static Packet wrap(String content) {
         Packet packet = new Packet();
         packet.setContent(content);
         return packet;

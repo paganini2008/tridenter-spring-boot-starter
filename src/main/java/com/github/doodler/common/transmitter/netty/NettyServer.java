@@ -102,7 +102,7 @@ public class NettyServer implements NioServer {
             return;
         }
         if (!isStarted()) {
-            throw new IllegalStateException("NettyServer is not started.");
+            throw new TransportClientException("NettyServer is not started.");
         }
         try {
             Future<?> workerFuture = workerGroup.shutdownGracefully();

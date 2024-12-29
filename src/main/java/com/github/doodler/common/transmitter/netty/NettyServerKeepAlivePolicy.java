@@ -2,11 +2,11 @@ package com.github.doodler.common.transmitter.netty;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.doodler.common.transmitter.ChannelEvent;
+import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.KeepAlivePolicy;
 import com.github.doodler.common.transmitter.Packet;
 import com.github.doodler.common.transmitter.TransmitterNioProperties;
-import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +48,7 @@ public class NettyServerKeepAlivePolicy extends KeepAlivePolicy {
         }
     }
 
-    protected boolean isPing(Object data) {
+    private boolean isPing(Object data) {
         return (data instanceof Packet) && ((Packet) data).isPing();
     }
 

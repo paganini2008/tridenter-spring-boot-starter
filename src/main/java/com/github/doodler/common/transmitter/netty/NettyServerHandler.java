@@ -3,9 +3,9 @@ package com.github.doodler.common.transmitter.netty;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.transmitter.ChannelEvent;
+import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
-import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -45,7 +45,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         super.exceptionCaught(ctx, cause);
         log.error(cause.getMessage(), cause);
-        fireChannelEvent(ctx.channel(), EventType.FAULTY, cause);
+        fireChannelEvent(ctx.channel(), EventType.ERROR, cause);
     }
 
     @Override

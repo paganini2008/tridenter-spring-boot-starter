@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import com.github.doodler.common.cloud.ApplicationInfoManager;
@@ -15,15 +17,9 @@ import com.github.doodler.common.events.Buffer;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.events.EventPublisherImpl;
 import com.github.doodler.common.events.EventSubscriber;
-import com.github.doodler.common.transmitter.netty.NettyChannelEventListener;
-import com.github.doodler.common.transmitter.netty.NettyClient;
-import com.github.doodler.common.transmitter.netty.NettyMessageCodecFactory;
-import com.github.doodler.common.transmitter.netty.NettyServer;
-import com.github.doodler.common.transmitter.netty.NettyServerHandler;
-import com.github.doodler.common.transmitter.netty.NettyServerKeepAlivePolicy;
+import com.github.doodler.common.transmitter.netty.NettyTransportAutoConfiguration;
 import com.github.doodler.common.transmitter.serializer.KryoSerializer;
 import com.github.doodler.common.transmitter.serializer.Serializer;
-import io.netty.channel.Channel;
 
 /**
  * 
@@ -33,6 +29,7 @@ import io.netty.channel.Channel;
  * @Version 1.0.0
  */
 @EnableConfigurationProperties({TransmitterNioProperties.class, TransmitterEventProperties.class})
+@Import({NettyTransportAutoConfiguration.class})
 @Configuration(proxyBeanMethods = false)
 public class NioTransmitterAutoConfiguration {
 
@@ -55,6 +52,7 @@ public class NioTransmitterAutoConfiguration {
         return new NioServerBootstrap(nioServer);
     }
 
+    @DependsOn("nioServerBootstrap")
     @Bean
     public NioClientBootstrap nioClientBootstrap(NioClient nioClient,
             ApplicationInfoManager applicationInfoManager) {
@@ -75,64 +73,22 @@ public class NioTransmitterAutoConfiguration {
 
     @Bean
     public EventPublisher<Packet> eventPublisher(ThreadPoolTaskExecutor taskExecutor,
-            Buffer<Packet> buffer) {
-        return new EventPublisherImpl<>(taskExecutor, eventProperties.getMaxBufferCapacity(),
-                eventProperties.getRequestFetchSize(), eventProperties.getTimeout(), buffer,
-                eventProperties.getBufferCleanInterval());
-    }
-
-    @Autowired
-    public void configure(EventPublisher<Packet> eventPublisher,
-            List<EventSubscriber<Packet>> eventSubscribers) {
+            Buffer<Packet> buffer, List<EventSubscriber<Packet>> eventSubscribers) {
+        EventPublisher<Packet> eventPublisher = new EventPublisherImpl<>(taskExecutor,
+                eventProperties.getMaxBufferCapacity(), eventProperties.getRequestFetchSize(),
+                eventProperties.getTimeout(), buffer, eventProperties.getBufferCleanInterval());
         if (CollectionUtils.isNotEmpty(eventSubscribers)) {
             eventPublisher.subscribe(eventSubscribers);
         }
+        return eventPublisher;
     }
+
+
 
     @ConditionalOnProperty("doodler.transmitter.event.logging.enabled")
     @Bean
     public LoggingPacketSubscriber loggingPacketSubscriber() {
         return new LoggingPacketSubscriber();
-    }
-
-
-    @Configuration(proxyBeanMethods = false)
-    @ConditionalOnProperty(name = "doodler.transmitter.nio.selection", havingValue = "netty",
-            matchIfMissing = true)
-    public static class NettyTransportConfig {
-
-        @Bean(initMethod = "open", destroyMethod = "close")
-        public NioClient nioClient(MessageCodecFactory codecFactory) {
-            return new NettyClient();
-        }
-
-        @Bean
-        public NioServer nioServer() {
-            return new NettyServer();
-        }
-
-        @ConditionalOnMissingBean
-        @Bean
-        public KeepAlivePolicy keepAlivePolicy() {
-            return new NettyServerKeepAlivePolicy();
-        }
-
-        @ConditionalOnMissingBean
-        @Bean
-        public MessageCodecFactory codecFactory(Serializer serializer) {
-            return new NettyMessageCodecFactory(serializer);
-        }
-
-        @Bean
-        public NettyServerHandler serverHandler() {
-            return new NettyServerHandler();
-        }
-
-        @ConditionalOnMissingBean
-        @Bean
-        public ChannelEventListener<Channel> channelEventListener() {
-            return new NettyChannelEventListener();
-        }
     }
 
 }

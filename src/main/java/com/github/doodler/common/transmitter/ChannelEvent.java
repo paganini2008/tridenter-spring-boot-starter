@@ -41,7 +41,7 @@ public class ChannelEvent<T> extends EventObject {
 
     public static enum EventType {
 
-        CONNECTED, CLOSED, PING, PONG, FAULTY
+        CONNECTED, CLOSED, PING, PONG, ERROR;
 
     }
 

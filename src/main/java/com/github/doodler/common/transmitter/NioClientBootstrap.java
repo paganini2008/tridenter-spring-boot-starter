@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import com.github.doodler.common.cloud.AffectedApplicationInfo;
 import com.github.doodler.common.cloud.AffectedApplicationInfo.AffectedType;
@@ -23,17 +23,20 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class NioClientBootstrap implements InitializingBean {
+public class NioClientBootstrap {
 
     private final TransmitterNioProperties nioProperties;
     private final NioClient nioClient;
     private final ApplicationInfoManager applicationInfoManager;
 
-    @Override
-    public void afterPropertiesSet() throws Exception {
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReadyEvent(ApplicationReadyEvent event) {
         if (nioProperties.isConnectWithSelf()) {
             String serverLocation = applicationInfoManager.getMetadata()
                     .get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION);
+            if (StringUtils.isBlank(serverLocation)) {
+                throw new TransmitterException("Unable to connect with myself");
+            }
             nioClient.connect(serverLocation, addr -> {
                 log.info("Successfully connected to address: {}", addr.toString());
             });
@@ -42,20 +45,21 @@ public class NioClientBootstrap implements InitializingBean {
 
     @EventListener(SiblingApplicationInfoChangeEvent.class)
     public void onSiblingApplicationInfoChangeEvent(SiblingApplicationInfoChangeEvent event) {
-        Collection<AffectedApplicationInfo> affectedApplications = event.getAffects();
+        Collection<AffectedApplicationInfo> affectedApplications = event.getAffectedApplications();
         if (CollectionUtils.isNotEmpty(affectedApplications)) {
             affectedApplications.stream()
                     .filter(app -> app.getAffectedType().equals(AffectedType.ONLINE))
                     .forEach(app -> {
                         Map<String, String> metadata = app.getApplicationInfo().getMetadata();
                         if (MapUtils.isEmpty(metadata)) {
-                            log.warn("No metadata in app: {}", app);
+                            log.warn("No Metadata in AppInfo: {}", app.getApplicationInfo());
                             return;
                         }
                         String serverLocation = (String) metadata
                                 .get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION);
                         if (StringUtils.isBlank(serverLocation)) {
-                            log.warn("No 'TRANSMITTER_SERVER_LOCATION' in metadata: {}", metadata);
+                            log.warn("No 'TRANSMITTER_SERVER_LOCATION' in Metadata. AppInfo: {}",
+                                    app.getApplicationInfo());
                             return;
                         }
                         nioClient.connect(serverLocation, addr -> {

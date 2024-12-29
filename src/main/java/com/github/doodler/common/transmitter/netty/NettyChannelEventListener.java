@@ -1,8 +1,8 @@
 package com.github.doodler.common.transmitter.netty;
 
 import com.github.doodler.common.transmitter.ChannelEvent;
-import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
+import com.github.doodler.common.transmitter.ChannelEventListener;
 import io.netty.channel.Channel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,19 +23,24 @@ public class NettyChannelEventListener implements ChannelEventListener<Channel> 
             EventType eventType = channelEvent.getEventType();
             switch (eventType) {
                 case CONNECTED:
-                    log.trace(channel.remoteAddress() + " has established connection.");
+                    log.trace("{} ->> {} has established connection.", channel.localAddress(),
+                            channel.remoteAddress());
                     break;
                 case CLOSED:
-                    log.trace(channel.remoteAddress() + " has loss connection.");
+                    log.trace("{} ->> {} has loss connection.", channel.localAddress(),
+                            channel.remoteAddress());
                     break;
                 case PING:
-                    log.trace(channel.remoteAddress() + " send a ping.");
+                    log.trace("{} ->> {} send a ping.", channel.localAddress(),
+                            channel.remoteAddress());
                     break;
                 case PONG:
-                    log.trace(channel.remoteAddress() + " send a pong.");
+                    log.trace("{} ->> {} send a pong.", channel.localAddress(),
+                            channel.remoteAddress());
                     break;
-                case FAULTY:
-                    log.trace(channel.remoteAddress() + " has loss connection for fatal reason.",
+                case ERROR:
+                    log.trace("{} ->> {} has loss connection for fatal reason.",
+                            channel.localAddress(), channel.remoteAddress(),
                             channelEvent.getCause());
                     break;
             }

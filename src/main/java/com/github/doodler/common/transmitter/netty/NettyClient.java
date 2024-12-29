@@ -4,6 +4,7 @@ import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
 import com.github.doodler.common.transmitter.HandshakeCallback;
@@ -26,7 +27,6 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.GenericFutureListener;
-import lombok.RequiredArgsConstructor;
 
 /**
  * 
@@ -35,7 +35,6 @@ import lombok.RequiredArgsConstructor;
  * @Date: 28/12/2024
  * @Version 1.0.0
  */
-@RequiredArgsConstructor
 public class NettyClient implements NioClient {
 
     private final NettyChannelContext channelContext = new NettyChannelContext();
@@ -46,17 +45,19 @@ public class NettyClient implements NioClient {
     @Autowired
     private TransmitterNioProperties nioProperties;
 
+    @Lazy
     @Autowired
     private MessageCodecFactory codecFactory;
+
+    @Autowired
+    public void setChannelEventListener(ChannelEventListener<Channel> channelEventListener) {
+        this.channelContext.setChannelEventListener(channelEventListener);
+    }
 
     @Override
     public void watchConnection(int checkInterval, TimeUnit timeUnit) {
         this.channelContext
                 .setConnectionKeeper(new ConnectionKeeper(checkInterval, timeUnit, this));
-    }
-
-    public void setChannelEventListener(ChannelEventListener<Channel> channelEventListener) {
-        this.channelContext.setChannelEventListener(channelEventListener);
     }
 
     public void open() {

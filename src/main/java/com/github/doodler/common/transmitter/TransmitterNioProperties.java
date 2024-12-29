@@ -31,7 +31,7 @@ public class TransmitterNioProperties {
     @Data
     public static class NioServer {
         private int threadCount = -1;
-        private String bindHostName;
+        private String bindHostName = "127.0.0.1";
         private int backlog = 128;
         private int receiverBufferSize = 2 * 1024 * 1024;
         private int readerIdleTimeout = 60;

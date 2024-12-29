@@ -26,12 +26,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 
 /**
  * 
- * @Description: NettyChannelContextAware
+ * @Description: NettyChannelContextSupport
  * @Author: Fred Feng
  * @Date: 27/12/2024
  * @Version 1.0.0
  */
-public abstract class NettyChannelContextAware extends ChannelInboundHandlerAdapter
+public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAdapter
         implements ChannelContext<Channel> {
 
     private ConnectionKeeper connectionKeeper;
@@ -69,7 +69,7 @@ public abstract class NettyChannelContextAware extends ChannelInboundHandlerAdap
         removeChannel(remoteAddress);
 
         fireReconnectionIfNecessary(remoteAddress);
-        fireChannelEvent(ctx.channel(), EventType.FAULTY, cause);
+        fireChannelEvent(ctx.channel(), EventType.ERROR, cause);
 
     }
 

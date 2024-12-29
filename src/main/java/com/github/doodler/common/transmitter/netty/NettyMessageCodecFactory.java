@@ -32,8 +32,4 @@ public class NettyMessageCodecFactory implements MessageCodecFactory {
         return new NettyEncoderDecoders.PacketDecoder(serializer);
     }
 
-    public Serializer getSerializer() {
-        return serializer;
-    }
-
 }

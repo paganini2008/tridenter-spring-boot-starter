@@ -15,6 +15,7 @@ import io.netty.handler.timeout.IdleStateEvent;
 @Sharable
 public abstract class KeepAlivePolicy extends ChannelInboundHandlerAdapter {
 
+    @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent e = (IdleStateEvent) evt;
@@ -33,6 +34,7 @@ public abstract class KeepAlivePolicy extends ChannelInboundHandlerAdapter {
             super.userEventTriggered(ctx, evt);
         }
     }
+
 
     protected void whenReaderIdle(ChannelHandlerContext ctx) {
         throw new KeepAliveTimeoutException("Reading Idle.");

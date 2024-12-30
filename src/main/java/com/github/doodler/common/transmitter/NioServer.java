@@ -11,9 +11,9 @@ import java.net.SocketAddress;
  */
 public interface NioServer {
 
-    static final int PORT_RANGE_BEGIN = 50000;
+    static final int PORT_RANGE_BEGIN = 40000;
 
-    static final int PORT_RANGE_END = 60000;
+    static final int PORT_RANGE_END = 45000;
 
     SocketAddress start() throws Exception;
 

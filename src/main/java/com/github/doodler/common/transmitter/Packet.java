@@ -109,6 +109,10 @@ public class Packet extends HashMap<String, Object> {
         return get(fieldName);
     }
 
+    public Object getField(String fieldName, Object defaultValue) {
+        return getOrDefault(fieldName, defaultValue);
+    }
+
     public Double getDoubleField(String fieldName) {
         return getField(fieldName, Double.class);
     }

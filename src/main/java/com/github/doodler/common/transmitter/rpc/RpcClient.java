@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  * @Date: 28/12/2024
  * @Version 1.0.0
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface RpcClient {

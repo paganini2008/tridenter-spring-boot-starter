@@ -10,6 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import org.objenesis.strategy.StdInstantiatorStrategy;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
@@ -31,11 +33,30 @@ public class KryoUtils {
     public static final int DEFAULT_BUFFER_SIZE = 64;
     public static final int DEFAULT_POOL_SIZE = 256;
 
+    private static final List<Class<?>> registeredClasses = new ArrayList<>();
+
+    static {
+        registeredClasses.add(Packet.class);
+        registeredClasses.add(Object[].class);
+    }
+
+    private static boolean registrationRequired = false;
+
+    public static void setRegistrationRequired(boolean registrationRequired) {
+        KryoUtils.registrationRequired = registrationRequired;
+    }
+
+    public void registerClass(Class<?> type) {
+        registeredClasses.add(type);
+    }
+
     private static final ThreadLocal<Kryo> KRYOS = ThreadLocal.withInitial(() -> {
         Kryo kryo = new Kryo();
-        kryo.register(Packet.class);
+        registeredClasses.forEach(c -> {
+            kryo.register(c);
+        });
         kryo.setReferences(false);
-        kryo.setRegistrationRequired(true);
+        kryo.setRegistrationRequired(registrationRequired);
         kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
         return kryo;
     });
@@ -45,9 +66,11 @@ public class KryoUtils {
         @Override
         protected Kryo create() {
             Kryo kryo = new Kryo();
-            kryo.register(Packet.class);
+            registeredClasses.forEach(c -> {
+                kryo.register(c);
+            });
             kryo.setReferences(false);
-            kryo.setRegistrationRequired(true);
+            kryo.setRegistrationRequired(registrationRequired);
             kryo.setInstantiatorStrategy(new StdInstantiatorStrategy());
             return kryo;
         }
@@ -148,5 +171,7 @@ public class KryoUtils {
         Packet other = deserializeFromBytesWithPool(bytes, Packet.class);
         System.out.println(other.equals(packet));
     }
+
+
 
 }

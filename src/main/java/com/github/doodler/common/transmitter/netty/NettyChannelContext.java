@@ -42,7 +42,8 @@ public class NettyChannelContext extends NettyChannelContextSupport
 
     @Override
     public List<Channel> getChannels(Predicate<SocketAddress> p) {
-        return channelHolds.stream().filter(c -> p.test(c.remoteAddress()))
+        return channelHolds.stream()
+                .filter(c -> c.remoteAddress() != null && p.test(c.remoteAddress()))
                 .collect(Collectors.toUnmodifiableList());
     }
 

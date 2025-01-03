@@ -2,18 +2,18 @@ package com.github.doodler.common.transmitter;
 
 /**
  * 
- * @Description: PacketFilter
+ * @Description: PacketHandler
  * @Author: Fred Feng
  * @Date: 03/01/2025
  * @Version 1.0.0
  */
-public interface PacketFilter {
+public interface PacketHandler {
 
     default boolean shouldFilter(Packet packet) {
-        return getName().equals(packet.getStringField("packetFilter"));
+        return getName().equals(packet.getStringField(TransmitterConstants.ATTR_PACKET_HANDLER));
     }
 
-    Object doFilter(Packet packet);
+    Object handle(Packet packet);
 
     default String getName() {
         return getClass().getName();

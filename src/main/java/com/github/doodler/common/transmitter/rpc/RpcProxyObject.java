@@ -3,6 +3,7 @@ package com.github.doodler.common.transmitter.rpc;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -19,6 +20,8 @@ public class RpcProxyObject<T> implements InvocationHandler {
     private final String className;
     private final String beanName;
     private final int maxRetries;
+    private final long timeout;
+    private final TimeUnit timeUnit;
     private final Object actualInstance;
     private final RpcTemplate rpcTemplate;
 
@@ -29,6 +32,8 @@ public class RpcProxyObject<T> implements InvocationHandler {
         this.className = rpcClient.className();
         this.beanName = rpcClient.beanName();
         this.maxRetries = rpcClient.maxRetries();
+        this.timeout = rpcClient.timeout();
+        this.timeUnit = rpcClient.timeUnit();
         this.rpcTemplate = rpcTemplate;
         this.actualInstance = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                 new Class<?>[] {interfaceClass}, this);
@@ -46,9 +51,10 @@ public class RpcProxyObject<T> implements InvocationHandler {
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         if (StringUtils.isNotBlank(serviceId)) {
             return rpcTemplate.invokeTargetMethod(serviceId, className, beanName, method.getName(),
-                    args);
+                    args, timeout, timeUnit);
         }
-        return rpcTemplate.invokeTargetMethod(className, beanName, method.getName(), args);
+        return rpcTemplate.invokeTargetMethod(className, beanName, method.getName(), args, timeout,
+                timeUnit);
     }
 
 }

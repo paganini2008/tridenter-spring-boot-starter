@@ -6,7 +6,7 @@ import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
-import com.github.doodler.common.transmitter.PacketFilterExecution;
+import com.github.doodler.common.transmitter.PacketHandlerExecution;
 import com.github.doodler.common.transmitter.TransmitterConstants;
 import com.github.doodler.common.utils.IdUtils;
 import io.netty.channel.Channel;
@@ -33,7 +33,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private ChannelEventListener<Channel> channelEventListener;
 
     @Autowired
-    private PacketFilterExecution packetFilterExecution;
+    private PacketHandlerExecution packetFilterExecution;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {

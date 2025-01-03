@@ -134,7 +134,7 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public void send(SocketAddress address, Object data) {
+    public void send(Object data, SocketAddress address) {
         Channel channel = channelContext.getChannel(address);
         if (channel != null) {
             doSend(null, channel, data, MODE_ASYNC);
@@ -150,7 +150,7 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public Object sendAndReturn(SocketAddress address, Object data) {
+    public Object sendAndReturn(Object data, SocketAddress address) {
         return sendAndReturn(data, new SelectedChannelCallback() {
             @Override
             public <T> T doSelectChannel(ChannelContext<T> channelContext) {
@@ -160,7 +160,7 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public Object sendAndReturn(SocketAddress address, Object data, long timeout,
+    public Object sendAndReturn(Object data, SocketAddress address, long timeout,
             TimeUnit timeUnit) {
         return sendAndReturn(data, new SelectedChannelCallback() {
             @Override
@@ -193,6 +193,7 @@ public class NettyClient implements NioClient {
 
     @Override
     public Object sendAndReturn(Object data, SelectedChannelCallback callback) {
+
         Channel channel = callback.doSelectChannel(channelContext);
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();

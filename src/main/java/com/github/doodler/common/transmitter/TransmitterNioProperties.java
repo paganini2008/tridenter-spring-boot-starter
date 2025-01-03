@@ -24,7 +24,7 @@ public class TransmitterNioProperties {
         private int connectionTimeout = 60 * 1000;
         private int senderBufferSize = 1024 * 1024;
         private int readerIdleTimeout = 0;
-        private int writerIdleTimeout = 30;
+        private int writerIdleTimeout = 60;
         private int allIdleTimeout = 0;
     }
 
@@ -34,7 +34,7 @@ public class TransmitterNioProperties {
         private String bindHostName = "127.0.0.1";
         private int backlog = 128;
         private int receiverBufferSize = 2 * 1024 * 1024;
-        private int readerIdleTimeout = 60;
+        private int readerIdleTimeout = 180;
         private int writerIdleTimeout = 0;
         private int allIdleTimeout = 0;
     }

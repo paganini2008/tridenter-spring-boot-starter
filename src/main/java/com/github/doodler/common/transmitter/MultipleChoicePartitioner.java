@@ -51,10 +51,13 @@ public class MultipleChoicePartitioner implements Partitioner {
 
     @Override
     public <T> T selectChannel(Object data, List<T> channels) {
-        Packet packet = (Packet) data;
-        Partitioner partitioner = byTopics.get(packet.getTopic());
-        if (partitioner == null) {
-            partitioner = byNames.get(packet.getPartitioner());
+        Partitioner partitioner = null;
+        if (data instanceof Packet) {
+            Packet packet = (Packet) data;
+            partitioner = byTopics.get(packet.getTopic());
+            if (partitioner == null) {
+                partitioner = byNames.get(packet.getPartitioner());
+            }
         }
         if (partitioner == null) {
             partitioner = defaultPartitioner;

@@ -1,5 +1,7 @@
 package com.github.doodler.common.transmitter.rpc;
 
+import static com.github.doodler.common.transmitter.TransmitterConstants.ATTR_PACKET_HANDLER;
+import static com.github.doodler.common.transmitter.TransmitterConstants.TRANSMITTER_SERVER_LOCATION;
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -11,7 +13,6 @@ import com.github.doodler.common.transmitter.NioClient;
 import com.github.doodler.common.transmitter.Packet;
 import com.github.doodler.common.transmitter.Partitioner;
 import com.github.doodler.common.transmitter.SelectedChannelCallback;
-import com.github.doodler.common.transmitter.TransmitterConstants;
 import com.github.doodler.common.utils.NetUtils;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +35,7 @@ public class RpcTemplate {
         Map<String, Object> kwargs = Map.of("className", className, "beanName", beanName,
                 "methodName", methodName, "arguments", arguments);
         Packet packet = Packet.wrap(kwargs);
-        packet.setField("packetFilter", MethodInvocationPacketFilter.class.getName());
+        packet.setField(ATTR_PACKET_HANDLER, MethodInvocationPacketHandler.class.getName());
         return nioClient.sendAndReturn(packet, partitioner, timeout, timeUnit);
     }
 
@@ -43,7 +44,7 @@ public class RpcTemplate {
         Map<String, Object> kwargs = Map.of("className", className, "beanName", beanName,
                 "methodName", methodName, "arguments", arguments);
         Packet packet = Packet.wrap(kwargs);
-        packet.setField("packetFilter", MethodInvocationPacketFilter.class.getName());
+        packet.setField(ATTR_PACKET_HANDLER, MethodInvocationPacketHandler.class.getName());
         List<SocketAddress> socketAddresses = lookupSocketAddressesFromDiscoveryClient(serviceId);
         return nioClient.sendAndReturn(packet, new SelectedChannelCallback() {
             @Override
@@ -59,7 +60,7 @@ public class RpcTemplate {
         Map<String, Object> kwargs = Map.of("className", className, "beanName", beanName,
                 "methodName", methodName, "arguments", arguments);
         Packet packet = Packet.wrap(kwargs);
-        packet.setField("packetFilter", MethodInvocationPacketFilter.class.getName());
+        packet.setField(ATTR_PACKET_HANDLER, MethodInvocationPacketHandler.class.getName());
         return nioClient.sendAndReturn(packet, partitioner);
     }
 
@@ -68,7 +69,7 @@ public class RpcTemplate {
         Map<String, Object> kwargs = Map.of("className", className, "beanName", beanName,
                 "methodName", methodName, "arguments", arguments);
         Packet packet = Packet.wrap(kwargs);
-        packet.setField("packetFilter", MethodInvocationPacketFilter.class.getName());
+        packet.setField(ATTR_PACKET_HANDLER, MethodInvocationPacketHandler.class.getName());
         List<SocketAddress> socketAddresses = lookupSocketAddressesFromDiscoveryClient(serviceId);
         return nioClient.sendAndReturn(packet, new SelectedChannelCallback() {
             @Override
@@ -81,8 +82,7 @@ public class RpcTemplate {
 
     private List<SocketAddress> lookupSocketAddressesFromDiscoveryClient(String serviceId) {
         List<ServiceInstance> serviceInstances = discoveryClient.getInstances(serviceId);
-        return serviceInstances.stream()
-                .map(i -> i.getMetadata().get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION))
+        return serviceInstances.stream().map(i -> i.getMetadata().get(TRANSMITTER_SERVER_LOCATION))
                 .map(s -> NetUtils.parse(s)).toList();
     }
 

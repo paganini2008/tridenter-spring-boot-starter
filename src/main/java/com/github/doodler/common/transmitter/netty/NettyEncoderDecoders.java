@@ -1,12 +1,14 @@
 package com.github.doodler.common.transmitter.netty;
 
+import java.io.IOException;
 import java.util.List;
 import com.github.doodler.common.transmitter.Packet;
-import com.github.doodler.common.transmitter.TransmitterClientException;
 import com.github.doodler.common.transmitter.serializer.Serializer;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
@@ -30,9 +32,14 @@ public abstract class NettyEncoderDecoders {
         protected void encode(ChannelHandlerContext ctx, Packet input, ByteBuf out)
                 throws Exception {
             if (input == null) {
-                throw new TransmitterClientException("Input could not be null");
+                throw new EncoderException("Input could not be null");
             }
-            byte[] data = serializer.serialize(input);
+            byte[] data;
+            try {
+                data = serializer.serialize(input);
+            } catch (IOException e) {
+                throw new EncoderException(e.getMessage(), e);
+            }
             out.writeInt(data.length);
             out.writeBytes(data);
         }
@@ -56,8 +63,7 @@ public abstract class NettyEncoderDecoders {
             in.markReaderIndex();
             int dataLength = in.readInt();
             if (dataLength < 4) {
-                throw new TransmitterClientException(
-                        "Data length should be greater than 4: " + dataLength);
+                throw new EncoderException("Data length should be greater than 4: " + dataLength);
             }
             if (in.readableBytes() < dataLength) {
                 in.resetReaderIndex();
@@ -66,7 +72,12 @@ public abstract class NettyEncoderDecoders {
 
             byte[] body = new byte[dataLength];
             in.readBytes(body);
-            Packet packet = serializer.deserialize(body);
+            Packet packet;
+            try {
+                packet = serializer.deserialize(body);
+            } catch (IOException e) {
+                throw new DecoderException(e.getMessage(), e);
+            }
             out.add(packet);
         }
 

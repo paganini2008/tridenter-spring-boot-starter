@@ -6,6 +6,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.springframework.context.annotation.Import;
+import com.github.doodler.common.transmitter.rpc.RpcAutoConfiguration;
 
 /**
  * 
@@ -17,7 +18,7 @@ import org.springframework.context.annotation.Import;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({NioTransmitterAutoConfiguration.class})
+@Import({NioTransmitterAutoConfiguration.class, RpcAutoConfiguration.class})
 public @interface EnableNioTransmitter {
 
 }

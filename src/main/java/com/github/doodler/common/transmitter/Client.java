@@ -15,25 +15,25 @@ public interface Client {
 
     void send(Object data);
 
-    void send(SocketAddress socketAddress, Object data);
+    void send(Object data, SocketAddress socketAddress);
 
     void send(Object data, Partitioner partitioner);
 
-    default void send(String serviceLocation, Object data) {
-        send(NetUtils.parse(serviceLocation), data);
+    default void send(Object data, String serviceLocation) {
+        send(data, NetUtils.parse(serviceLocation));
     }
 
-    Object sendAndReturn(SocketAddress address, Object data);
+    Object sendAndReturn(Object data, SocketAddress address);
 
-    Object sendAndReturn(SocketAddress address, Object data, long timeout, TimeUnit timeUnit);
+    Object sendAndReturn(Object data, SocketAddress address, long timeout, TimeUnit timeUnit);
 
-    default Object sendAndReturn(String serviceLocation, Object data) {
-        return sendAndReturn(NetUtils.parse(serviceLocation), data);
+    default Object sendAndReturn(Object data, String serviceLocation) {
+        return sendAndReturn(data, NetUtils.parse(serviceLocation));
     }
 
-    default Object sendAndReturn(String serviceLocation, Object data, long timeout,
+    default Object sendAndReturn(Object data, String serviceLocation, long timeout,
             TimeUnit timeUnit) {
-        return sendAndReturn(NetUtils.parse(serviceLocation), data, timeout, timeUnit);
+        return sendAndReturn(data, NetUtils.parse(serviceLocation), timeout, timeUnit);
     }
 
     Object sendAndReturn(Object data, Partitioner partitioner);
@@ -44,7 +44,5 @@ public interface Client {
 
     Object sendAndReturn(Object data, SelectedChannelCallback callback, long timeout,
             TimeUnit timeUnit);
-
-
 
 }

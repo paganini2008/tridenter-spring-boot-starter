@@ -91,4 +91,9 @@ public class NioTransmitterAutoConfiguration {
         return new LoggingPacketSubscriber();
     }
 
+    @Bean
+    public PacketHandlerExecution packetHandlerExecution(List<PacketHandler> packetHandlers) {
+        return new PacketHandlerExecution(packetHandlers);
+    }
+
 }

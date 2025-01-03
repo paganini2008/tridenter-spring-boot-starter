@@ -1,6 +1,7 @@
 package com.github.doodler.common.transmitter.serializer;
 
 import java.io.IOException;
+import java.util.Map;
 import com.github.doodler.common.transmitter.Packet;
 
 /**
@@ -22,6 +23,13 @@ public class KryoSerializer implements Serializer {
         return KryoUtils.deserializeFromBytes(bytes, Packet.class);
     }
 
+    public static void main(String[] args) throws IOException {
+        KryoSerializer kryoSerializer = new KryoSerializer();
+        Packet packet = Packet.wrap(Map.of("data", new Object[] {"Hello2"}));
+        byte[] bytes = kryoSerializer.serialize(packet);
+        System.out.println(bytes);
+        System.out.println(kryoSerializer.deserialize(bytes));
+    }
 
 
 }

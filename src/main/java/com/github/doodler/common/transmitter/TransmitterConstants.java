@@ -15,6 +15,6 @@ public interface TransmitterConstants {
 
     String MODE_ASYNC = "async";
 
-
+    String ATTR_PACKET_HANDLER = "packHandler";
 
 }

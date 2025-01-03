@@ -6,7 +6,7 @@ import com.github.doodler.common.transmitter.ChannelEvent;
 import com.github.doodler.common.transmitter.ChannelEvent.EventType;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
-import com.github.doodler.common.transmitter.PacketReader;
+import com.github.doodler.common.transmitter.PacketFilterExecution;
 import com.github.doodler.common.transmitter.TransmitterConstants;
 import com.github.doodler.common.utils.IdUtils;
 import io.netty.channel.Channel;
@@ -32,8 +32,8 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     @Autowired(required = false)
     private ChannelEventListener<Channel> channelEventListener;
 
-    @Autowired(required = false)
-    private PacketReader packetReader;
+    @Autowired
+    private PacketFilterExecution packetFilterExecution;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -59,14 +59,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         Packet packet = (Packet) message;
         if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
             Packet result = packet.copy();
-            if (packetReader != null) {
-                Object returnData = packetReader.response(packet);
-                if (returnData != null) {
-                    if (returnData instanceof Packet) {
-                        result = (Packet) returnData;
-                    } else {
-                        result.setObject(returnData);
-                    }
+            Object returnData = packetFilterExecution.executeFilterChain(packet);
+            if (returnData != null) {
+                if (returnData instanceof Packet) {
+                    result = (Packet) returnData;
+                } else {
+                    result.setObject(returnData);
                 }
             }
             result.setField("server", ctx.channel().localAddress().toString());

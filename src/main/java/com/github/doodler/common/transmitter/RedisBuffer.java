@@ -75,7 +75,7 @@ public class RedisBuffer implements Buffer<Packet> {
 
     @Override
     public Packet poll() {
-        return redisTemplate.opsForList().leftPop(getKey(namespace));
+        return redisTemplate.opsForList().rightPop(getKey(namespace));
     }
 
     @Override

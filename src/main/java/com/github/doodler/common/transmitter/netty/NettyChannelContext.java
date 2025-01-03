@@ -1,11 +1,12 @@
 package com.github.doodler.common.transmitter.netty;
 
 import java.net.SocketAddress;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.Partitioner;
+import com.google.common.base.Predicate;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 
@@ -40,6 +41,12 @@ public class NettyChannelContext extends NettyChannelContextSupport
     }
 
     @Override
+    public List<Channel> getChannels(Predicate<SocketAddress> p) {
+        return channelHolds.stream().filter(c -> p.test(c.remoteAddress()))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
+    @Override
     public void removeChannel(SocketAddress address) {
         for (Channel channel : channelHolds) {
             if (channel.remoteAddress() != null && channel.remoteAddress().equals(address)) {
@@ -59,7 +66,7 @@ public class NettyChannelContext extends NettyChannelContextSupport
     }
 
     @Override
-    public Collection<Channel> getChannels() {
+    public List<Channel> getChannels() {
         return channelHolds;
     }
 

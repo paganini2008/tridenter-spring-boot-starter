@@ -21,13 +21,9 @@ public @interface RpcClient {
 
     String serviceId() default "";
 
-    String serverLocation() default "";
-
     String className() default "";
 
     String beanName() default "";
-
-    String methodName() default "";
 
     long timeout() default 60;
 

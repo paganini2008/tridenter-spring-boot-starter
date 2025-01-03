@@ -18,11 +18,6 @@
 	</properties>
 
     <dependencies>
-    
-        <dependency>
-            <groupId>com.github.doodler</groupId>
-            <artifactId>doodler-common-data</artifactId>
-        </dependency>
         
         <dependency>
             <groupId>com.github.doodler</groupId>
@@ -32,11 +27,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.github.doodler</groupId>
-            <artifactId>doodler-common-timeseries</artifactId>
         </dependency>
         
         <dependency>

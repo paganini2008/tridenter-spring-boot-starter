@@ -1,7 +1,8 @@
 package com.github.doodler.common.transmitter;
 
 import java.net.SocketAddress;
-import java.util.Collection;
+import java.util.List;
+import com.google.common.base.Predicate;
 
 /**
  * 
@@ -20,13 +21,15 @@ public interface ChannelContext<T> {
 
     T getChannel(SocketAddress address);
 
+    List<T> getChannels(Predicate<SocketAddress> p);
+
     void removeChannel(SocketAddress address);
 
     int countOfChannels();
 
     T selectChannel(Object data, Partitioner partitioner);
 
-    Collection<T> getChannels();
+    List<T> getChannels();
 
     void setChannelEventListener(ChannelEventListener<T> channelEventListener);
 

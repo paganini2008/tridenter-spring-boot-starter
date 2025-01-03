@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
 import com.github.doodler.common.transmitter.HandshakeCallback;
@@ -17,8 +18,9 @@ import com.github.doodler.common.transmitter.NioClient;
 import com.github.doodler.common.transmitter.Packet;
 import com.github.doodler.common.transmitter.Partitioner;
 import com.github.doodler.common.transmitter.RequestFutureHolder;
-import com.github.doodler.common.transmitter.TransmitterNioProperties;
+import com.github.doodler.common.transmitter.SelectedChannelCallback;
 import com.github.doodler.common.transmitter.TransmitterClientException;
+import com.github.doodler.common.transmitter.TransmitterNioProperties;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -140,45 +142,6 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public Object sendAndReturn(SocketAddress address, Object data) {
-        Channel channel = channelContext.getChannel(address);
-        if (channel != null) {
-            String requestId = UUID.randomUUID().toString();
-            channel.attr(REQUEST_ID).set(requestId);
-            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
-            doSend(requestId, channel, data, MODE_SYNC);
-            try {
-                return completableFuture.get();
-            } catch (Exception e) {
-                throw new TransmitterClientException(e.getMessage(), e);
-            } finally {
-                RequestFutureHolder.removeRequest(requestId);
-            }
-        }
-        return null;
-    }
-
-    @Override
-    public Object sendAndReturn(SocketAddress address, Object data, long timeout,
-            TimeUnit timeUnit) {
-        Channel channel = channelContext.getChannel(address);
-        if (channel != null) {
-            String requestId = UUID.randomUUID().toString();
-            channel.attr(REQUEST_ID).set(requestId);
-            CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
-            doSend(requestId, channel, data, MODE_SYNC);
-            try {
-                return completableFuture.get(timeout, timeUnit);
-            } catch (Exception e) {
-                throw new TransmitterClientException(e.getMessage(), e);
-            } finally {
-                RequestFutureHolder.removeRequest(requestId);
-            }
-        }
-        return null;
-    }
-
-    @Override
     public void send(Object data, Partitioner partitioner) {
         Channel channel = channelContext.selectChannel(data, partitioner);
         if (channel != null) {
@@ -187,8 +150,50 @@ public class NettyClient implements NioClient {
     }
 
     @Override
+    public Object sendAndReturn(SocketAddress address, Object data) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.getChannel(address);
+            }
+        });
+    }
+
+    @Override
+    public Object sendAndReturn(SocketAddress address, Object data, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.getChannel(address);
+            }
+        }, timeout, timeUnit);
+    }
+
+    @Override
     public Object sendAndReturn(Object data, Partitioner partitioner) {
-        Channel channel = channelContext.selectChannel(data, partitioner);
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.selectChannel(data, partitioner);
+            }
+        });
+    }
+
+    @Override
+    public Object sendAndReturn(Object data, Partitioner partitioner, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.selectChannel(data, partitioner);
+            }
+        }, timeout, timeUnit);
+    }
+
+    @Override
+    public Object sendAndReturn(Object data, SelectedChannelCallback callback) {
+        Channel channel = callback.doSelectChannel(channelContext);
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();
             channel.attr(REQUEST_ID).set(requestId);
@@ -206,9 +211,9 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public Object sendAndReturn(Object data, Partitioner partitioner, long timeout,
+    public Object sendAndReturn(Object data, SelectedChannelCallback callback, long timeout,
             TimeUnit timeUnit) {
-        Channel channel = channelContext.selectChannel(data, partitioner);
+        Channel channel = callback.doSelectChannel(channelContext);
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();
             channel.attr(REQUEST_ID).set(requestId);
@@ -243,6 +248,7 @@ public class NettyClient implements NioClient {
         }
     }
 
+    @Override
     public void close() {
         try {
             channelContext.getChannels().forEach(channel -> {

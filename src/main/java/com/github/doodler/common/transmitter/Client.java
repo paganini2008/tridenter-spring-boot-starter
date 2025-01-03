@@ -19,25 +19,32 @@ public interface Client {
 
     void send(Object data, Partitioner partitioner);
 
-    default void send(String serverLocation, Object data) {
-        send(NetUtils.parse(serverLocation), data);
+    default void send(String serviceLocation, Object data) {
+        send(NetUtils.parse(serviceLocation), data);
     }
 
     Object sendAndReturn(SocketAddress address, Object data);
 
     Object sendAndReturn(SocketAddress address, Object data, long timeout, TimeUnit timeUnit);
 
+    default Object sendAndReturn(String serviceLocation, Object data) {
+        return sendAndReturn(NetUtils.parse(serviceLocation), data);
+    }
+
+    default Object sendAndReturn(String serviceLocation, Object data, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(NetUtils.parse(serviceLocation), data, timeout, timeUnit);
+    }
+
     Object sendAndReturn(Object data, Partitioner partitioner);
 
     Object sendAndReturn(Object data, Partitioner partitioner, long timeout, TimeUnit timeUnit);
 
-    default Object sendAndReturn(String serverLocation, Object data) {
-        return sendAndReturn(NetUtils.parse(serverLocation), data);
-    }
+    Object sendAndReturn(Object data, SelectedChannelCallback callback);
 
-    default Object sendAndReturn(String serverLocation, Object data, long timeout,
-            TimeUnit timeUnit) {
-        return sendAndReturn(NetUtils.parse(serverLocation), data, timeout, timeUnit);
-    }
+    Object sendAndReturn(Object data, SelectedChannelCallback callback, long timeout,
+            TimeUnit timeUnit);
+
+
 
 }

@@ -28,15 +28,13 @@ public class HashPartitioner implements Partitioner {
     }
 
     @Override
-    public <T> T selectChannel(Object obj, List<T> channels) {
-        Packet packet = (Packet) obj;
-        Object[] data = new Object[fieldNames.size()];
-        int i = 0;
-        for (String fieldName : fieldNames) {
-            data[i++] = getFieldValue(packet, fieldName);
+    public <T> T selectChannel(Object message, List<T> channels) {
+        if (channels.size() == 1) {
+            return channels.get(0);
         }
+        Object[] values = getValues(message);
         try {
-            return channels.get(indexFor(packet, data, channels.size()));
+            return channels.get(indexFor(message, values, channels.size()));
         } catch (RuntimeException e) {
             return null;
         }
@@ -47,12 +45,18 @@ public class HashPartitioner implements Partitioner {
         return "hash";
     }
 
-    protected Object getFieldValue(Packet packet, String fieldName) {
-        return packet.getField(fieldName);
+    protected Object[] getValues(Object message) {
+        Packet packet = (Packet) message;
+        Object[] data = new Object[fieldNames.size()];
+        int i = 0;
+        for (String fieldName : fieldNames) {
+            data[i++] = packet.getField(fieldName);
+        }
+        return data;
     }
 
-    protected int indexFor(Packet packet, Object[] data, int length) {
-        int hash = Arrays.deepHashCode(data);
+    protected int indexFor(Object message, Object[] values, int length) {
+        int hash = Arrays.deepHashCode(values);
         return (hash & 0x7FFFFFFF) % length;
     }
 

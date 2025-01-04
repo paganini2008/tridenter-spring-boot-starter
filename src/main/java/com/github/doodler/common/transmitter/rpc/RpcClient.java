@@ -31,8 +31,8 @@ public @interface RpcClient {
 
     int maxRetries() default 3;
 
-    Class<?> fallback() default Void.class;
+    Class<?> fallback() default void.class;
 
-    Class<?> fallbackFactory() default Void.class;
+    Class<?> fallbackFactory() default void.class;
 
 }

@@ -7,6 +7,8 @@ package com.github.doodler.common.transmitter.rpc;
  * @Date: 30/12/2024
  * @Version 1.0.0
  */
-public interface RpcFallbackFactory {
+public interface RpcFallbackFactory<T> {
+
+    T createFallback(Throwable e);
 
 }

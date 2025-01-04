@@ -193,15 +193,16 @@ public class NettyClient implements NioClient {
 
     @Override
     public Object sendAndReturn(Object data, SelectedChannelCallback callback) {
-
         Channel channel = callback.doSelectChannel(channelContext);
         if (channel != null) {
             String requestId = UUID.randomUUID().toString();
             channel.attr(REQUEST_ID).set(requestId);
             CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
             doSend(requestId, channel, data, MODE_SYNC);
+            Packet packet = null;
             try {
-                return completableFuture.get();
+                packet = (Packet) completableFuture.get();
+                return packet.getObject();
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {
@@ -220,8 +221,10 @@ public class NettyClient implements NioClient {
             channel.attr(REQUEST_ID).set(requestId);
             CompletableFuture<Object> completableFuture = RequestFutureHolder.getRequest(requestId);
             doSend(requestId, channel, data, MODE_SYNC);
+            Packet packet = null;
             try {
-                return completableFuture.get(timeout, timeUnit);
+                packet = (Packet) completableFuture.get(timeout, timeUnit);
+                return packet.getObject();
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {

@@ -85,8 +85,4 @@ public class RpcTemplate {
         return serviceInstances.stream().map(i -> i.getMetadata().get(TRANSMITTER_SERVER_LOCATION))
                 .map(s -> NetUtils.parse(s)).toList();
     }
-
-    public <T> T createProxyObject(Class<T> interfaceClass) {
-        return new RpcProxyObject<>(interfaceClass, this).getActualInstance();
-    }
 }

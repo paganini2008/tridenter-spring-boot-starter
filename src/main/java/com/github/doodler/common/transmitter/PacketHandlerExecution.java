@@ -31,18 +31,18 @@ public final class PacketHandlerExecution {
         return packetFilterChain;
     }
 
-    public Object executeFilterChain(Packet packet) {
-        return executeFilterChain(packetFilterChain, packet);
+    public Object executeHandlerChain(Packet packet) {
+        return executeHandlerChain(packetFilterChain, packet);
     }
 
-    Object executeFilterChain(PacketHandlerChain filterChain, Packet packet) {
+    Object executeHandlerChain(PacketHandlerChain filterChain, Packet packet) {
         if (filterChain == null) {
             return packet;
         }
         if (filterChain.shouldFilter(packet)) {
             return filterChain.handle(packet);
         }
-        return executeFilterChain(filterChain.next, packet);
+        return executeHandlerChain(filterChain.next, packet);
     }
 
 }

@@ -34,7 +34,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private ChannelEventListener<Channel> channelEventListener;
 
     @Autowired
-    private PacketHandlerExecution packetFilterExecution;
+    private PacketHandlerExecution packetHandlerExecution;
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -61,7 +61,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
             Packet result = packet.copy();
             try {
-                Object returnData = packetFilterExecution.executeFilterChain(packet);
+                Object returnData = packetHandlerExecution.executeHandlerChain(packet);
                 if (returnData != null) {
                     if (returnData instanceof Packet) {
                         result = (Packet) returnData;

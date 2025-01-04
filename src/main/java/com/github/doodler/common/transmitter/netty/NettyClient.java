@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Lazy;
 import com.github.doodler.common.transmitter.ChannelContext;
 import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.ConnectionKeeper;
+import com.github.doodler.common.transmitter.DataAccessTransmitterClientException;
 import com.github.doodler.common.transmitter.HandshakeCallback;
 import com.github.doodler.common.transmitter.MessageCodecFactory;
 import com.github.doodler.common.transmitter.NioClient;
@@ -224,7 +225,14 @@ public class NettyClient implements NioClient {
             Packet packet = null;
             try {
                 packet = (Packet) completableFuture.get(timeout, timeUnit);
+                if (packet.containsKey("errorMsg") || packet.containsKey("errorDetails")) {
+                    throw new DataAccessTransmitterClientException(
+                            packet.getStringField("errorMsg"),
+                            packet.getStringField("errorDetails"));
+                }
                 return packet.getObject();
+            } catch (TransmitterClientException e) {
+                throw e;
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {

@@ -26,5 +26,4 @@ public class TransmitterClientException extends TransmitterException {
     public TransmitterClientException(String msg, Throwable e) {
         super(msg, e);
     }
-
 }

@@ -8,6 +8,7 @@ import com.github.doodler.common.transmitter.ChannelEventListener;
 import com.github.doodler.common.transmitter.Packet;
 import com.github.doodler.common.transmitter.PacketHandlerExecution;
 import com.github.doodler.common.transmitter.TransmitterConstants;
+import com.github.doodler.common.utils.ExceptionUtils;
 import com.github.doodler.common.utils.IdUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -59,13 +60,18 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         Packet packet = (Packet) message;
         if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
             Packet result = packet.copy();
-            Object returnData = packetFilterExecution.executeFilterChain(packet);
-            if (returnData != null) {
-                if (returnData instanceof Packet) {
-                    result = (Packet) returnData;
-                } else {
-                    result.setObject(returnData);
+            try {
+                Object returnData = packetFilterExecution.executeFilterChain(packet);
+                if (returnData != null) {
+                    if (returnData instanceof Packet) {
+                        result = (Packet) returnData;
+                    } else {
+                        result.setObject(returnData);
+                    }
                 }
+            } catch (Exception e) {
+                result.setField("errorMsg", e.getMessage());
+                result.setField("errorDetails", ExceptionUtils.toString(e));
             }
             result.setField("server", ctx.channel().localAddress().toString());
             result.setField("salt", IdUtils.getShortUuid());

@@ -9,6 +9,6 @@ package com.github.doodler.common.transmitter.rpc;
  */
 public interface RpcFallbackFactory<T> {
 
-    T createFallback(Throwable e);
+    T getFallback(Throwable e);
 
 }

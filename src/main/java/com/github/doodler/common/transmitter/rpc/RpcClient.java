@@ -27,9 +27,13 @@ public @interface RpcClient {
 
     long timeout() default 60;
 
-    TimeUnit timeUnit() default TimeUnit.SECONDS;
-
     int maxRetries() default 3;
+
+    int retryInterval() default 1;
+
+    Class<? extends Throwable>[] retryableExceptions() default Exception.class;
+
+    TimeUnit timeUnit() default TimeUnit.SECONDS;
 
     Class<?> fallback() default void.class;
 

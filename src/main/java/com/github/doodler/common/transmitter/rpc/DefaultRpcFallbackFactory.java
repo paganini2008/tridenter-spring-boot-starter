@@ -23,7 +23,7 @@ public class DefaultRpcFallbackFactory<T> implements RpcFallbackFactory<T> {
     }
 
     @Override
-    public T createFallback(Throwable cause) {
+    public T getFallback(Throwable cause) {
         try {
             return (T) applicationContext.getBean(fallbackClass);
         } catch (RuntimeException e) {

@@ -25,7 +25,7 @@ public class GenericTypeRpcFallbackFactory<T> implements RpcFallbackFactory<T>, 
     private T rpcClientProxy;
 
     @Override
-    public T createFallback(Throwable e) {
+    public T getFallback(Throwable e) {
         if (e != null) {
             if (log.isErrorEnabled()) {
                 log.error(e.getMessage(), e);

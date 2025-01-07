@@ -61,9 +61,9 @@ Dingo fully integrates with Spring Boot and Spring Cloud, enabling:
 Include the following dependency in your `pom.xml`:
 ```xml
 <dependency>
-    <groupId>com.example</groupId>
+    <groupId>com.github.paganini2008</groupId>
     <artifactId>dingo-spring-boot-starter</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -71,30 +71,46 @@ Include the following dependency in your `pom.xml`:
 Add the necessary configuration to `application.yml`:
 ```yaml
 dingo:
-  transport:
-    type: netty # Options: netty, mina, grizzly
-    port: 8081
+  transmitter:
+    nio:
+      selection: netty # Options: netty, mina, grizzly
   rpc:
-    async: true
+    async: false
     retry:
       enabled: true
       maxAttempts: 3
-    rateLimit:
-      enabled: true
-      limit: 100 # requests per second
-    circuitBreaker:
-      enabled: true
-      failureThreshold: 50 # percentage
+      
 ```
 
 ### 3. Define Services
-Annotate your service methods with `@DingoService` to expose them as RPC endpoints:
+Annotate your service methods with `@RpcClient` to expose them as RPC endpoints:
 ```java
-@DingoService
-public class MyRpcService {
-    public String processData(String input) {
-        return "Processed: " + input;
+@RpcClient(serviceId = "doodler-transmitter-service", beanName = "testService", timeout = 60,
+        timeUnit = TimeUnit.SECONDS, retryInterval = 1,
+        fallbackFactory = TestRpcFallbackFactory.class)
+public interface TestServiceRpcClient {
+
+    String helloWorld(String name);
+
+}
+```
+
+Declare <code>FallbackFactory</code> (Optional)
+
+```java
+public class TestRpcFallbackFactory implements RpcFallbackFactory<TestServiceProxy> {
+
+    @Override
+    public TestServiceProxy getFallback(Throwable e) {
+        return new TestServiceProxy() {
+
+            @Override
+            public String helloWorld(String name) {
+                return "Bad: I am fallback: " + name;
+            }
+        };
     }
+
 }
 ```
 
@@ -102,11 +118,11 @@ public class MyRpcService {
 Use the `DingoClient` to perform remote calls:
 ```java
 @Autowired
-private DingoClient dingoClient;
+private TestServiceRpcClient testServiceRpcClient;
 
 public void sendRequest() {
-    String response = dingoClient.invoke("remoteService", "processData", "Sample Data");
-    System.out.println(response);
+    String response = testServiceRpcClient.helloWorld("Java!");
+    System.out.println(response);// Hello world: Java!
 }
 ```
 

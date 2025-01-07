@@ -10,7 +10,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>doodler-common-transmitter</artifactId>
+    <groupId>com.github.paganini2008</groupId>
+    <artifactId>dingo-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
     
     <properties>

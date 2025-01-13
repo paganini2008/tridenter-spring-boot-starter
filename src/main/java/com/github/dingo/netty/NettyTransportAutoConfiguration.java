@@ -19,7 +19,7 @@ import io.netty.channel.Channel;
  * @Version 1.0.0
  */
 @Configuration(proxyBeanMethods = false)
-@ConditionalOnProperty(name = "dingo.transmitter.nio.selection", havingValue = "netty",
+@ConditionalOnProperty(name = "doodler.transmitter.nio.selection", havingValue = "netty",
         matchIfMissing = true)
 public class NettyTransportAutoConfiguration {
 

@@ -1,5 +1,6 @@
 package com.github.dingo.rpc;
 
+import java.beans.Introspector;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -52,7 +53,7 @@ public class RpcProxyObject<API> implements InvocationHandler, RetryListener {
         this.interfaceClass = interfaceClass;
         this.serviceId = rpcClient.serviceId();
         this.className = rpcClient.className();
-        this.beanName = rpcClient.beanName();
+        this.beanName = inspectBeanName(rpcClient);
         this.maxRetries = rpcClient.maxRetries();
         this.retryInterval = rpcClient.retryInterval();
         this.retryableExceptions = rpcClient.retryableExceptions();
@@ -66,6 +67,18 @@ public class RpcProxyObject<API> implements InvocationHandler, RetryListener {
         this.applicationContext = applicationContext;
         this.actualInstance = Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                 new Class<?>[] {interfaceClass}, this);
+    }
+
+    private String inspectBeanName(RpcClient rpcClient) {
+        if (StringUtils.isBlank(rpcClient.className())
+                && StringUtils.isBlank(rpcClient.beanName())) {
+            if (interfaceClass.getSimpleName().endsWith("Proxy")) {
+                String classSimpleName = interfaceClass.getSimpleName();
+                return Introspector
+                        .decapitalize(classSimpleName.substring(0, classSimpleName.length() - 5));
+            }
+        }
+        return rpcClient.beanName();
     }
 
     private Supplier<RpcFallbackFactory<API>> getFallbackFactorySupplier(

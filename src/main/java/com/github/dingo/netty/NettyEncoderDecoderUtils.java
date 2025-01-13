@@ -13,12 +13,12 @@ import io.netty.handler.codec.MessageToByteEncoder;
 
 /**
  * 
- * @Description: NettyEncoderDecoders
+ * @Description: NettyEncoderDecoderUtils
  * @Author: Fred Feng
  * @Date: 27/12/2024
  * @Version 1.0.0
  */
-public abstract class NettyEncoderDecoders {
+public abstract class NettyEncoderDecoderUtils {
 
     public static class PacketEncoder extends MessageToByteEncoder<Packet> {
 

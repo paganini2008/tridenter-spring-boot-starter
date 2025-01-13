@@ -23,10 +23,6 @@ public interface Client {
         send(data, NetUtils.parse(serviceLocation));
     }
 
-    Object sendAndReturn(Object data, SocketAddress address);
-
-    Object sendAndReturn(Object data, SocketAddress address, long timeout, TimeUnit timeUnit);
-
     default Object sendAndReturn(Object data, String serviceLocation) {
         return sendAndReturn(data, NetUtils.parse(serviceLocation));
     }
@@ -36,13 +32,48 @@ public interface Client {
         return sendAndReturn(data, NetUtils.parse(serviceLocation), timeout, timeUnit);
     }
 
-    Object sendAndReturn(Object data, Partitioner partitioner);
-
-    Object sendAndReturn(Object data, Partitioner partitioner, long timeout, TimeUnit timeUnit);
-
     Object sendAndReturn(Object data, SelectedChannelCallback callback);
 
     Object sendAndReturn(Object data, SelectedChannelCallback callback, long timeout,
             TimeUnit timeUnit);
+
+    default Object sendAndReturn(Object data, SocketAddress address) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.getChannel(address);
+            }
+        });
+    }
+
+    default Object sendAndReturn(Object data, SocketAddress address, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.getChannel(address);
+            }
+        }, timeout, timeUnit);
+    }
+
+
+    default Object sendAndReturn(Object data, Partitioner partitioner) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.selectChannel(data, partitioner);
+            }
+        });
+    }
+
+    default Object sendAndReturn(Object data, Partitioner partitioner, long timeout,
+            TimeUnit timeUnit) {
+        return sendAndReturn(data, new SelectedChannelCallback() {
+            @Override
+            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
+                return channelContext.selectChannel(data, partitioner);
+            }
+        }, timeout, timeUnit);
+    }
 
 }

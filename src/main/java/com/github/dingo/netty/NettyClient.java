@@ -9,7 +9,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import com.github.dingo.ChannelContext;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ConnectionKeeper;
 import com.github.dingo.DataAccessTransmitterClientException;
@@ -151,48 +150,6 @@ public class NettyClient implements NioClient {
     }
 
     @Override
-    public Object sendAndReturn(Object data, SocketAddress address) {
-        return sendAndReturn(data, new SelectedChannelCallback() {
-            @Override
-            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
-                return channelContext.getChannel(address);
-            }
-        });
-    }
-
-    @Override
-    public Object sendAndReturn(Object data, SocketAddress address, long timeout,
-            TimeUnit timeUnit) {
-        return sendAndReturn(data, new SelectedChannelCallback() {
-            @Override
-            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
-                return channelContext.getChannel(address);
-            }
-        }, timeout, timeUnit);
-    }
-
-    @Override
-    public Object sendAndReturn(Object data, Partitioner partitioner) {
-        return sendAndReturn(data, new SelectedChannelCallback() {
-            @Override
-            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
-                return channelContext.selectChannel(data, partitioner);
-            }
-        });
-    }
-
-    @Override
-    public Object sendAndReturn(Object data, Partitioner partitioner, long timeout,
-            TimeUnit timeUnit) {
-        return sendAndReturn(data, new SelectedChannelCallback() {
-            @Override
-            public <T> T doSelectChannel(ChannelContext<T> channelContext) {
-                return channelContext.selectChannel(data, partitioner);
-            }
-        }, timeout, timeUnit);
-    }
-
-    @Override
     public Object sendAndReturn(Object data, SelectedChannelCallback callback) {
         Channel channel = callback.doSelectChannel(channelContext);
         if (channel != null) {
@@ -203,6 +160,11 @@ public class NettyClient implements NioClient {
             Packet packet = null;
             try {
                 packet = (Packet) completableFuture.get();
+                if (packet.containsKey("errorMsg") || packet.containsKey("errorDetails")) {
+                    throw new DataAccessTransmitterClientException(
+                            packet.getStringField("errorMsg"),
+                            packet.getStringField("errorDetails"));
+                }
                 return packet.getObject();
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);

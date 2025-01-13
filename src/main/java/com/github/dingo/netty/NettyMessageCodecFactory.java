@@ -25,11 +25,11 @@ public class NettyMessageCodecFactory implements MessageCodecFactory {
     }
 
     public ChannelHandler getEncoder() {
-        return new NettyEncoderDecoders.PacketEncoder(serializer);
+        return new NettyEncoderDecoderUtils.PacketEncoder(serializer);
     }
 
     public ChannelHandler getDecoder() {
-        return new NettyEncoderDecoders.PacketDecoder(serializer);
+        return new NettyEncoderDecoderUtils.PacketDecoder(serializer);
     }
 
 }

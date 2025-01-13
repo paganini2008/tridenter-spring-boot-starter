@@ -12,6 +12,8 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import com.github.dingo.grizzly.GrizzlyTransportAutoConfiguration;
+import com.github.dingo.mina.MinaTransportAutoConfiguration;
 import com.github.dingo.netty.NettyTransportAutoConfiguration;
 import com.github.dingo.serializer.KryoSerializer;
 import com.github.dingo.serializer.Serializer;
@@ -29,7 +31,8 @@ import com.github.doodler.common.events.EventSubscriber;
  * @Version 1.0.0
  */
 @EnableConfigurationProperties({TransmitterNioProperties.class, TransmitterEventProperties.class})
-@Import({NettyTransportAutoConfiguration.class})
+@Import({NettyTransportAutoConfiguration.class, MinaTransportAutoConfiguration.class,
+        GrizzlyTransportAutoConfiguration.class})
 @Configuration(proxyBeanMethods = false)
 public class NioTransmitterAutoConfiguration {
 
@@ -82,8 +85,6 @@ public class NioTransmitterAutoConfiguration {
         }
         return eventPublisher;
     }
-
-
 
     @ConditionalOnProperty("doodler.transmitter.event.logging.enabled")
     @Bean

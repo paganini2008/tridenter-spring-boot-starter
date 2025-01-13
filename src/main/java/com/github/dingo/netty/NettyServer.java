@@ -88,7 +88,7 @@ public class NettyServer implements NioServer {
                     : new InetSocketAddress(port);
             bootstrap.bind(socketAddress).sync();
             started.set(true);
-            log.info("Netty is started on: " + socketAddress);
+            log.info("NettyServer is started on: " + socketAddress);
         } catch (Exception e) {
             throw new TransmitterServerException(e.getMessage(), e);
         }

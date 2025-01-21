@@ -83,7 +83,7 @@ public class RedisBuffer implements Buffer<Packet> {
         if (fetchSize == 1) {
             return Collections.singletonList(poll());
         }
-        List<Packet> results = redisTemplate.opsForList().leftPop(getKey(namespace), fetchSize);
+        List<Packet> results = redisTemplate.opsForList().rightPop(getKey(namespace), fetchSize);
         return results != null && results.size() > 0 ? Collections.unmodifiableCollection(results)
                 : Collections.emptyList();
     }

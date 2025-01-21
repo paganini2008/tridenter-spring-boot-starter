@@ -19,18 +19,18 @@ import com.google.common.base.Predicate;
 public class MinaChannelContext extends MinaChannelContextSupport
         implements ChannelContext<IoSession> {
 
-    private final List<IoSession> channelHolds = new CopyOnWriteArrayList<IoSession>();
+    private final List<IoSession> sessionCache = new CopyOnWriteArrayList<IoSession>();
 
     @Override
     public void addChannel(IoSession channel, int weight) {
         for (int i = 0; i < weight; i++) {
-            channelHolds.add(channel);
+            sessionCache.add(channel);
         }
     }
 
     @Override
     public IoSession getChannel(SocketAddress address) {
-        for (IoSession channel : channelHolds) {
+        for (IoSession channel : sessionCache) {
             if (channel.getRemoteAddress() != null && channel.getRemoteAddress().equals(address)) {
                 return channel;
             }
@@ -40,31 +40,31 @@ public class MinaChannelContext extends MinaChannelContextSupport
 
     @Override
     public void removeChannel(SocketAddress address) {
-        for (IoSession channel : channelHolds) {
+        for (IoSession channel : sessionCache) {
             if (channel.getRemoteAddress() != null && channel.getRemoteAddress().equals(address)) {
-                channelHolds.remove(channel);
+                sessionCache.remove(channel);
             }
         }
     }
 
     @Override
     public int countOfChannels() {
-        return channelHolds.size();
+        return sessionCache.size();
     }
 
     @Override
     public IoSession selectChannel(Object data, Partitioner partitioner) {
-        return channelHolds.isEmpty() ? null : partitioner.selectChannel(data, channelHolds);
+        return sessionCache.isEmpty() ? null : partitioner.selectChannel(data, sessionCache);
     }
 
     @Override
     public List<IoSession> getChannels() {
-        return channelHolds;
+        return sessionCache;
     }
 
     @Override
     public List<IoSession> getChannels(Predicate<SocketAddress> p) {
-        return channelHolds.stream()
+        return sessionCache.stream()
                 .filter(i -> i.getRemoteAddress() != null && p.test(i.getRemoteAddress()))
                 .collect(Collectors.toUnmodifiableList());
     }

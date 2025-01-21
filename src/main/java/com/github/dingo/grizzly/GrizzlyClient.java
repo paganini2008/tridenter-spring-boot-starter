@@ -4,10 +4,13 @@ import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.collections4.CollectionUtils;
 import org.glassfish.grizzly.CompletionHandler;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.FilterChainBuilder;
@@ -20,16 +23,19 @@ import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.DataAccessTransmitterClientException;
 import com.github.dingo.HandshakeCallback;
 import com.github.dingo.NioClient;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.Partitioner;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.SelectedChannelCallback;
 import com.github.dingo.TransmitterClientException;
 import com.github.dingo.TransmitterNioProperties;
+import com.github.dingo.TransmitterTimeoutException;
+import com.github.doodler.common.context.InstanceId;
 
 /**
  * 
@@ -47,15 +53,22 @@ public class GrizzlyClient implements NioClient {
     private DelayedExecutor delayedExecutor;
 
     @Autowired
+    private InstanceId instanceId;
+
+    @Autowired
     private TransmitterNioProperties nioProperties;
+
+    @Autowired
+    private ChannelSwitcher channelSwitcher;
 
     @Lazy
     @Autowired
     private PacketCodecFactory codecFactory;
 
     @Autowired
-    public void setChannelEventListener(ChannelEventListener<Connection<?>> channelEventListener) {
-        this.channelContext.setChannelEventListener(channelEventListener);
+    public void setChannelEventListeners(
+            List<ChannelEventListener<Connection<?>>> channelEventListeners) {
+        this.channelContext.setChannelEventListeners(channelEventListeners);
     }
 
     @Override
@@ -66,7 +79,9 @@ public class GrizzlyClient implements NioClient {
         delayedExecutor = IdleTimeoutFilter.createDefaultIdleDelayedExecutor(5, TimeUnit.SECONDS);
         delayedExecutor.start();
         IdleTimeoutFilter timeoutFilter = new IdleTimeoutFilter(delayedExecutor,
-                clientConfig.getWriterIdleTimeout(), TimeUnit.SECONDS, IdleTimeoutPolicies.PING);
+                clientConfig.getWriterIdleTimeout(), TimeUnit.SECONDS,
+                nioProperties.getClient().isKeepAlive() ? IdleTimeoutPolicies.PING
+                        : IdleTimeoutPolicies.CLOSE);
         filterChainBuilder.add(timeoutFilter);
         filterChainBuilder.add(new PacketFilter(codecFactory));
         filterChainBuilder.add(channelContext);
@@ -148,7 +163,7 @@ public class GrizzlyClient implements NioClient {
         public void completed(Connection connection) {
             if (connection.isOpen()) {
                 SocketAddress remoteAddress = (SocketAddress) connection.getPeerAddress();
-                ConnectionKeeper connectionKeeper = channelContext.getConnectionKeeper();
+                NioConnectionKeeper connectionKeeper = channelContext.getNioConnectionKeeper();
                 if (connectionKeeper != null) {
                     connectionKeeper.keep(remoteAddress, handshakeCallback);
                 }
@@ -167,13 +182,32 @@ public class GrizzlyClient implements NioClient {
     }
 
     @Override
-    public void watchConnection(int checkInterval, TimeUnit timeUnit) {
-        this.channelContext
-                .setConnectionKeeper(new ConnectionKeeper(checkInterval, timeUnit, this));
+    public void watchConnection(int checkInterval, TimeUnit timeUnit, int maxAttempts) {
+        this.channelContext.setNioConnectionKeeper(
+                new NioConnectionKeeper(checkInterval, timeUnit, maxAttempts, this));
+    }
+
+    @Override
+    public void keep(SocketAddress remoteAddress, HandshakeCallback handshakeCallback) {
+        NioConnectionKeeper connectionKeeper = channelContext.getNioConnectionKeeper();
+        if (connectionKeeper != null) {
+            connectionKeeper.keep(remoteAddress, handshakeCallback);
+        }
+        if (handshakeCallback != null) {
+            handshakeCallback.operationComplete(remoteAddress);
+        }
+    }
+
+    @Override
+    public void fireReconnection(SocketAddress remoteAddress) {
+        this.channelContext.getNioConnectionKeeper().reconnect(remoteAddress);
     }
 
     @Override
     public void send(Object data) {
+        if (channelContext.getChannels().isEmpty()) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
         channelContext.getChannels().forEach(connection -> {
             doSend(null, connection, data, MODE_ASYNC);
         });
@@ -184,6 +218,8 @@ public class GrizzlyClient implements NioClient {
         Connection<?> connection = channelContext.getChannel(address);
         if (connection != null) {
             doSend(null, connection, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -192,6 +228,8 @@ public class GrizzlyClient implements NioClient {
         Connection<?> connection = channelContext.selectChannel(data, partitioner);
         if (connection != null) {
             doSend(null, connection, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -212,13 +250,15 @@ public class GrizzlyClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TransmitterClientException e) {
+                throw e;
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     @Override
@@ -239,13 +279,18 @@ public class GrizzlyClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TimeoutException e) {
+                throw new TransmitterTimeoutException(
+                        "Execute timeout: " + timeout + " " + timeUnit.name().toLowerCase());
+            } catch (TransmitterClientException e) {
+                throw e;
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     private void doSend(String requestId, Connection<?> connection, Object data, String mode) {
@@ -259,11 +304,26 @@ public class GrizzlyClient implements NioClient {
             if (packet != null) {
                 packet.setMode(mode);
                 packet.setField("requestId", requestId);
-                connection.write(packet);
+                packet.setField("instanceId", instanceId.get());
+                if (channelSwitcher.canAccess((SocketAddress) connection.getPeerAddress())) {
+                    connection.write(packet);
+                } else {
+                    getAvailableConnection().write(packet);
+                }
             }
         } catch (Exception e) {
             throw new TransmitterClientException(e.getMessage(), e);
         }
     }
+
+    private Connection<?> getAvailableConnection() {
+        List<Connection<?>> list = channelContext.getChannels(sa -> channelSwitcher.canAccess(sa));
+        if (CollectionUtils.isEmpty(list)) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
+        return list.get(0);
+    }
+
+
 
 }

@@ -12,13 +12,13 @@ import java.net.SocketAddress;
  */
 public interface NioConnection {
 
-    default void connect(String serverLocation, HandshakeCallback handshakeCallback) {
-        int index = serverLocation.indexOf(":");
+    default void connect(String serviceLocation, HandshakeCallback handshakeCallback) {
+        int index = serviceLocation.indexOf(":");
         if (index == -1) {
-            throw new IllegalArgumentException(serverLocation);
+            throw new IllegalArgumentException(serviceLocation);
         }
-        String hostName = serverLocation.substring(0, index);
-        int port = Integer.parseInt(serverLocation.substring(index + 1));
+        String hostName = serviceLocation.substring(0, index);
+        int port = Integer.parseInt(serviceLocation.substring(index + 1));
         connect(new InetSocketAddress(hostName, port), handshakeCallback);
     }
 

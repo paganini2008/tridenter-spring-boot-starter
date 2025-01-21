@@ -3,24 +3,30 @@ package com.github.dingo.netty;
 import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.DataAccessTransmitterClientException;
 import com.github.dingo.HandshakeCallback;
 import com.github.dingo.MessageCodecFactory;
 import com.github.dingo.NioClient;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.Partitioner;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.SelectedChannelCallback;
 import com.github.dingo.TransmitterClientException;
 import com.github.dingo.TransmitterNioProperties;
+import com.github.dingo.TransmitterTimeoutException;
+import com.github.doodler.common.context.InstanceId;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -53,21 +59,44 @@ public class NettyClient implements NioClient {
     private Bootstrap bootstrap;
 
     @Autowired
+    private InstanceId instanceId;
+
+    @Autowired
     private TransmitterNioProperties nioProperties;
+
+    @Autowired
+    private ChannelSwitcher channelSwitcher;
 
     @Lazy
     @Autowired
     private MessageCodecFactory codecFactory;
 
     @Autowired
-    public void setChannelEventListener(ChannelEventListener<Channel> channelEventListener) {
-        this.channelContext.setChannelEventListener(channelEventListener);
+    public void setChannelEventListeners(
+            List<ChannelEventListener<Channel>> channelEventListeners) {
+        this.channelContext.setChannelEventListeners(channelEventListeners);
     }
 
     @Override
-    public void watchConnection(int checkInterval, TimeUnit timeUnit) {
-        this.channelContext
-                .setConnectionKeeper(new ConnectionKeeper(checkInterval, timeUnit, this));
+    public void watchConnection(int checkInterval, TimeUnit timeUnit, int maxAttempts) {
+        this.channelContext.setNioConnectionKeeper(
+                new NioConnectionKeeper(checkInterval, timeUnit, maxAttempts, this));
+    }
+
+    @Override
+    public void keep(SocketAddress remoteAddress, HandshakeCallback handshakeCallback) {
+        NioConnectionKeeper connectionKeeper = channelContext.getNioConnectionKeeper();
+        if (connectionKeeper != null) {
+            connectionKeeper.keep(remoteAddress, handshakeCallback);
+        }
+        if (handshakeCallback != null) {
+            handshakeCallback.operationComplete(remoteAddress);
+        }
+    }
+
+    @Override
+    public void fireReconnection(SocketAddress remoteAddress) {
+        this.channelContext.getNioConnectionKeeper().reconnect(remoteAddress);
     }
 
     public void open() {
@@ -87,7 +116,7 @@ public class NettyClient implements NioClient {
                 pipeline.addLast(new IdleStateHandler(clientConfig.getReaderIdleTimeout(),
                         clientConfig.getWriterIdleTimeout(), clientConfig.getAllIdleTimeout(),
                         TimeUnit.SECONDS));
-                pipeline.addLast(new NettyClientKeepAlivePolicy());
+                pipeline.addLast(new NettyClientKeepAlivePolicy(nioProperties));
                 pipeline.addLast(codecFactory.getEncoder(), codecFactory.getDecoder());
                 pipeline.addLast(channelContext);
             }
@@ -109,8 +138,8 @@ public class NettyClient implements NioClient {
                     .addListener(new GenericFutureListener<ChannelFuture>() {
                         public void operationComplete(ChannelFuture future) throws Exception {
                             if (future.isSuccess()) {
-                                ConnectionKeeper connectionKeeper =
-                                        channelContext.getConnectionKeeper();
+                                NioConnectionKeeper connectionKeeper =
+                                        channelContext.getNioConnectionKeeper();
                                 if (connectionKeeper != null) {
                                     connectionKeeper.keep(remoteAddress, handshakeCallback);
                                 }
@@ -128,6 +157,9 @@ public class NettyClient implements NioClient {
 
     @Override
     public void send(Object data) {
+        if (channelContext.getChannels().isEmpty()) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
         channelContext.getChannels().forEach(channel -> {
             doSend(null, channel, data, MODE_ASYNC);
         });
@@ -138,6 +170,8 @@ public class NettyClient implements NioClient {
         Channel channel = channelContext.getChannel(address);
         if (channel != null) {
             doSend(null, channel, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -146,6 +180,8 @@ public class NettyClient implements NioClient {
         Channel channel = channelContext.selectChannel(data, partitioner);
         if (channel != null) {
             doSend(null, channel, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -166,13 +202,15 @@ public class NettyClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TransmitterClientException e) {
+                throw e;
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     @Override
@@ -193,6 +231,9 @@ public class NettyClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TimeoutException e) {
+                throw new TransmitterTimeoutException(
+                        "Execute timeout: " + timeout + " " + timeUnit.name().toLowerCase());
             } catch (TransmitterClientException e) {
                 throw e;
             } catch (Exception e) {
@@ -201,7 +242,7 @@ public class NettyClient implements NioClient {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     private void doSend(String requestId, Channel channel, Object data, String mode) {
@@ -215,11 +256,24 @@ public class NettyClient implements NioClient {
             if (packet != null) {
                 packet.setMode(mode);
                 packet.setField("requestId", requestId);
-                channel.writeAndFlush(packet);
+                packet.setField("instanceId", instanceId.get());
+                if (channelSwitcher.canAccess(channel.remoteAddress())) {
+                    channel.writeAndFlush(packet);
+                } else {
+                    getAvailableChannel().writeAndFlush(packet);
+                }
             }
         } catch (Exception e) {
             throw new TransmitterClientException(e.getMessage(), e);
         }
+    }
+
+    private Channel getAvailableChannel() {
+        List<Channel> list = channelContext.getChannels(sa -> channelSwitcher.canAccess(sa));
+        if (CollectionUtils.isEmpty(list)) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
+        return list.get(0);
     }
 
     @Override

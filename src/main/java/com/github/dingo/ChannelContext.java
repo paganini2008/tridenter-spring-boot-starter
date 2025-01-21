@@ -31,6 +31,6 @@ public interface ChannelContext<T> {
 
     List<T> getChannels();
 
-    void setChannelEventListener(ChannelEventListener<T> channelEventListener);
+    void setChannelEventListeners(List<ChannelEventListener<T>> channelEventListeners);
 
 }

@@ -21,27 +21,28 @@ public class NettyChannelEventListener implements ChannelEventListener<Channel> 
         if (log.isTraceEnabled()) {
             Channel channel = channelEvent.getSource();
             EventType eventType = channelEvent.getEventType();
+            String prefix = channelEvent.isServerSide() ? "ServerSide" : "ClientSide";
             switch (eventType) {
                 case CONNECTED:
-                    log.trace("{} ->> {} has established connection.", channel.localAddress(),
-                            channel.remoteAddress());
+                    log.trace("{}: {} ->> {} has established connection.", prefix,
+                            channel.localAddress(), channel.remoteAddress());
                     break;
                 case CLOSED:
-                    log.trace("{} ->> {} has loss connection.", channel.localAddress(),
+                    log.trace("{}: {} ->> {} has lost connection.", prefix, channel.localAddress(),
                             channel.remoteAddress());
                     break;
                 case PING:
-                    log.trace("{} ->> {} send a ping.", channel.remoteAddress(),
+                    log.trace("{}: {} ->> {} send a ping.", prefix, channel.remoteAddress(),
                             channel.localAddress());
                     break;
                 case PONG:
-                    log.trace("{} ->> {} send a pong.", channel.remoteAddress(),
+                    log.trace("{}: {} ->> {} send a pong.", prefix, channel.remoteAddress(),
                             channel.localAddress());
                     break;
                 case ERROR:
-                    log.trace("{} ->> {} has loss connection for fatal reason.",
+                    log.trace("{}: {} ->> {} has loss connection for fatal reason: {}", prefix,
                             channel.localAddress(), channel.remoteAddress(),
-                            channelEvent.getCause());
+                            channelEvent.getCause().getMessage(), channelEvent.getCause());
                     break;
             }
         }

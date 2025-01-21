@@ -1,6 +1,7 @@
 package com.github.dingo.mina;
 
 import java.net.SocketAddress;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dingo.ChannelContext;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.ChannelEvent.EventType;
@@ -26,14 +27,14 @@ public abstract class MinaChannelContextSupport extends IoHandlerAdapter
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private ConnectionKeeper connectionKeeper;
-    private ChannelEventListener<IoSession> channelEventListener;
+    private NioConnectionKeeper connectionKeeper;
+    private List<ChannelEventListener<IoSession>> channelEventListeners;
 
-    public ConnectionKeeper getConnectionKeeper() {
+    public NioConnectionKeeper getNioConnectionKeeper() {
         return connectionKeeper;
     }
 
-    public void setConnectionKeeper(ConnectionKeeper connectionKeeper) {
+    public void setNioConnectionKeeper(NioConnectionKeeper connectionKeeper) {
         this.connectionKeeper = connectionKeeper;
     }
 
@@ -89,18 +90,20 @@ public abstract class MinaChannelContextSupport extends IoHandlerAdapter
         return (data instanceof Packet) && ((Packet) data).isPong();
     }
 
-    public void setChannelEventListener(ChannelEventListener<IoSession> channelEventListener) {
-        this.channelEventListener = channelEventListener;
+    @Override
+    public void setChannelEventListeners(
+            List<ChannelEventListener<IoSession>> channelEventListeners) {
+        this.channelEventListeners = channelEventListeners;
     }
 
-    public ChannelEventListener<IoSession> getChannelEventListener() {
-        return channelEventListener;
+    public List<ChannelEventListener<IoSession>> getChannelEventListeners() {
+        return channelEventListeners;
     }
 
     private void fireChannelEvent(IoSession channel, EventType eventType, Throwable cause) {
-        if (channelEventListener != null) {
-            channelEventListener
-                    .fireChannelEvent(new ChannelEvent<IoSession>(channel, eventType, cause));
+        if (channelEventListeners != null) {
+            channelEventListeners.forEach(l -> l.fireChannelEvent(
+                    new ChannelEvent<IoSession>(channel, eventType, false, cause)));
         }
     }
 

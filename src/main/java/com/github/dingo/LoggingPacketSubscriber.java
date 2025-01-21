@@ -1,5 +1,6 @@
 package com.github.dingo;
 
+import org.springframework.core.Ordered;
 import com.github.doodler.common.events.EventSubscriber;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +28,9 @@ public class LoggingPacketSubscriber implements EventSubscriber<Packet> {
         }
     }
 
-
+    @Override
+    public int getOrder() {
+        return Ordered.HIGHEST_PRECEDENCE;
+    }
 
 }

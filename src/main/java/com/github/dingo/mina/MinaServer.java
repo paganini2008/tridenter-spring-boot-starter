@@ -148,8 +148,8 @@ public class MinaServer implements NioServer {
 
         public Object getResponse(IoSession session, Object request) {
             if (channelEventListener != null) {
-                channelEventListener.fireChannelEvent(
-                        new ChannelEvent<IoSession>(session, ChannelEvent.EventType.PING, null));
+                channelEventListener.fireChannelEvent(new ChannelEvent<IoSession>(session,
+                        ChannelEvent.EventType.PING, true, null));
             }
             return Packet.PONG;
         }

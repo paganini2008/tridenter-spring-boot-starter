@@ -27,11 +27,12 @@ public class NioClientBootstrap {
 
     private final TransmitterNioProperties nioProperties;
     private final NioClient nioClient;
+    private final ChannelSwitcher channelSwitch;
     private final ApplicationInfoManager applicationInfoManager;
 
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReadyEvent(ApplicationReadyEvent event) {
-        if (nioProperties.isConnectWithSelf()) {
+        if (nioProperties.getClient().isConnectWithSelf()) {
             final String serverLocation = applicationInfoManager.getMetadata()
                     .get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION);
             if (StringUtils.isBlank(serverLocation)) {
@@ -39,7 +40,15 @@ public class NioClientBootstrap {
             }
             nioClient.connect(serverLocation, addr -> {
                 log.info("Successfully connected to address: {}", addr.toString());
+                channelSwitch.enableInternalChannel(addr);
             });
+        } else {
+            log.warn(
+                    "=============================================================================================");
+            log.warn(
+                    "| No available internal channel will be used in the future until external channel coming in.|");
+            log.warn(
+                    "=============================================================================================");
         }
     }
 
@@ -55,15 +64,17 @@ public class NioClientBootstrap {
                             log.warn("No Metadata in AppInfo: {}", app.getApplicationInfo());
                             return;
                         }
-                        String serverLocation = (String) metadata
+                        String serviceLocation = (String) metadata
                                 .get(TransmitterConstants.TRANSMITTER_SERVER_LOCATION);
-                        if (StringUtils.isBlank(serverLocation)) {
+                        if (StringUtils.isBlank(serviceLocation)) {
                             log.warn("No 'TRANSMITTER_SERVER_LOCATION' in Metadata. AppInfo: {}",
                                     app.getApplicationInfo());
                             return;
                         }
-                        nioClient.connect(serverLocation, addr -> {
+                        nioClient.connect(serviceLocation, addr -> {
                             log.info("Successfully connected to address: {}", addr.toString());
+                            channelSwitch.enableExternalChannel(addr,
+                                    nioProperties.isDefaultExternalChannelAccessable());
                         });
                     });
         }

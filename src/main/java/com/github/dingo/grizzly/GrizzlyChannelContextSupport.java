@@ -2,6 +2,7 @@ package com.github.dingo.grizzly;
 
 import java.io.IOException;
 import java.net.SocketAddress;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.BaseFilter;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.github.dingo.ChannelContext;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.ChannelEvent.EventType;
@@ -29,14 +30,14 @@ public abstract class GrizzlyChannelContextSupport extends BaseFilter
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private ConnectionKeeper connectionKeeper;
-    private ChannelEventListener<Connection<?>> channelEventListener;
+    private NioConnectionKeeper connectionKeeper;
+    private List<ChannelEventListener<Connection<?>>> channelEventListeners;
 
-    public ConnectionKeeper getConnectionKeeper() {
+    public NioConnectionKeeper getNioConnectionKeeper() {
         return connectionKeeper;
     }
 
-    public void setConnectionKeeper(ConnectionKeeper connectionKeeper) {
+    public void setNioConnectionKeeper(NioConnectionKeeper connectionKeeper) {
         this.connectionKeeper = connectionKeeper;
     }
 
@@ -91,18 +92,20 @@ public abstract class GrizzlyChannelContextSupport extends BaseFilter
         fireChannelEvent(ctx.getConnection(), EventType.ERROR, error);
     }
 
-    public void setChannelEventListener(ChannelEventListener<Connection<?>> channelEventListener) {
-        this.channelEventListener = channelEventListener;
+    public List<ChannelEventListener<Connection<?>>> getChannelEventListeners() {
+        return channelEventListeners;
     }
 
-    public ChannelEventListener<Connection<?>> getChannelEventListener() {
-        return channelEventListener;
+    @Override
+    public void setChannelEventListeners(
+            List<ChannelEventListener<Connection<?>>> channelEventListeners) {
+        this.channelEventListeners = channelEventListeners;
     }
 
     private void fireChannelEvent(Connection<?> channel, EventType eventType, Throwable cause) {
-        if (channelEventListener != null) {
-            channelEventListener
-                    .fireChannelEvent(new ChannelEvent<Connection<?>>(channel, eventType, cause));
+        if (channelEventListeners != null) {
+            channelEventListeners.forEach(l -> l.fireChannelEvent(
+                    new ChannelEvent<Connection<?>>(channel, eventType, false, cause)));
         }
     }
 

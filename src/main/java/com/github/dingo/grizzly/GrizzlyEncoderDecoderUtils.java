@@ -29,7 +29,7 @@ public abstract class GrizzlyEncoderDecoderUtils {
 
         @Override
         public String getName() {
-            return "TupleDecoder";
+            return "PacketDecoder";
         }
 
         @Override
@@ -76,7 +76,7 @@ public abstract class GrizzlyEncoderDecoderUtils {
 
         @Override
         public String getName() {
-            return "TupleEncoder";
+            return "PacketEncoder";
         }
 
         @Override

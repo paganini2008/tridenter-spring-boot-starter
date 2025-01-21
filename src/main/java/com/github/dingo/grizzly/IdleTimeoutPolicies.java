@@ -17,6 +17,12 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("all")
 public abstract class IdleTimeoutPolicies {
 
+    public static IdleTimeoutFilter.TimeoutHandler NOOP = new IdleTimeoutFilter.TimeoutHandler() {
+
+        public void onTimeout(Connection connection) {}
+
+    };
+
     public static IdleTimeoutFilter.TimeoutHandler PING = new IdleTimeoutFilter.TimeoutHandler() {
 
         public void onTimeout(Connection connection) {
@@ -50,7 +56,13 @@ public abstract class IdleTimeoutPolicies {
 
     public static IdleTimeoutFilter.TimeoutHandler CLOSE = new IdleTimeoutFilter.TimeoutHandler() {
 
-        public void onTimeout(Connection connection) {}
+        public void onTimeout(Connection connection) {
+            log.warn(
+                    "Closing the channel because a keep-alive response "
+                            + "message was not sent within {} second(s).",
+                    connection.getWriteTimeout(TimeUnit.SECONDS));
+            connection.closeSilently();
+        }
 
     };
 

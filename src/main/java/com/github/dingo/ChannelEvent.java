@@ -13,21 +13,27 @@ public class ChannelEvent<T> extends EventObject {
 
     private static final long serialVersionUID = 6921528186565405569L;
 
-    public ChannelEvent(T source, EventType eventType) {
-        this(source, eventType, null);
+    public ChannelEvent(T source, EventType eventType, boolean serverSide) {
+        this(source, eventType, serverSide, null);
     }
 
-    public ChannelEvent(T source, EventType eventType, Throwable cause) {
+    public ChannelEvent(T source, EventType eventType, boolean serverSide, Throwable cause) {
         super(source);
         this.eventType = eventType;
         this.cause = cause;
+        this.serverSide = serverSide;
     }
 
     private final EventType eventType;
     private final Throwable cause;
+    private final boolean serverSide;
 
     public EventType getEventType() {
         return eventType;
+    }
+
+    public boolean isServerSide() {
+        return serverSide;
     }
 
     public Throwable getCause() {

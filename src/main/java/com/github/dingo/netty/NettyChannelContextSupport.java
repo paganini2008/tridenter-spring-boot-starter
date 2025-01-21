@@ -1,5 +1,5 @@
 /**
- * Copyright 2017-2022 Fred Feng (paganini.fy@gmail.com)
+ * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
  * 
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  * in compliance with the License. You may obtain a copy of the License at
@@ -14,13 +14,14 @@
 package com.github.dingo.netty;
 
 import java.net.SocketAddress;
+import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.github.dingo.ChannelContext;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.ChannelEvent.EventType;
@@ -40,14 +41,15 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
 
     protected Logger log = LoggerFactory.getLogger(getClass());
 
-    private ConnectionKeeper connectionKeeper;
-    private ChannelEventListener<Channel> channelEventListener;
+    private NioConnectionKeeper connectionKeeper;
 
-    public ConnectionKeeper getConnectionKeeper() {
+    private List<ChannelEventListener<Channel>> channelEventListeners;
+
+    public NioConnectionKeeper getNioConnectionKeeper() {
         return connectionKeeper;
     }
 
-    public void setConnectionKeeper(ConnectionKeeper connectionKeeper) {
+    public void setNioConnectionKeeper(NioConnectionKeeper connectionKeeper) {
         this.connectionKeeper = connectionKeeper;
     }
 
@@ -104,18 +106,15 @@ public abstract class NettyChannelContextSupport extends ChannelInboundHandlerAd
     }
 
     @Override
-    public void setChannelEventListener(ChannelEventListener<Channel> channelEventListener) {
-        this.channelEventListener = channelEventListener;
-    }
-
-    public ChannelEventListener<Channel> getChannelEventListener() {
-        return channelEventListener;
+    public void setChannelEventListeners(
+            List<ChannelEventListener<Channel>> channelEventListeners) {
+        this.channelEventListeners = channelEventListeners;
     }
 
     private void fireChannelEvent(Channel channel, EventType eventType, Throwable cause) {
-        if (channelEventListener != null) {
-            channelEventListener
-                    .fireChannelEvent(new ChannelEvent<Channel>(channel, eventType, cause));
+        if (channelEventListeners != null) {
+            channelEventListeners.forEach(l -> l
+                    .fireChannelEvent(new ChannelEvent<Channel>(channel, eventType, false, cause)));
         }
     }
 

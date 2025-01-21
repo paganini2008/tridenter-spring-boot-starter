@@ -21,27 +21,28 @@ public class MinaChannelEventListener implements ChannelEventListener<IoSession>
         if (log.isTraceEnabled()) {
             IoSession session = channelEvent.getSource();
             EventType eventType = channelEvent.getEventType();
+            String prefix = channelEvent.isServerSide() ? "ServerSide" : "ClientSide";
             switch (eventType) {
                 case CONNECTED:
-                    log.trace("{} ->> {} has established connection.", session.getLocalAddress(),
-                            session.getRemoteAddress());
+                    log.trace("{}: {} ->> {} has established connection.", prefix,
+                            session.getLocalAddress(), session.getRemoteAddress());
                     break;
                 case CLOSED:
-                    log.trace("{} ->> {} has loss connection.", session.getLocalAddress(),
-                            session.getRemoteAddress());
+                    log.trace("{}: {} ->> {} has lost connection.", prefix,
+                            session.getLocalAddress(), session.getRemoteAddress());
                     break;
                 case PING:
-                    log.trace("{} ->> {} send a ping.", session.getRemoteAddress(),
+                    log.trace("{}: {} ->> {} send a ping.", prefix, session.getRemoteAddress(),
                             session.getLocalAddress());
                     break;
                 case PONG:
-                    log.trace("{} ->> {} send a pong.", session.getRemoteAddress(),
+                    log.trace("{}: {} ->> {} send a pong.", prefix, session.getRemoteAddress(),
                             session.getLocalAddress());
                     break;
                 case ERROR:
-                    log.trace("{} ->> {} has loss connection for fatal reason.",
+                    log.trace("{}: {} ->> {} has lost connection for fatal reason: {}", prefix,
                             session.getLocalAddress(), session.getRemoteAddress(),
-                            channelEvent.getCause());
+                            channelEvent.getCause().getMessage(), channelEvent.getCause());
                     break;
             }
         }

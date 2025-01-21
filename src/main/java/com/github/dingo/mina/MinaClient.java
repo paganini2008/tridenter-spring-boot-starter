@@ -3,10 +3,13 @@ package com.github.dingo.mina;
 import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import java.net.SocketAddress;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.buffer.SimpleBufferAllocator;
 import org.apache.mina.core.future.IoFuture;
@@ -24,17 +27,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
-import com.github.dingo.ConnectionKeeper;
+import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.DataAccessTransmitterClientException;
 import com.github.dingo.HandshakeCallback;
 import com.github.dingo.NioClient;
+import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.Partitioner;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.SelectedChannelCallback;
 import com.github.dingo.TransmitterClientException;
 import com.github.dingo.TransmitterNioProperties;
+import com.github.dingo.TransmitterTimeoutException;
 import com.github.dingo.ChannelEvent.EventType;
+import com.github.doodler.common.context.InstanceId;
 
 /**
  * 
@@ -58,21 +64,44 @@ public class MinaClient implements NioClient {
     private NioSocketConnector connector;
 
     @Autowired
+    private InstanceId instanceId;
+
+    @Autowired
     private TransmitterNioProperties nioProperties;
+
+    @Autowired
+    private ChannelSwitcher channelSwitcher;
 
     @Lazy
     @Autowired
     private ProtocolCodecFactory protocolCodecFactory;
 
     @Autowired
-    public void setChannelEventListener(ChannelEventListener<IoSession> channelEventListener) {
-        this.channelContext.setChannelEventListener(channelEventListener);
+    public void setChannelEventListeners(
+            List<ChannelEventListener<IoSession>> channelEventListeners) {
+        this.channelContext.setChannelEventListeners(channelEventListeners);
     }
 
     @Override
-    public void watchConnection(int checkInterval, TimeUnit timeUnit) {
-        this.channelContext
-                .setConnectionKeeper(new ConnectionKeeper(checkInterval, timeUnit, this));
+    public void watchConnection(int checkInterval, TimeUnit timeUnit, int maxAttempts) {
+        this.channelContext.setNioConnectionKeeper(
+                new NioConnectionKeeper(checkInterval, timeUnit, maxAttempts, this));
+    }
+
+    @Override
+    public void keep(SocketAddress remoteAddress, HandshakeCallback handshakeCallback) {
+        NioConnectionKeeper connectionKeeper = channelContext.getNioConnectionKeeper();
+        if (connectionKeeper != null) {
+            connectionKeeper.keep(remoteAddress, handshakeCallback);
+        }
+        if (handshakeCallback != null) {
+            handshakeCallback.operationComplete(remoteAddress);
+        }
+    }
+
+    @Override
+    public void fireReconnection(SocketAddress remoteAddress) {
+        this.channelContext.getNioConnectionKeeper().reconnect(remoteAddress);
     }
 
     @Override
@@ -87,9 +116,11 @@ public class MinaClient implements NioClient {
         sessionConfig.setTcpNoDelay(true);
         sessionConfig.setSendBufferSize(clientConfig.getSenderBufferSize());
 
-        KeepAliveFilter heartBeat = new KeepAliveFilter(new ClientKeepAliveMessageFactory(),
-                IdleStatus.WRITER_IDLE, KeepAliveRequestTimeoutHandler.LOG,
-                clientConfig.getWriterIdleTimeout(), clientConfig.getWriterIdleTimeout());
+        KeepAliveFilter heartBeat =
+                new KeepAliveFilter(new ClientKeepAliveMessageFactory(), IdleStatus.WRITER_IDLE,
+                        nioProperties.getClient().isKeepAlive() ? KeepAliveRequestTimeoutHandler.LOG
+                                : KeepAliveRequestTimeoutHandler.CLOSE,
+                        clientConfig.getWriterIdleTimeout(), clientConfig.getWriterIdleTimeout());
         heartBeat.setForwardEvent(true);
         connector.getFilterChain().addLast("codec", new ProtocolCodecFilter(protocolCodecFactory));
         connector.getFilterChain().addLast("heartbeat", heartBeat);
@@ -135,7 +166,8 @@ public class MinaClient implements NioClient {
             connector.connect(remoteAddress).addListener(new IoFutureListener<IoFuture>() {
                 public void operationComplete(IoFuture future) {
                     if (future.isDone()) {
-                        ConnectionKeeper connectionKeeper = channelContext.getConnectionKeeper();
+                        NioConnectionKeeper connectionKeeper =
+                                channelContext.getNioConnectionKeeper();
                         if (connectionKeeper != null) {
                             connectionKeeper.keep(remoteAddress, handshakeCallback);
                         }
@@ -158,6 +190,9 @@ public class MinaClient implements NioClient {
 
     @Override
     public void send(Object data) {
+        if (channelContext.getChannels().isEmpty()) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
         channelContext.getChannels().forEach(ioSession -> {
             doSend(null, ioSession, data, MODE_ASYNC);
         });
@@ -168,6 +203,8 @@ public class MinaClient implements NioClient {
         IoSession ioSession = channelContext.getChannel(address);
         if (ioSession != null) {
             doSend(null, ioSession, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -176,6 +213,8 @@ public class MinaClient implements NioClient {
         IoSession ioSession = channelContext.selectChannel(data, partitioner);
         if (ioSession != null) {
             doSend(null, ioSession, data, MODE_ASYNC);
+        } else {
+            throw new DataAccessTransmitterClientException("No available channel found");
         }
     }
 
@@ -196,13 +235,15 @@ public class MinaClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TransmitterClientException e) {
+                throw e;
             } catch (Exception e) {
                 throw new TransmitterClientException(e.getMessage(), e);
             } finally {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     @Override
@@ -223,6 +264,9 @@ public class MinaClient implements NioClient {
                             packet.getStringField("errorDetails"));
                 }
                 return packet.getObject();
+            } catch (TimeoutException e) {
+                throw new TransmitterTimeoutException(
+                        "Execute timeout: " + timeout + " " + timeUnit.name().toLowerCase());
             } catch (TransmitterClientException e) {
                 throw e;
             } catch (Exception e) {
@@ -231,7 +275,7 @@ public class MinaClient implements NioClient {
                 RequestFutureHolder.removeRequest(requestId);
             }
         }
-        return null;
+        throw new DataAccessTransmitterClientException("No available channel found");
     }
 
     private void doSend(String requestId, IoSession ioSession, Object data, String mode) {
@@ -245,11 +289,25 @@ public class MinaClient implements NioClient {
             if (packet != null) {
                 packet.setMode(mode);
                 packet.setField("requestId", requestId);
-                ioSession.write(packet);
+                packet.setField("instanceId", instanceId.get());
+                if (channelSwitcher.canAccess(ioSession.getRemoteAddress())) {
+                    ioSession.write(packet);
+                } else {
+                    getAvailableIoSession().write(packet);
+                }
+
             }
         } catch (Exception e) {
             throw new TransmitterClientException(e.getMessage(), e);
         }
+    }
+
+    private IoSession getAvailableIoSession() {
+        List<IoSession> list = channelContext.getChannels(sa -> channelSwitcher.canAccess(sa));
+        if (CollectionUtils.isEmpty(list)) {
+            throw new DataAccessTransmitterClientException("No available channel found");
+        }
+        return list.get(0);
     }
 
     /**
@@ -270,15 +328,15 @@ public class MinaClient implements NioClient {
         }
 
         public Object getRequest(IoSession session) {
-            return Packet.PING;
+            return nioProperties.getClient().isKeepAlive() ? Packet.PING : null;
         }
 
         public Object getResponse(IoSession session, Object request) {
-            ChannelEventListener<IoSession> channelEventListener =
-                    channelContext.getChannelEventListener();
-            if (channelEventListener != null) {
-                channelEventListener.fireChannelEvent(
-                        new ChannelEvent<IoSession>(session, EventType.PONG, null));
+            List<ChannelEventListener<IoSession>> channelEventListeners =
+                    channelContext.getChannelEventListeners();
+            if (channelEventListeners != null) {
+                channelEventListeners.forEach(l -> l.fireChannelEvent(
+                        new ChannelEvent<IoSession>(session, EventType.PONG, false, null)));
             }
             return null;
         }

@@ -1,11 +1,12 @@
 package com.github.dingo.netty;
 
+import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandlerExecution;
-import com.github.dingo.TransmitterConstants;
+import com.github.dingo.PerformanceInspector;
 import com.github.dingo.ChannelEvent.EventType;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.utils.ExceptionUtils;
@@ -29,6 +30,9 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Autowired
     private EventPublisher<Packet> eventPublisher;
+
+    @Autowired
+    private PerformanceInspector performanceInspector;
 
     @Autowired(required = false)
     private ChannelEventListener<Channel> channelEventListener;
@@ -57,11 +61,12 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
-        Packet packet = (Packet) message;
-        if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
-            Packet result = packet.copy();
+        if (MODE_SYNC.equalsIgnoreCase(((Packet) message).getMode())) {
+            Packet result = ((Packet) message).copy();
+            long timestamp = result.getTimestamp();
+            String instanceId = result.getStringField("instanceId");
             try {
-                Object returnData = packetHandlerExecution.executeHandlerChain(packet);
+                Object returnData = packetHandlerExecution.executeHandlerChain(result);
                 if (returnData != null) {
                     if (returnData instanceof Packet) {
                         result = (Packet) returnData;
@@ -69,25 +74,32 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                         result.setObject(returnData);
                     }
                 }
+
             } catch (Exception e) {
                 if (log.isErrorEnabled()) {
                     log.error(e.getMessage(), e);
                 }
                 result.setField("errorMsg", e.getMessage());
                 result.setField("errorDetails", ExceptionUtils.toString(e));
+            } finally {
+                performanceInspector.update(instanceId, MODE_SYNC, timestamp, s -> {
+                    s.getSample().accumulatedExecutionTime
+                            .add(System.currentTimeMillis() - timestamp);
+                    s.getSample().totalExecutions.increment();
+                });
             }
             result.setField("server", ctx.channel().localAddress().toString());
             result.setField("salt", IdUtils.getShortUuid());
             ctx.writeAndFlush(result);
         } else {
-            eventPublisher.publish(packet);
+            eventPublisher.publish((Packet) message);
         }
     }
 
     private void fireChannelEvent(Channel channel, EventType eventType, Throwable cause) {
         if (channelEventListener != null) {
             channelEventListener
-                    .fireChannelEvent(new ChannelEvent<Channel>(channel, eventType, cause));
+                    .fireChannelEvent(new ChannelEvent<Channel>(channel, eventType, true, cause));
         }
     }
 

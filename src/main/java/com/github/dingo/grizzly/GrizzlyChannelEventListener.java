@@ -21,27 +21,28 @@ public class GrizzlyChannelEventListener implements ChannelEventListener<Connect
         if (log.isTraceEnabled()) {
             Connection<?> connection = channelEvent.getSource();
             EventType eventType = channelEvent.getEventType();
+            String prefix = channelEvent.isServerSide() ? "ServerSide" : "ClientSide";
             switch (eventType) {
                 case CONNECTED:
-                    log.trace("{} ->> {} has established connection.", connection.getLocalAddress(),
-                            connection.getPeerAddress());
+                    log.trace("{}: {} ->> {} has established connection.", prefix,
+                            connection.getLocalAddress(), connection.getPeerAddress());
                     break;
                 case CLOSED:
-                    log.trace("{} ->> {} has loss connection.", connection.getLocalAddress(),
-                            connection.getPeerAddress());
+                    log.trace("{}: {} ->> {} has loss connection.", prefix,
+                            connection.getLocalAddress(), connection.getPeerAddress());
                     break;
                 case PING:
-                    log.trace(connection.getPeerAddress() + "{} ->> {} send a ping.",
-                            connection.getPeerAddress(), connection.getLocalAddress());
+                    log.trace("{}: {} ->> {} send a ping.", prefix, connection.getPeerAddress(),
+                            connection.getLocalAddress());
                     break;
                 case PONG:
-                    log.trace("{} ->> {} send a pong.", connection.getPeerAddress(),
+                    log.trace("{}: {} ->> {} send a pong.", prefix, connection.getPeerAddress(),
                             connection.getLocalAddress());
                     break;
                 case ERROR:
-                    log.trace("{} ->> {} has loss connection for fatal reason.",
+                    log.trace("{}: {} ->> {} has loss connection for fatal reason: {}", prefix,
                             connection.getLocalAddress(), connection.getPeerAddress(),
-                            channelEvent.getCause());
+                            channelEvent.getCause().getMessage(), channelEvent.getCause());
                     break;
             }
         }

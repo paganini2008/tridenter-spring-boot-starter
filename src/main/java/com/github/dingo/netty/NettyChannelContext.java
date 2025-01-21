@@ -21,18 +21,18 @@ import io.netty.channel.ChannelHandler.Sharable;
 public class NettyChannelContext extends NettyChannelContextSupport
         implements ChannelContext<Channel> {
 
-    private final List<Channel> channelHolds = new CopyOnWriteArrayList<Channel>();
+    private final List<Channel> channelCache = new CopyOnWriteArrayList<Channel>();
 
     @Override
     public void addChannel(Channel channel, int weight) {
         for (int i = 0; i < weight; i++) {
-            channelHolds.add(channel);
+            channelCache.add(channel);
         }
     }
 
     @Override
     public Channel getChannel(SocketAddress address) {
-        for (Channel channel : channelHolds) {
+        for (Channel channel : channelCache) {
             if (channel.remoteAddress() != null && channel.remoteAddress().equals(address)) {
                 return channel;
             }
@@ -42,33 +42,33 @@ public class NettyChannelContext extends NettyChannelContextSupport
 
     @Override
     public List<Channel> getChannels(Predicate<SocketAddress> p) {
-        return channelHolds.stream()
+        return channelCache.stream()
                 .filter(c -> c.remoteAddress() != null && p.test(c.remoteAddress()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public void removeChannel(SocketAddress address) {
-        for (Channel channel : channelHolds) {
+        for (Channel channel : channelCache) {
             if (channel.remoteAddress() != null && channel.remoteAddress().equals(address)) {
-                channelHolds.remove(channel);
+                channelCache.remove(channel);
             }
         }
     }
 
     @Override
     public int countOfChannels() {
-        return channelHolds.size();
+        return channelCache.size();
     }
 
     @Override
     public Channel selectChannel(Object data, Partitioner partitioner) {
-        return channelHolds.isEmpty() ? null : partitioner.selectChannel(data, channelHolds);
+        return channelCache.isEmpty() ? null : partitioner.selectChannel(data, channelCache);
     }
 
     @Override
     public List<Channel> getChannels() {
-        return channelHolds;
+        return channelCache;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.github.dingo.mina;
 
+import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +8,7 @@ import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandlerExecution;
-import com.github.dingo.TransmitterConstants;
+import com.github.dingo.PerformanceInspector;
 import com.github.dingo.ChannelEvent.EventType;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.utils.ExceptionUtils;
@@ -26,6 +27,9 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
     @Autowired
     private EventPublisher<Packet> eventPublisher;
+
+    @Autowired
+    private PerformanceInspector performanceInspector;
 
     @Autowired(required = false)
     private ChannelEventListener<IoSession> channelEventListener;
@@ -53,11 +57,12 @@ public class MinaServerHandler extends IoHandlerAdapter {
 
     @Override
     public void messageReceived(IoSession session, Object message) throws Exception {
-        Packet packet = (Packet) message;
-        if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
-            Packet result = packet.copy();
+        if (MODE_SYNC.equalsIgnoreCase(((Packet) message).getMode())) {
+            Packet result = ((Packet) message).copy();
+            long timestamp = result.getTimestamp();
+            String instanceId = result.getStringField("instanceId");
             try {
-                Object returnData = packetHandlerExecution.executeHandlerChain(packet);
+                Object returnData = packetHandlerExecution.executeHandlerChain(result);
                 if (returnData != null) {
                     if (returnData instanceof Packet) {
                         result = (Packet) returnData;
@@ -71,19 +76,25 @@ public class MinaServerHandler extends IoHandlerAdapter {
                 }
                 result.setField("errorMsg", e.getMessage());
                 result.setField("errorDetails", ExceptionUtils.toString(e));
+            } finally {
+                performanceInspector.update(instanceId, MODE_SYNC, timestamp, s -> {
+                    s.getSample().accumulatedExecutionTime
+                            .add(System.currentTimeMillis() - timestamp);
+                    s.getSample().totalExecutions.increment();
+                });
             }
             result.setField("server", session.getLocalAddress().toString());
             result.setField("salt", IdUtils.getShortUuid());
             session.write(result);
         } else {
-            eventPublisher.publish(packet);
+            eventPublisher.publish((Packet) message);
         }
     }
 
     private void fireChannelEvent(IoSession channel, EventType eventType, Throwable cause) {
         if (channelEventListener != null) {
             channelEventListener
-                    .fireChannelEvent(new ChannelEvent<IoSession>(channel, eventType, cause));
+                    .fireChannelEvent(new ChannelEvent<IoSession>(channel, eventType, true, cause));
         }
     }
 

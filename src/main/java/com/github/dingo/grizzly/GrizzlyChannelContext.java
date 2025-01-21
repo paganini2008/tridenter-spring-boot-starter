@@ -19,18 +19,18 @@ import com.google.common.base.Predicate;
 public class GrizzlyChannelContext extends GrizzlyChannelContextSupport
         implements ChannelContext<Connection<?>> {
 
-    private final List<Connection<?>> connectionHolds = new CopyOnWriteArrayList<Connection<?>>();
+    private final List<Connection<?>> connectionCache = new CopyOnWriteArrayList<Connection<?>>();
 
     @Override
     public void addChannel(Connection<?> channel, int weight) {
         for (int i = 0; i < weight; i++) {
-            connectionHolds.add(channel);
+            connectionCache.add(channel);
         }
     }
 
     @Override
     public Connection<?> getChannel(SocketAddress address) {
-        for (Connection<?> channel : connectionHolds) {
+        for (Connection<?> channel : connectionCache) {
             if (channel.getPeerAddress() != null && channel.getPeerAddress().equals(address)) {
                 return channel;
             }
@@ -40,33 +40,33 @@ public class GrizzlyChannelContext extends GrizzlyChannelContextSupport
 
     @Override
     public void removeChannel(SocketAddress address) {
-        for (Connection<?> channel : connectionHolds) {
+        for (Connection<?> channel : connectionCache) {
             if (channel.getPeerAddress() != null && channel.getPeerAddress().equals(address)) {
-                connectionHolds.remove(channel);
+                connectionCache.remove(channel);
             }
         }
     }
 
     @Override
     public int countOfChannels() {
-        return connectionHolds.size();
+        return connectionCache.size();
     }
 
     @Override
     public Connection<?> selectChannel(Object data, Partitioner partitioner) {
-        return connectionHolds.isEmpty() ? null : partitioner.selectChannel(data, connectionHolds);
+        return connectionCache.isEmpty() ? null : partitioner.selectChannel(data, connectionCache);
     }
 
     @Override
     public List<Connection<?>> getChannels(Predicate<SocketAddress> p) {
-        return connectionHolds.stream().filter(
+        return connectionCache.stream().filter(
                 c -> c.getPeerAddress() != null && p.test((SocketAddress) c.getPeerAddress()))
                 .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
     public List<Connection<?>> getChannels() {
-        return connectionHolds;
+        return connectionCache;
     }
 
 }

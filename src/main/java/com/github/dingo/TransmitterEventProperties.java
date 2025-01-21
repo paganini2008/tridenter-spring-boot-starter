@@ -18,6 +18,7 @@ public class TransmitterEventProperties {
     private int requestFetchSize = 10;
     private long timeout = 100L;
     private long bufferCleanInterval = 5L * 1000;
+    private boolean bufferCleanerEnabled = true;
 
     private InMemoryBuffer memory = new InMemoryBuffer();
     private RedisBuffer redis = new RedisBuffer();

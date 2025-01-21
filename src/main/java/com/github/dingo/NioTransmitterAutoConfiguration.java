@@ -32,7 +32,7 @@ import com.github.doodler.common.events.EventSubscriber;
  */
 @EnableConfigurationProperties({TransmitterNioProperties.class, TransmitterEventProperties.class})
 @Import({NettyTransportAutoConfiguration.class, MinaTransportAutoConfiguration.class,
-        GrizzlyTransportAutoConfiguration.class})
+        GrizzlyTransportAutoConfiguration.class, PerformanceInspectorController.class})
 @Configuration(proxyBeanMethods = false)
 public class NioTransmitterAutoConfiguration {
 
@@ -51,6 +51,11 @@ public class NioTransmitterAutoConfiguration {
     }
 
     @Bean
+    public ChannelSwitcher channelSwitcher() {
+        return new ChannelSwitcher();
+    }
+
+    @Bean
     public NioServerBootstrap nioServerBootstrap(NioServer nioServer) {
         return new NioServerBootstrap(nioServer);
     }
@@ -58,8 +63,9 @@ public class NioTransmitterAutoConfiguration {
     @DependsOn("nioServerBootstrap")
     @Bean
     public NioClientBootstrap nioClientBootstrap(NioClient nioClient,
-            ApplicationInfoManager applicationInfoManager) {
-        return new NioClientBootstrap(nioProperties, nioClient, applicationInfoManager);
+            ChannelSwitcher remoteChannelSwitch, ApplicationInfoManager applicationInfoManager) {
+        return new NioClientBootstrap(nioProperties, nioClient, remoteChannelSwitch,
+                applicationInfoManager);
     }
 
     @ConditionalOnMissingBean
@@ -80,6 +86,7 @@ public class NioTransmitterAutoConfiguration {
         EventPublisher<Packet> eventPublisher = new EventPublisherImpl<>(taskExecutor,
                 eventProperties.getMaxBufferCapacity(), eventProperties.getRequestFetchSize(),
                 eventProperties.getTimeout(), buffer, eventProperties.getBufferCleanInterval());
+        eventPublisher.enableBufferCleaner(eventProperties.isBufferCleanerEnabled());
         if (CollectionUtils.isNotEmpty(eventSubscribers)) {
             eventPublisher.subscribe(eventSubscribers);
         }
@@ -90,6 +97,17 @@ public class NioTransmitterAutoConfiguration {
     @Bean
     public LoggingPacketSubscriber loggingPacketSubscriber() {
         return new LoggingPacketSubscriber();
+    }
+
+    @Bean
+    public PerformanceInspectorPacketSubscriber performanceInspectorPacketSubscriber(
+            PerformanceInspector performanceInspector) {
+        return new PerformanceInspectorPacketSubscriber(performanceInspector);
+    }
+
+    @Bean
+    public PerformanceInspector performanceInspector() {
+        return new PerformanceInspector();
     }
 
     @Bean

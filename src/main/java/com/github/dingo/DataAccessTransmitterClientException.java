@@ -13,6 +13,11 @@ public class DataAccessTransmitterClientException extends TransmitterClientExcep
 
     private final String detail;
 
+    public DataAccessTransmitterClientException(String msg) {
+        super(msg);
+        this.detail = "";
+    }
+
     public DataAccessTransmitterClientException(String msg, String detail) {
         super(msg);
         this.detail = detail;

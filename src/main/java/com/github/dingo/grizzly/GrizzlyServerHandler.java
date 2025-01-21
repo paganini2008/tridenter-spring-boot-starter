@@ -1,5 +1,6 @@
 package com.github.dingo.grizzly;
 
+import static com.github.dingo.TransmitterConstants.MODE_SYNC;
 import java.io.IOException;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.BaseFilter;
@@ -10,6 +11,7 @@ import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandlerExecution;
+import com.github.dingo.PerformanceInspector;
 import com.github.dingo.TransmitterConstants;
 import com.github.dingo.ChannelEvent.EventType;
 import com.github.doodler.common.events.EventPublisher;
@@ -30,6 +32,9 @@ public class GrizzlyServerHandler extends BaseFilter {
     @Autowired
     private EventPublisher<Packet> eventPublisher;
 
+    @Autowired
+    private PerformanceInspector performanceInspector;
+
     @Autowired(required = false)
     private ChannelEventListener<Connection<?>> channelEventListener;
 
@@ -41,14 +46,16 @@ public class GrizzlyServerHandler extends BaseFilter {
         Packet packet = ctx.getMessage();
         if (isPing(packet)) {
             if (channelEventListener != null) {
-                channelEventListener.fireChannelEvent(
-                        new ChannelEvent<Connection<?>>(ctx.getConnection(), EventType.PING, null));
+                channelEventListener.fireChannelEvent(new ChannelEvent<Connection<?>>(
+                        ctx.getConnection(), EventType.PING, true, null));
             }
             ctx.write(Packet.PONG);
             return ctx.getStopAction();
         } else {
             if (TransmitterConstants.MODE_SYNC.equalsIgnoreCase(packet.getMode())) {
                 Packet result = packet.copy();
+                long timestamp = result.getTimestamp();
+                String instanceId = result.getStringField("instanceId");
                 try {
                     Object returnData = packetHandlerExecution.executeHandlerChain(packet);
                     if (returnData != null) {
@@ -64,6 +71,12 @@ public class GrizzlyServerHandler extends BaseFilter {
                     }
                     result.setField("errorMsg", e.getMessage());
                     result.setField("errorDetails", ExceptionUtils.toString(e));
+                } finally {
+                    performanceInspector.update(instanceId, MODE_SYNC, timestamp, s -> {
+                        s.getSample().accumulatedExecutionTime
+                                .add(System.currentTimeMillis() - timestamp);
+                        s.getSample().totalExecutions.increment();
+                    });
                 }
                 result.setField("server", ctx.getConnection().getLocalAddress().toString());
                 result.setField("salt", IdUtils.getShortUuid());
@@ -99,8 +112,8 @@ public class GrizzlyServerHandler extends BaseFilter {
 
     private void fireChannelEvent(Connection<?> channel, EventType eventType, Throwable cause) {
         if (channelEventListener != null) {
-            channelEventListener
-                    .fireChannelEvent(new ChannelEvent<Connection<?>>(channel, eventType, cause));
+            channelEventListener.fireChannelEvent(
+                    new ChannelEvent<Connection<?>>(channel, eventType, true, cause));
         }
     }
 

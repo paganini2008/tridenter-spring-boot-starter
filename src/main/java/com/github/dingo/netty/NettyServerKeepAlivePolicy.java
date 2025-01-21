@@ -1,5 +1,6 @@
 package com.github.dingo.netty;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
@@ -24,7 +25,7 @@ public class NettyServerKeepAlivePolicy extends KeepAlivePolicy {
     private TransmitterNioProperties transmitterNioProperties;
 
     @Autowired(required = false)
-    private ChannelEventListener<Channel> channelEventListener;
+    private List<ChannelEventListener<Channel>> channelEventListeners;
 
     @Override
     protected void whenReaderIdle(ChannelHandlerContext ctx) {
@@ -37,9 +38,9 @@ public class NettyServerKeepAlivePolicy extends KeepAlivePolicy {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object data) throws Exception {
         if (isPing(data)) {
-            if (channelEventListener != null) {
-                channelEventListener.fireChannelEvent(
-                        new ChannelEvent<Channel>(ctx.channel(), EventType.PING, null));
+            if (channelEventListeners != null) {
+                channelEventListeners.forEach(l -> l.fireChannelEvent(
+                        new ChannelEvent<Channel>(ctx.channel(), EventType.PING, true, null)));
             }
             ctx.writeAndFlush(Packet.PONG);
         } else {

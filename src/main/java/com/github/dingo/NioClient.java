@@ -1,5 +1,6 @@
 package com.github.dingo;
 
+import java.net.SocketAddress;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -11,6 +12,9 @@ import java.util.concurrent.TimeUnit;
  */
 public interface NioClient extends LifeCycle, NioConnection, Client {
 
-    void watchConnection(int checkInterval, TimeUnit timeUnit);
+    void watchConnection(int checkInterval, TimeUnit timeUnit, int maxAttempts);
 
+    void keep(SocketAddress socketAddress, HandshakeCallback handshakeCallback);
+
+    void fireReconnection(SocketAddress socketAddress);
 }

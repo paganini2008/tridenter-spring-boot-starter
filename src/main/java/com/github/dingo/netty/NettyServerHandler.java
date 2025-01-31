@@ -1,12 +1,14 @@
 package com.github.dingo.netty;
 
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
+
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandlerExecution;
-import com.github.dingo.PerformanceInspector;
+import com.github.dingo.PerformanceInspectorService;
 import com.github.dingo.ChannelEvent.EventType;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.utils.ExceptionUtils;
@@ -32,7 +34,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
     private EventPublisher<Packet> eventPublisher;
 
     @Autowired
-    private PerformanceInspector performanceInspector;
+    private PerformanceInspectorService performanceInspector;
 
     @Autowired(required = false)
     private ChannelEventListener<Channel> channelEventListener;
@@ -74,7 +76,6 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                         result.setObject(returnData);
                     }
                 }
-
             } catch (Exception e) {
                 if (log.isErrorEnabled()) {
                     log.error(e.getMessage(), e);
@@ -82,10 +83,15 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
                 result.setField("errorMsg", e.getMessage());
                 result.setField("errorDetails", ExceptionUtils.toString(e));
             } finally {
+                final Packet tmp = result;
                 performanceInspector.update(instanceId, MODE_SYNC, timestamp, s -> {
                     s.getSample().accumulatedExecutionTime
                             .add(System.currentTimeMillis() - timestamp);
                     s.getSample().totalExecutions.increment();
+                    s.getSample().timestamp = System.currentTimeMillis();
+                    if (tmp.hasField("errorMsg") || tmp.hasField("errorDetails")) {
+                        s.getSample().failedExecutions.increment();
+                    }
                 });
             }
             result.setField("server", ctx.channel().localAddress().toString());

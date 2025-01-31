@@ -1,7 +1,9 @@
 package com.github.dingo.netty;
 
 import io.netty.channel.ChannelHandler.Sharable;
+
 import com.github.dingo.KeepAliveTimeoutException;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.timeout.IdleStateEvent;

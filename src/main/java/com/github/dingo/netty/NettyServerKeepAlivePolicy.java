@@ -2,11 +2,13 @@ package com.github.dingo.netty;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.TransmitterNioProperties;
 import com.github.dingo.ChannelEvent.EventType;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;

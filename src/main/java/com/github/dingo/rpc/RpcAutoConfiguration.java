@@ -3,6 +3,7 @@ package com.github.dingo.rpc;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import com.github.dingo.NioClient;
 import com.github.dingo.Partitioner;
 import com.github.doodler.common.context.BeanReflectionService;

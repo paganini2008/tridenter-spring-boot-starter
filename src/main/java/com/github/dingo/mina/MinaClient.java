@@ -2,6 +2,7 @@ package com.github.dingo.mina;
 
 import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
+
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import org.apache.mina.transport.socket.SocketSessionConfig;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;

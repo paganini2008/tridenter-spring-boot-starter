@@ -1,6 +1,7 @@
 package com.github.dingo.serializer;
 
 import org.apache.commons.lang3.SerializationUtils;
+
 import com.github.dingo.Packet;
 
 /**

@@ -68,9 +68,9 @@ public class RedisBuffer implements Buffer<Packet> {
     }
 
     @Override
-    public int size() {
+    public long size() {
         Number result = redisTemplate.opsForList().size(getKey(namespace));
-        return result != null ? result.intValue() : 0;
+        return result != null ? result.longValue() : 0;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class RedisBuffer implements Buffer<Packet> {
     }
 
     @Override
-    public Collection<Packet> poll(int fetchSize) {
+    public Collection<Packet> poll(long fetchSize) {
         if (fetchSize == 1) {
             return Collections.singletonList(poll());
         }

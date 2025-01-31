@@ -2,8 +2,10 @@ package com.github.dingo.netty;
 
 import java.io.IOException;
 import java.util.List;
+
 import com.github.dingo.Packet;
 import com.github.dingo.serializer.Serializer;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

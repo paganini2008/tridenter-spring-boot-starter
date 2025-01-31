@@ -3,6 +3,7 @@ package com.github.dingo.netty;
 import com.github.dingo.MessageCodecFactory;
 import com.github.dingo.serializer.KryoSerializer;
 import com.github.dingo.serializer.Serializer;
+
 import io.netty.channel.ChannelHandler;
 
 /**

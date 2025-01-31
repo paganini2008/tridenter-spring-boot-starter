@@ -6,12 +6,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.MessageCodecFactory;
 import com.github.dingo.NioClient;
 import com.github.dingo.NioServer;
 import com.github.dingo.TransmitterNioProperties;
 import com.github.dingo.serializer.Serializer;
+
 import io.netty.channel.Channel;
 
 /**

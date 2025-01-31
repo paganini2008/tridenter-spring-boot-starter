@@ -5,8 +5,10 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.config.BeanExpressionContext;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandler;
+
 import lombok.Setter;
 
 /**

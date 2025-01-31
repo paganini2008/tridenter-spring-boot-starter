@@ -1,6 +1,7 @@
 package com.github.dingo.serializer;
 
 import org.nustaq.serialization.FSTConfiguration;
+
 import com.github.dingo.Packet;
 
 /**

@@ -1,6 +1,7 @@
 package com.github.dingo.serializer;
 
 import java.io.IOException;
+
 import com.github.dingo.Packet;
 
 /**

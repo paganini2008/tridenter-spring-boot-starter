@@ -2,10 +2,12 @@ package com.github.dingo.mina;
 
 import java.net.SocketAddress;
 import org.apache.mina.core.session.IoSession;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.ChannelEvent.EventType;
+
 import lombok.RequiredArgsConstructor;
 
 /**

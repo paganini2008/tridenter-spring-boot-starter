@@ -24,34 +24,47 @@ public final class ChannelSwitcher {
     private final Map<SocketAddress, Boolean> external = new ConcurrentHashMap<>();
 
     public void enableInternalChannel(SocketAddress socketAddress) {
-        internal.add(socketAddress);
-        if (log.isInfoEnabled()) {
-            log.info(marker, "Enable internal channel to socket address: {}", socketAddress);
+        if (!internal.contains(socketAddress)) {
+            if (internal.add(socketAddress)) {
+                if (log.isInfoEnabled()) {
+                    log.info(marker, "Add internal channel to socket address: {}", socketAddress);
+                }
+            }
         }
     }
 
     public void enableExternalChannel(SocketAddress socketAddress, boolean enabled) {
-        external.put(socketAddress, enabled);
-        if (log.isInfoEnabled()) {
-            log.info(marker, "{} external channel to socket address: {}",
-                    enabled ? "Enable" : "Disable", socketAddress);
+        if (!internal.contains(socketAddress)) {
+            if (!external.containsKey(socketAddress) || !external.get(socketAddress)) {
+                external.put(socketAddress, enabled);
+                if (enabled) {
+                    if (log.isInfoEnabled()) {
+                        log.info(marker, "Add external channel to socket address: {}",
+                                socketAddress);
+                    }
+                }
+            }
         }
     }
 
-    public void toggle(boolean enabled) {
+    public void enableExternalChannels(boolean enabled) {
         for (Map.Entry<SocketAddress, Boolean> entry : external.entrySet()) {
             entry.setValue(enabled);
         }
         if (log.isInfoEnabled()) {
-            log.info(marker, "{} all external channels.", enabled ? "Enable" : "Disable");
+            log.info(marker, "{} all external channels", enabled ? "Enable" : "Disable");
         }
     }
 
+    public boolean contains(SocketAddress socketAddress) {
+        return internal.contains(socketAddress) || external.containsKey(socketAddress);
+    }
+
     public void remove(SocketAddress socketAddress) {
-        internal.remove(socketAddress);
-        external.remove(socketAddress);
-        if (log.isInfoEnabled()) {
-            log.info(marker, "Remove channel to socket address: {}", socketAddress);
+        if (internal.remove(socketAddress) || external.remove(socketAddress)) {
+            if (log.isInfoEnabled()) {
+                log.info(marker, "Remove channel to socket address: {}", socketAddress);
+            }
         }
     }
 

@@ -1,9 +1,11 @@
 package com.github.dingo.grizzly;
 
 import org.glassfish.grizzly.Connection;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelEvent.EventType;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**

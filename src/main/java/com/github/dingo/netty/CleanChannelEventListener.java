@@ -1,10 +1,12 @@
 package com.github.dingo.netty;
 
 import java.net.SocketAddress;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.ChannelEvent.EventType;
+
 import io.netty.channel.Channel;
 import lombok.RequiredArgsConstructor;
 

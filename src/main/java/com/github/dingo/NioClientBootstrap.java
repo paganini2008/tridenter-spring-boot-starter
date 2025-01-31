@@ -27,7 +27,7 @@ public class NioClientBootstrap {
 
     private final TransmitterNioProperties nioProperties;
     private final NioClient nioClient;
-    private final ChannelSwitcher channelSwitch;
+    private final ChannelSwitcher channelSwitcher;
     private final ApplicationInfoManager applicationInfoManager;
 
     @EventListener(ApplicationReadyEvent.class)
@@ -40,7 +40,7 @@ public class NioClientBootstrap {
             }
             nioClient.connect(serverLocation, addr -> {
                 log.info("Successfully connected to address: {}", addr.toString());
-                channelSwitch.enableInternalChannel(addr);
+                channelSwitcher.enableInternalChannel(addr);
             });
         } else {
             log.warn(
@@ -73,7 +73,7 @@ public class NioClientBootstrap {
                         }
                         nioClient.connect(serviceLocation, addr -> {
                             log.info("Successfully connected to address: {}", addr.toString());
-                            channelSwitch.enableExternalChannel(addr,
+                            channelSwitcher.enableExternalChannel(addr,
                                     nioProperties.isDefaultExternalChannelAccessable());
                         });
                     });

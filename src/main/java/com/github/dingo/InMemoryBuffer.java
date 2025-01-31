@@ -37,8 +37,8 @@ public class InMemoryBuffer<T> implements Buffer<T>, BoundedList.RemovalListener
     }
 
     @Override
-    public int size() {
-        int n = cache.size();
+    public long size() {
+        long n = cache.size();
         if (overflowBuffer != null) {
             n += overflowBuffer.size();
         }
@@ -54,14 +54,15 @@ public class InMemoryBuffer<T> implements Buffer<T>, BoundedList.RemovalListener
     }
 
     @Override
-    public Collection<T> poll(int fetchSize) {
+    public Collection<T> poll(long fetchSize) {
         if (fetchSize == 1) {
             return Collections.singletonList(poll());
         }
         if (overflowBuffer != null && overflowBuffer.size() > 0) {
             return overflowBuffer.poll(fetchSize);
         }
-        List<T> sublist = new ArrayList<>(cache.subList(0, Math.min(fetchSize, cache.size())));
+        List<T> sublist =
+                new ArrayList<>(cache.subList(0, Math.min((int) fetchSize, cache.size())));
         cache.removeAll(sublist);
         return sublist;
     }

@@ -15,10 +15,14 @@ import lombok.Data;
 public class TransmitterEventProperties {
 
     private int maxBufferCapacity = 256;
-    private int requestFetchSize = 10;
+    private int requestFetchSize = 1;
     private long timeout = 100L;
-    private long bufferCleanInterval = 5L * 1000;
+    private long bufferCleanInterval = 3L * 1000;
     private boolean bufferCleanerEnabled = true;
+
+    private boolean failureRetryEnabled = false;
+    private int failureRetryInterval = 5;
+    private int failureRetryTimes = 10;
 
     private InMemoryBuffer memory = new InMemoryBuffer();
     private RedisBuffer redis = new RedisBuffer();

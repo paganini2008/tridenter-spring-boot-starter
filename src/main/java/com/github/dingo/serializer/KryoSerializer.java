@@ -2,6 +2,7 @@ package com.github.dingo.serializer;
 
 import java.io.IOException;
 import java.util.Map;
+
 import com.github.dingo.Packet;
 
 /**

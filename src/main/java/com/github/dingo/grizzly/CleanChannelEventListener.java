@@ -2,10 +2,12 @@ package com.github.dingo.grizzly;
 
 import java.net.SocketAddress;
 import org.glassfish.grizzly.Connection;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.ChannelEvent.EventType;
+
 import lombok.RequiredArgsConstructor;
 
 /**

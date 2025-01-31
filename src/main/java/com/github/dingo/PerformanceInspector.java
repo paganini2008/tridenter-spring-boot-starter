@@ -1,61 +1,66 @@
 package com.github.dingo;
 
-import java.util.Arrays;
-import java.util.List;
+import static com.github.doodler.common.Constants.NEWLINE;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import com.github.doodler.common.context.ManagedBeanLifeCycle;
-import com.github.doodler.common.timeseries.LoggingOverflowDataHandler;
-import com.github.doodler.common.timeseries.OverflowDataHandler;
-import com.github.doodler.common.timeseries.RateCalculator;
-import com.github.doodler.common.timeseries.Sampler;
-import com.github.doodler.common.timeseries.SamplerImpl;
-import com.github.doodler.common.timeseries.StringSamplerService;
-import com.github.doodler.common.utils.TimeWindowUnit;
+import com.github.doodler.common.events.EventPublisher;
+import com.github.doodler.common.utils.SimpleTimer;
 
 /**
  * 
  * @Description: PerformanceInspector
  * @Author: Fred Feng
- * @Date: 21/01/2025
+ * @Date: 29/01/2025
  * @Version 1.0.0
  */
-public class PerformanceInspector extends StringSamplerService<NioSample>
-        implements ManagedBeanLifeCycle {
+public class PerformanceInspector extends SimpleTimer {
 
-    public PerformanceInspector() {
-        this(Arrays.asList(new LoggingOverflowDataHandler<>()));
+    private final EventPublisher<?> eventPublisher;
+    private final NioContext nioContext;
+    private final PerformanceInspectorService performanceInspectorService;
+
+    PerformanceInspector(long period, TimeUnit timeUnit, EventPublisher<?> eventPublisher,
+            NioContext nioContext, PerformanceInspectorService performanceInspectorService) {
+        super(period, timeUnit);
+        this.eventPublisher = eventPublisher;
+        this.nioContext = nioContext;
+        this.performanceInspectorService = performanceInspectorService;
     }
 
-    public PerformanceInspector(List<OverflowDataHandler<String, String, NioSample>> dataHandlers) {
-        super(5, TimeWindowUnit.MINUTES, 60, dataHandlers);
-    }
+    private int idleTimeout = 15000;
 
-    private RateCalculator<String, String, NioSample, Sampler<NioSample>> rateCalculator;
-
-    @Override
-    protected Sampler<NioSample> getEmptySampler(String category, String dimension,
-            long timestampMillis) {
-        return new SamplerImpl<NioSample>(timestampMillis, new NioSample());
-    }
-
-    @Override
-    public void update(String category, String dimension, long timestampMillis,
-            Consumer<Sampler<NioSample>> consumer) {
-        super.update(category, dimension, timestampMillis, consumer);
-        rateCalculator.incr(category, dimension);
+    public void setIdleTimeout(int idleTimeout) {
+        this.idleTimeout = idleTimeout;
     }
 
     @Override
-    public void afterPropertiesSet() throws Exception {
-        rateCalculator = new RateCalculator<>(1, TimeUnit.SECONDS, this);
-        rateCalculator.start();
-    }
-
-    @Override
-    public void destroy() throws Exception {
-        if (rateCalculator != null) {
-            rateCalculator.stop();
+    public boolean change() throws Exception {
+        if (eventPublisher.getEstimatedLagAmount() > 0
+                || eventPublisher.remainingBufferSize() > 0) {
+            StringBuilder str = new StringBuilder();
+            str.append("[EventPublisher]: estimatedLagAmount: "
+                    + eventPublisher.getEstimatedLagAmount())
+                    .append(", remainingBufferSize: " + eventPublisher.remainingBufferSize())
+                    .append(", concurrents: " + nioContext.getConcurrents());
+            if (log.isInfoEnabled()) {
+                log.info(str.toString());
+            }
         }
+        performanceInspectorService.categories().forEach(cat -> {
+            performanceInspectorService.summarize(cat).entrySet().forEach(e -> {
+                long lastModified = e.getValue().getSample().timestamp;
+                if (System.currentTimeMillis() - lastModified < idleTimeout) {
+                    StringBuilder logStr = new StringBuilder();
+                    logStr.append(NEWLINE).append("Instance: " + cat);
+                    logStr.append(NEWLINE).append("Mode: " + e.getKey());
+                    logStr.append(NEWLINE).append("Concurrents: " + nioContext.getConcurrents(cat));
+                    logStr.append(NEWLINE).append(e.getValue().getSample().toString());
+                    if (log.isInfoEnabled()) {
+                        log.info(logStr.toString());
+                    }
+                }
+            });
+        });
+        return true;
     }
+
 }

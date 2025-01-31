@@ -2,6 +2,7 @@ package com.github.dingo.grizzly;
 
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.Transformer;
+
 import com.github.dingo.Packet;
 
 /**

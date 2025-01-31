@@ -2,6 +2,7 @@ package com.github.dingo.grizzly;
 
 import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
+
 import java.io.IOException;
 import java.net.SocketAddress;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.glassfish.grizzly.threadpool.ThreadPoolConfig;
 import org.glassfish.grizzly.utils.DelayedExecutor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.DataAccessTransmitterClientException;

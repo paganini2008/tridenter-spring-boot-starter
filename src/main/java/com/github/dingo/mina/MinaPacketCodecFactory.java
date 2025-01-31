@@ -4,6 +4,7 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
+
 import com.github.dingo.mina.MinaEncoderDecoderUtils.PacketDecoder;
 import com.github.dingo.mina.MinaEncoderDecoderUtils.PacketEncoder;
 import com.github.dingo.serializer.KryoSerializer;

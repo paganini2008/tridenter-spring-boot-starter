@@ -2,8 +2,10 @@ package com.github.dingo.grizzly;
 
 import java.util.concurrent.TimeUnit;
 import org.glassfish.grizzly.Connection;
+
 import com.github.dingo.KeepAliveTimeoutException;
 import com.github.dingo.Packet;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**

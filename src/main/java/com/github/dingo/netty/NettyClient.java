@@ -2,6 +2,7 @@ package com.github.dingo.netty;
 
 import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
+
 import java.net.SocketAddress;
 import java.util.List;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.ChannelSwitcher;
 import com.github.dingo.DataAccessTransmitterClientException;
@@ -27,6 +29,7 @@ import com.github.dingo.TransmitterClientException;
 import com.github.dingo.TransmitterNioProperties;
 import com.github.dingo.TransmitterTimeoutException;
 import com.github.doodler.common.context.InstanceId;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;

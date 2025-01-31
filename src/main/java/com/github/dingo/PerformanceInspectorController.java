@@ -22,25 +22,25 @@ import com.github.doodler.common.ApiResult;
 public class PerformanceInspectorController {
 
     @Autowired
-    private PerformanceInspector performanceInspector;
+    private PerformanceInspectorService performanceInspectorService;
 
     @GetMapping("/instances")
     public ApiResult<Collection<String>> categories() {
-        return ApiResult.ok(performanceInspector.categories());
+        return ApiResult.ok(performanceInspectorService.categories());
     }
 
     @GetMapping("/sequence")
     public ApiResult<Map<String, Object>> sequence(@RequestParam("instanceId") String instanceId,
             @RequestParam("mode") String mode) {
-        return ApiResult.ok(performanceInspector.sequence(instanceId, mode,
+        return ApiResult.ok(performanceInspectorService.sequence(instanceId, mode,
                 DateTimeFormatter.ofPattern("HH:mm:ss")));
     }
 
     @GetMapping("/summarize")
     public ApiResult<Object> summarize(@RequestParam("instanceId") String instanceId,
             @RequestParam("mode") String mode) {
-        return ApiResult
-                .ok(performanceInspector.summarize(instanceId, mode).getSample().represent());
+        return ApiResult.ok(
+                performanceInspectorService.summarize(instanceId, mode).getSample().represent());
     }
 
 }

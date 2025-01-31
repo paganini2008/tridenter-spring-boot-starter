@@ -1,6 +1,7 @@
 package com.github.dingo;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import com.github.doodler.common.utils.NetUtils;
 import lombok.Data;
 
 /**
@@ -35,7 +36,7 @@ public class TransmitterNioProperties {
     @Data
     public static class NioServer {
         private int threadCount = -1;
-        private String bindHostName = "127.0.0.1";
+        private String bindHostName = NetUtils.getLocalHostAddress();
         private int backlog = 128;
         private int readerBufferSize = 2 * 1024 * 1024;
         private int receiverBufferSize = 2 * 1024 * 1024;

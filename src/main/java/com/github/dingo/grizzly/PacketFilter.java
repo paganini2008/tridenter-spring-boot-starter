@@ -2,6 +2,7 @@ package com.github.dingo.grizzly;
 
 import org.glassfish.grizzly.Buffer;
 import org.glassfish.grizzly.filterchain.AbstractCodecFilter;
+
 import com.github.dingo.Packet;
 import com.github.dingo.serializer.KryoSerializer;
 import com.github.dingo.serializer.Serializer;

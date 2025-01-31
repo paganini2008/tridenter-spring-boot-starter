@@ -1,17 +1,19 @@
 package com.github.dingo.grizzly;
 
 import static com.github.dingo.TransmitterConstants.MODE_SYNC;
+
 import java.io.IOException;
 import org.glassfish.grizzly.Connection;
 import org.glassfish.grizzly.filterchain.BaseFilter;
 import org.glassfish.grizzly.filterchain.FilterChainContext;
 import org.glassfish.grizzly.filterchain.NextAction;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
 import com.github.dingo.Packet;
 import com.github.dingo.PacketHandlerExecution;
-import com.github.dingo.PerformanceInspector;
+import com.github.dingo.PerformanceInspectorService;
 import com.github.dingo.TransmitterConstants;
 import com.github.dingo.ChannelEvent.EventType;
 import com.github.doodler.common.events.EventPublisher;
@@ -33,7 +35,7 @@ public class GrizzlyServerHandler extends BaseFilter {
     private EventPublisher<Packet> eventPublisher;
 
     @Autowired
-    private PerformanceInspector performanceInspector;
+    private PerformanceInspectorService performanceInspector;
 
     @Autowired(required = false)
     private ChannelEventListener<Connection<?>> channelEventListener;
@@ -72,10 +74,15 @@ public class GrizzlyServerHandler extends BaseFilter {
                     result.setField("errorMsg", e.getMessage());
                     result.setField("errorDetails", ExceptionUtils.toString(e));
                 } finally {
+                    final Packet tmp = result;
                     performanceInspector.update(instanceId, MODE_SYNC, timestamp, s -> {
                         s.getSample().accumulatedExecutionTime
                                 .add(System.currentTimeMillis() - timestamp);
                         s.getSample().totalExecutions.increment();
+                        s.getSample().timestamp = System.currentTimeMillis();
+                        if (tmp.hasField("errorMsg") || tmp.hasField("errorDetails")) {
+                            s.getSample().failedExecutions.increment();
+                        }
                     });
                 }
                 result.setField("server", ctx.getConnection().getLocalAddress().toString());

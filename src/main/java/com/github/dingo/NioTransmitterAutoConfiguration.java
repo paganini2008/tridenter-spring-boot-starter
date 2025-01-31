@@ -1,6 +1,7 @@
 package com.github.dingo;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
 import com.github.dingo.grizzly.GrizzlyTransportAutoConfiguration;
 import com.github.dingo.mina.MinaTransportAutoConfiguration;
 import com.github.dingo.netty.NettyTransportAutoConfiguration;
@@ -22,6 +24,8 @@ import com.github.doodler.common.events.Buffer;
 import com.github.doodler.common.events.EventPublisher;
 import com.github.doodler.common.events.EventPublisherImpl;
 import com.github.doodler.common.events.EventSubscriber;
+import com.github.doodler.common.retry.RetryQueue;
+import com.github.doodler.common.retry.SimpleRetryQueue;
 
 /**
  * 
@@ -63,8 +67,8 @@ public class NioTransmitterAutoConfiguration {
     @DependsOn("nioServerBootstrap")
     @Bean
     public NioClientBootstrap nioClientBootstrap(NioClient nioClient,
-            ChannelSwitcher remoteChannelSwitch, ApplicationInfoManager applicationInfoManager) {
-        return new NioClientBootstrap(nioProperties, nioClient, remoteChannelSwitch,
+            ChannelSwitcher channelSwitcher, ApplicationInfoManager applicationInfoManager) {
+        return new NioClientBootstrap(nioProperties, nioClient, channelSwitcher,
                 applicationInfoManager);
     }
 
@@ -82,10 +86,12 @@ public class NioTransmitterAutoConfiguration {
 
     @Bean
     public EventPublisher<Packet> eventPublisher(ThreadPoolTaskExecutor taskExecutor,
-            Buffer<Packet> buffer, List<EventSubscriber<Packet>> eventSubscribers) {
+            Buffer<Packet> buffer, List<EventSubscriber<Packet>> eventSubscribers,
+            NioContext nioContext) {
         EventPublisher<Packet> eventPublisher = new EventPublisherImpl<>(taskExecutor,
                 eventProperties.getMaxBufferCapacity(), eventProperties.getRequestFetchSize(),
                 eventProperties.getTimeout(), buffer, eventProperties.getBufferCleanInterval());
+        eventPublisher.setContext(nioContext);
         eventPublisher.enableBufferCleaner(eventProperties.isBufferCleanerEnabled());
         if (CollectionUtils.isNotEmpty(eventSubscribers)) {
             eventPublisher.subscribe(eventSubscribers);
@@ -100,14 +106,20 @@ public class NioTransmitterAutoConfiguration {
     }
 
     @Bean
-    public PerformanceInspectorPacketSubscriber performanceInspectorPacketSubscriber(
-            PerformanceInspector performanceInspector) {
-        return new PerformanceInspectorPacketSubscriber(performanceInspector);
+    public NioContext nioContext(PerformanceInspectorService performanceInspectorService) {
+        return new NioContext(performanceInspectorService);
     }
 
     @Bean
-    public PerformanceInspector performanceInspector() {
-        return new PerformanceInspector();
+    public PerformanceInspectorService performanceInspectorService() {
+        return new PerformanceInspectorService();
+    }
+
+    @Bean
+    public PerformanceInspector performanceInspector(EventPublisher<Packet> eventPublisher,
+            NioContext nioContext, PerformanceInspectorService performanceInspectorService) {
+        return new PerformanceInspector(5, TimeUnit.SECONDS, eventPublisher, nioContext,
+                performanceInspectorService);
     }
 
     @Bean
@@ -118,6 +130,18 @@ public class NioTransmitterAutoConfiguration {
     @Bean
     public NioTemplate nioTemplate(NioClient nioClient, Partitioner partitioner) {
         return new NioTemplate(nioClient, partitioner);
+    }
+
+    @Bean
+    public PacketRetryer acknowledger(EventPublisher<Packet> eventPublisher,
+            PerformanceInspectorService performanceInspectorService) {
+        return new PacketRetryer(eventProperties, retryQueue(), eventPublisher);
+    }
+
+    @ConditionalOnMissingBean
+    @Bean
+    public RetryQueue retryQueue() {
+        return new SimpleRetryQueue();
     }
 
 }

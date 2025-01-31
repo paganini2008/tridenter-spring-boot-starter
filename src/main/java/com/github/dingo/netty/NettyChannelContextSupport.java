@@ -18,6 +18,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.github.dingo.ChannelContext;
 import com.github.dingo.ChannelEvent;
 import com.github.dingo.ChannelEventListener;
@@ -25,6 +26,7 @@ import com.github.dingo.NioConnectionKeeper;
 import com.github.dingo.Packet;
 import com.github.dingo.RequestFutureHolder;
 import com.github.dingo.ChannelEvent.EventType;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;

@@ -1,13 +1,22 @@
+/*
+ * Copyright 2017-2025 Fred Feng (paganini.fy@gmail.com)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *  http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.github.dingo;
 
-import static com.github.dingo.PacketKeywords.INSTANCE_ID;
-import static com.github.dingo.TransmitterConstants.MODE_ASYNC;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import com.github.doodler.common.events.Context;
-import com.github.doodler.common.utils.MapUtils;
 
 /**
  * 
@@ -18,51 +27,10 @@ import com.github.doodler.common.utils.MapUtils;
  */
 public final class NioContext extends Context {
 
-    NioContext(PerformanceInspectorService performanceInspectorService) {
-        this.performanceInspectorService = performanceInspectorService;
-    }
+    private final AtomicInteger concurrents = new AtomicInteger(0);
 
-    private final PerformanceInspectorService performanceInspectorService;
-    private final Map<String, AtomicInteger> concurrents = new ConcurrentHashMap<>();
-
-    @Override
-    protected void beforeConsuming(Object event) {
-        Packet packet = (Packet) event;
-        String instanceId = packet.getStringField(INSTANCE_ID);
-        MapUtils.getOrCreate(concurrents, instanceId, AtomicInteger::new).incrementAndGet();
-        long startTime = packet.getTimestamp();
-        performanceInspectorService.update(instanceId, MODE_ASYNC, System.currentTimeMillis(),
-                s -> {
-                    s.getSample().totalExecutions.increment();
-                    s.getSample().timestamp = startTime;
-                });
-    }
-
-    @Override
-    protected void completeConsuming(Object event, Exception error) {
-        Packet packet = (Packet) event;
-        String instanceId = packet.getStringField(INSTANCE_ID);
-        long startTime = packet.getTimestamp();
-        performanceInspectorService.update(instanceId, MODE_ASYNC, System.currentTimeMillis(),
-                s -> {
-                    if (error != null) {
-                        s.getSample().failedExecutions.increment();
-                    }
-                    s.getSample().accumulatedExecutionTime
-                            .add(System.currentTimeMillis() - startTime);
-                });
-        concurrents.get(instanceId).decrementAndGet();
-    }
-
-    public int getConcurrents(String instanceId) {
-        return concurrents.get(instanceId).get();
-    }
-
-    public int getConcurrents() {
-        if (concurrents.isEmpty()) {
-            return 0;
-        }
-        return concurrents.values().stream().mapToInt(AtomicInteger::get).sum();
+    public AtomicInteger getConcurrents() {
+        return concurrents;
     }
 
 }

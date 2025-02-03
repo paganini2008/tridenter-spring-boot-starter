@@ -6,16 +6,16 @@
     <parent>
         <groupId>com.github.paganini2008.doodler</groupId>
         <artifactId>doodler-framework-dependencies</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../pom.xml</relativePath>
+        <version>1.0.0-beta</version>
     </parent>
 
     <groupId>com.github.paganini2008</groupId>
     <artifactId>dingo-spring-boot-starter</artifactId>
     <packaging>jar</packaging>
+    <version>1.0.0-SNAPSHOT</version>
     
     <properties>
-		<shedlock.version>4.30.0</shedlock.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
 	</properties>
 
     <dependencies>
@@ -93,6 +93,27 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
             </plugin>
+            
+            <!-- mvn license:format 
+            <plugin>
+			    <groupId>com.mycila</groupId>
+			    <artifactId>license-maven-plugin</artifactId>
+			    <version>4.6</version>
+			    <executions>
+			        <execution>
+			            <goals>
+			                <goal>format</goal>
+			            </goals>
+			        </execution>
+			    </executions>
+			    <configuration>
+			        <header>${basedir}/license-header.txt</header>
+			        <includes>
+			            <include>**/*.java</include>
+			        </includes>
+			    </configuration>
+			</plugin>
+			-->
         </plugins>
     </build>
 </project>
